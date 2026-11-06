@@ -1567,7 +1567,11 @@ async function importPack(file){
   return n;
 }
 async function loadStoredIcons(){
-  if(window.EMBEDDED_ICON_PACK&&window.EMBEDDED_ICON_PACK.icons){ let n=0; for(const [k,u] of Object.entries(window.EMBEDDED_ICON_PACK.icons)){ USER_ICONS[k.toLowerCase()]=u; n++; } render(); return n; }
+  let pack=window.EMBEDDED_ICON_PACK||null;
+  // If an icon pack sits next to the page on a web host, load it automatically.
+  if(!pack&&/^https?:$/.test(location.protocol)&&!/claude\.ai$|claudeusercontent/.test(location.hostname)){
+    try{ const r=await fetch("rivellon-icons.json",{cache:"no-cache"}); if(r.ok){ const j=await r.json(); if(j&&j.format==="rivellon-icon-pack") pack=j; } }catch(e){} }
+  if(pack&&pack.icons){ let n=0; for(const [k,u] of Object.entries(pack.icons)){ USER_ICONS[k.toLowerCase()]=u; n++; } render(); return n; }
   try{ const all=await idbAll(); let n=0; for(const [k,b] of Object.entries(all)){ USER_ICONS[k]=URL.createObjectURL(b); n++; } if(n){ render(); } return n; }catch(e){ return 0; }
 }
 

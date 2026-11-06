@@ -47,7 +47,7 @@
 
 Skill, item, talent and stat values were extracted from the game's own data files. Item locations come from the game's level data where available. Tier rankings and the damage index are estimates meant for comparing builds, not exact in-game damage numbers.
 
-Game artwork is not included. Skill and item icons can be added locally from your own installation with **Import game icons** in the Skills section.
+Skill and item icons load automatically from `rivellon-icons.json` when it's present next to `index.html`. Without it, icons can be imported from your own installation with **Import game icons** in the Skills section.
 
 ## Running it
 
