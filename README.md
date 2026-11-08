@@ -25,6 +25,11 @@
 - Filter by tier, role, class, damage type, main stat, range, skill school, race, origin and party size.
 - Load any archetype at any level and every step fills in automatically, ready to edit.
 
+**Act-by-act playthrough guide**
+- For any loaded archetype: what to spend points on at every level, from character creation to level 22, including talents and which skills to learn or swap out.
+- Gear goals for each act (Fort Joy, Reaper's Coast, Nameless Isle, Arx): the best unique for each slot that you can actually find by then, with its location, plus what to look for on rolled gear.
+- Tick items off as you find them, and load the end-of-act build with its gear in one tap.
+
 **Character creation**
 - Origins and races, including undead variants, with their racial talents and skills.
 - Attributes, combat and civil abilities, and talents, with live point budgets for the chosen level.

@@ -234,6 +234,24 @@ textarea#exportBox{width:100%;min-height:140px;margin-top:8px;background:var(--p
 a{color:var(--accent)}
 
 /* ---------- phone layout ---------- */
+.gsum{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.gh{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+.gh span{text-transform:none;letter-spacing:0}
+.ggear{display:grid;gap:6px}
+.gg{display:grid;grid-template-columns:30px 34px minmax(0,1fr);gap:10px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2)}
+.gg small{display:block;color:var(--muted);font-size:12.5px;line-height:1.35}
+.gg .gwhere{color:var(--ink);opacity:.85}
+.got{width:30px;height:30px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:700;color:#fff;padding:0}
+.got[aria-pressed="true"]{background:var(--good);border-color:var(--good)}
+.got.ph{border-style:dashed;opacity:.4;cursor:default}
+.gg.done b{text-decoration:line-through;opacity:.75}
+.glv{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.glv-n{font-family:var(--mono);font-size:13px;color:var(--accent);padding-top:2px}
+.glv-b div{font-size:14px;margin:2px 0;line-height:1.4}
+.gk{display:inline-block;min-width:92px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.gnote{color:var(--muted);font-size:13px}
+.gsrc{font-style:normal;font-size:11px;color:var(--src);border:1px solid currentColor;border-radius:4px;padding:0 4px}
+@media (max-width:760px){ .gk{display:block;min-width:0;margin-top:4px} }
 .mtabs,.msub{display:none}
 @media (max-width:760px){
   body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
@@ -250,9 +268,9 @@ a{color:var(--accent)}
   .stepper button,.steppers button{min-width:40px;min-height:40px}
   body[data-mtab] [data-mg]{display:none}
   body[data-mtab="sheet"] main>footer{order:2;margin-top:12px}
-  body[data-mtab="builds"] [data-mg="builds"],body[data-mtab="char"] [data-mg="char"],body[data-mtab="skills"] [data-mg="skills"],body[data-mtab="gear"] [data-mg="gear"],body[data-mtab="sheet"] [data-mg="sheet"]{display:block}
+  body[data-mtab="builds"] [data-mg="builds"],body[data-mtab="char"] [data-mg="char"],body[data-mtab="skills"] [data-mg="skills"],body[data-mtab="gear"] [data-mg="gear"],body[data-mtab="guide"] [data-mg="guide"],body[data-mtab="sheet"] [data-mg="sheet"]{display:block}
   aside.sheet{position:static;margin:0}
-  .mtabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--panel);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.18)}
+  .mtabs{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--panel);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.18)}
   .mtabs button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:54px;padding:6px 2px;border:0;border-radius:8px;background:none;color:var(--muted);font:inherit;font-size:12px;cursor:pointer}
   .mtabs button svg{width:22px;height:22px;fill:currentColor}
   .mtabs button[aria-current="page"]{color:var(--accent);background:var(--panel-2)}
@@ -411,13 +429,20 @@ a{color:var(--accent)}
         <p class="note">Click a slot in your loadout, filter the list, then click an item to equip it. Unique items carry their real bonuses from the game files; for regular gear, set the rarity and add the bonuses your copy rolled.</p>
       </section>
 
+      <section class="step" id="stepGuide">
+        <div class="step-head"><div><div class="kicker">Playthrough</div><h2>Act-by-act guide</h2></div></div>
+        <p class="note" style="margin:0 0 10px">For the loaded build: what to pick at every level, and the best gear to hunt for in each act with where to find it. Tick items off as you get them.</p>
+        <div class="chips" id="guideActs"></div>
+        <div id="guideBody" style="margin-top:12px"></div>
+      </section>
+
       <footer>
         Hover (or tap) anything for its full details. Skills and unique items are read from the stat files in your own DOS2 install: names, AP, Source cost, cooldown, memory, requirements, descriptions and item bonuses. Damage is shown as a percentage of base damage because the real number depends on level and gear. Item attribute bonuses are the base values; the game raises them a little with item level. Talents come from the wikis because they aren't in the stat files. Icons are original glyphs unless you import your own from the game files.
       </footer>
     </main>
 
     <aside class="sheet" id="sheet" aria-label="Character sheet"></aside>
-<nav class="mtabs" id="mtabs" aria-label="Sections"><button type="button" data-mtab="builds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></svg>Builds<span class="dot" hidden></span></button><button type="button" data-mtab="char"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 10c4.4 0 8 2 8 5v3H4v-3c0-3 3.6-5 8-5z"/></svg>Character<span class="dot" hidden></span></button><button type="button" data-mtab="skills"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>Skills<span class="dot" hidden></span></button><button type="button" data-mtab="gear"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/></svg>Gear<span class="dot" hidden></span></button><button type="button" data-mtab="sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zm8 1v5h5M9 12h8v2H9zm0 4h8v2H9z"/></svg>Sheet<span class="dot" hidden></span></button></nav>
+<nav class="mtabs" id="mtabs" aria-label="Sections"><button type="button" data-mtab="builds"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></svg>Builds<span class="dot" hidden></span></button><button type="button" data-mtab="char"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 10c4.4 0 8 2 8 5v3H4v-3c0-3 3.6-5 8-5z"/></svg>Character<span class="dot" hidden></span></button><button type="button" data-mtab="skills"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>Skills<span class="dot" hidden></span></button><button type="button" data-mtab="gear"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/></svg>Gear<span class="dot" hidden></span></button><button type="button" data-mtab="guide"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M3 5l6-2 6 2 6-2v16l-6 2-6-2-6 2zm6 0v12l6 2V7z"/></svg>Guide<span class="dot" hidden></span></button><button type="button" data-mtab="sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zm8 1v5h5M9 12h8v2H9zm0 4h8v2H9z"/></svg>Sheet<span class="dot" hidden></span></button></nav>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -1083,6 +1108,10 @@ const AUTO_WEAR={str:"Heavy",fin:"Light",int:"Robe"};
 const AUTO_1H={str:["Sword","Axe","Mace"],fin:["Dagger"],int:["Wand"]};
 const AUTO_2H={str:["Sword","Axe","Mace"],fin:["Spear"],int:["Staff"]};
 const AUTO_ARMOUR=["helmet","chest","gloves","legs","boots"];
+// Rough rarity of rolled gear you can expect to have by a level (Divine shows up in Arx).
+function autoRarity(L){ return L<=3?"Uncommon":L<=8?"Rare":L<=12?"Epic":L<=18?"Legendary":"Divine"; }
+// Act an item comes from: the game's level data first, then the location note.
+function itemAct(g){ if(g.actN!=null) return g.actN; const m=(g.act||"").match(/Act (\d)/); return m?+m[1]:null; }
 function autoPrimary(st){ const at=st.attrs||{}; return ["str","fin","int"].reduce((b,k)=>(at[k]||0)>(at[b]||0)?k:b,"str"); }
 function autoWeights(st){
   const at=st.attrs||{}, cb=st.combat||{}, W={};
@@ -1110,11 +1139,12 @@ function autoFx(fx,tank){
     else if(m=f.match(/^-(\d+(?:\.\d+)?)m Movement/)) s-=.5*m[1]; }
   return s;
 }
-function autoGear(st){
-  const W=autoWeights(st), prim=autoPrimary(st), cb=st.combat||{}, L=Math.max(1,st.level||1);
+function autoGear(st,opt={}){
+  const W=autoWeights(st), prim=autoPrimary(st), cb=st.combat||{}, L=Math.max(1,st.level||1), maxAct=opt.maxAct??null;
   const tank=(st.attrs?.con||0)>(st.attrs?.[prim]||0)||(cb.retri||0)>=5;
   const have=new Set((st.skills||[]).map(id=>SKILL_BY_ID[id]?.n).filter(Boolean));
-  const gets=g=>!g.unique||(g.lvl||0)<=L+1;
+  // with an act cap (the playthrough guide), only uniques with a known place in that act or earlier count
+  const gets=g=>!g.unique||((g.lvl||0)<=L+1&&(maxAct==null||(itemAct(g)!=null&&itemAct(g)<=maxAct)));
   const isWeapon=g=>(g.slot==="main"||g.slot==="off")&&g.cat!=="Shield";
   const score=g=>{
     if(!g.unique) return isWeapon(g)?(g.hands===2?1.2:.8)*L+1:g.slot==="amulet"||g.slot==="ring"||g.slot==="belt"?1:.35*L+1;
@@ -1126,7 +1156,7 @@ function autoGear(st){
   };
   const used=new Set();
   const top=(slot,ok,n=1)=>ALL_GEAR.filter(g=>slotAccepts(slot,g)&&gets(g)&&ok(g)&&!used.has(g.id)).sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n)).slice(0,n);
-  const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); gear[slot]={id:g.id,rarity:"Rare",bonuses:[]}; };
+  const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); gear[slot]={id:g.id,rarity:autoRarity(L),bonuses:[]}; };
   const gear={};
   // weapons: decide the fighting style from the abilities, then compare the loadouts that fit it
   const wa={dual:cb.dual||0,ranged:cb.ranged||0,single:cb.single||0,twohand:cb.twohand||0};
@@ -1158,8 +1188,51 @@ function autoGear(st){
   put(gear,"belt",top("belt",()=>true)[0]);
   put(gear,"ring1",top("ring1",()=>true)[0]);
   put(gear,"ring2",top("ring2",()=>true)[0]);
-  return {gear,uniques:Object.values(gear).filter(e=>GEAR_BY_ID[e.id].unique).length};
+  // what to look for on rolled gear: the main attribute and the two abilities the build leans on most
+  const look=[prim,...Object.entries(cb).filter(([k])=>!["persev","lead","retri"].includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>k)];
+  if(look.length<3) look.push("wit");
+  return {gear,uniques:Object.values(gear).filter(e=>GEAR_BY_ID[e.id].unique).length,look};
 }
+
+// ---------- act-by-act playthrough guide ----------
+// Level ranges are typical for a full playthrough; side quests can push you a level either way.
+const ACTS=[
+ {n:1,name:"Fort Joy",from:1,to:9,note:"Includes the ship prologue. Source points unlock late in the act, so Source skills wait until then."},
+ {n:2,name:"Reaper's Coast",from:10,to:16,note:"The biggest act. Skillbook traders in Driftwood carry most Adept skills."},
+ {n:3,name:"Nameless Isle",from:17,to:18,note:"Short act. Master skillbooks start showing up at traders."},
+ {n:4,name:"Arx",from:19,to:22,note:"Endgame. Divine gear appears; level 22 needs nearly every fight and quest."}
+];
+const guideActFor=L=>ACTS.find(x=>L<=x.to)||ACTS[ACTS.length-1];
+// One row per level: what to spend that level's points on. Talents, once taken, stay taken.
+function buildGuide(a,keep){
+  const rows=[]; let prev=null; const tal=[];
+  for(let L=1;L<=LEVELS;L++){
+    const st=buildArchetype(a,L,keep);
+    const slots=TALENT_LEVELS.filter(l=>l<=L).length;
+    for(const id of a.t){ if(tal.length>=slots) break; if(tal.includes(id)) continue; const t=TALENT_BY_ID[id]; if(!t) continue;
+      if(t.lvl&&L<t.lvl) continue; if(t.needs&&(st.combat[t.needs[0]]||0)<t.needs[1]) continue;
+      if(t.excl&&tal.includes(t.excl)) continue; if(t.party&&keep.party>t.party) continue; tal.push(id); }
+    st.talents=[...tal];
+    const d=(cur,old)=>Object.entries(cur).map(([k,v])=>[k,v-((old&&old[k])||0)]).filter(([,v])=>v>0);
+    const ps=prev?prev.skills:[];
+    rows.push({L,attrs:d(st.attrs,prev&&prev.attrs),combat:d(st.combat,prev&&prev.combat),civil:d(st.civil,prev&&prev.civil),
+      talents:tal.filter(t=>!(prev?prev.talents:[]).includes(t)),learn:st.skills.filter(id=>!ps.includes(id)),drop:ps.filter(id=>!st.skills.includes(id)),st});
+    prev=st;
+  }
+  return rows;
+}
+const GOT_KEY="rivellon-planner-v1-got";
+function loadGot(){ try{return JSON.parse(localStorage.getItem(GOT_KEY))||{}}catch(e){return {}} }
+function saveGot(o){ try{localStorage.setItem(GOT_KEY,JSON.stringify(o))}catch(e){} }
+let GUIDE_CACHE={key:"",rows:null,gear:{}};
+function guideKeep(A){ return {origin:state.origin,race:state.race,party:A.lw?Math.min(state.party,2):state.party,gear:{}}; }
+function guideData(A){
+  const keep=guideKeep(A), key=[A.id,keep.origin,keep.race,keep.party].join("|");
+  if(GUIDE_CACHE.key!==key) GUIDE_CACHE={key,keep,rows:buildGuide(A,keep),gear:{}};
+  return GUIDE_CACHE;
+}
+function guideActGear(A,act){ const D=guideData(A);
+  return D.gear[act.n]||(D.gear[act.n]=autoGear(JSON.parse(JSON.stringify(D.rows[act.to-1].st)),{maxAct:act.n})); }
 
 // ---------- state ----------
 const STORE_KEY="rivellon-planner-v1";
@@ -1312,6 +1385,7 @@ function render(){
   const help=$("iconHelp"); help.hidden=hasIcons&&missing<5; $("btnClearIcons").hidden=!hasIcons;
   if(hasIcons&&missing>=5) help.innerHTML=`<b>${missing} icons are missing</b>, probably because they were saved by an earlier version of this page. Click <b>Import game icons</b> again and pick <code>Icons.pak</code> and <code>Patch1.pak</code> to add the item and racial icons.`;
   renderGear();
+  renderGuide();
   renderSheet(D);
   save();
   refreshTipAfterRender();
@@ -1517,6 +1591,55 @@ function renderGear(){
      ${gearIcon(g.glyph,g.attr,g.unique,38,g.icon)}<span class="gs"><b style="color:${g.unique?"var(--r-unique)":"var(--ink)"}">${esc(g.n)}</b><small>${g.unique?"Unique ":""}${g.cat}${g.lvl?` · Lv ${g.lvl}`:""}${g.hands===2?" · 2H":""}${g.unique?` · ${g.act||"Act unknown"}`:""}</small>
      ${top?`<small class="gfx">${esc(top)}</small>`:""}</span></button>`;}).join("")
     :`<p class="note">${sl==="off"&&offBlocked(state)?"Off hand is blocked by your two-handed weapon.":"No items match these filters."}</p>`;
+}
+const COMBAT_NAME=Object.fromEntries(COMBAT.flatMap(g=>g.items).map(i=>[i[0],i[1]]));
+const ATTR_LONG=Object.fromEntries(ATTRS.map(a=>[a[0],a[1]]));
+const CIVIL_NAME=Object.fromEntries(CIVIL.map(c=>[c[0],c[1]]));
+function renderGuide(){
+  const A=state.archetype&&ARCH_BY_ID[state.archetype];
+  if(!A){ $("guideActs").innerHTML=""; $("guideBody").innerHTML=`<p class="note" style="margin:0">Load an archetype from Builds first. The guide follows that build from character creation to level ${LEVELS}.</p>`; return; }
+  const D=guideData(A);
+  if(!ui.guideAct) ui.guideAct=guideActFor(state.level).n;
+  const act=ACTS.find(x=>x.n===ui.guideAct), G=guideActGear(A,act), end=D.rows[act.to-1].st;
+  const got=(loadGot()[A.id])||{};
+  $("guideActs").innerHTML=ACTS.map(x=>`<button type="button" class="chip" data-guideact="${x.n}" aria-pressed="${x.n===act.n}">Act ${x.n} · ${x.name}</button>`).join("");
+  const plus=(list,name)=>list.map(([k,v])=>`+${v} ${name[k]||k}`).join(", ");
+  const endAttrs=["str","fin","int","con","mem","wit"].filter(k=>end.attrs[k]).map(k=>`${ATTR_LONG[k]} ${10+end.attrs[k]}`).join(" · ");
+  const endComb=Object.entries(end.combat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${COMBAT_NAME[k]} ${v}`).join(" · ");
+  let h=`<div class="gsum"><b>${esc(A.n)} · Act ${act.n}, levels ${act.from}–${act.to}</b><p class="note" style="margin:4px 0 0">${act.note}</p>
+    <p class="note" style="margin:6px 0 0"><b>By level ${act.to}:</b> ${endAttrs}<br>${endComb}</p>
+    <button class="btn" type="button" data-guideload="${act.n}" style="margin-top:8px">Load the level ${act.to} build with this gear</button></div>`;
+  // gear goals
+  const lookTxt=G.look.map(k=>ATTR_LONG[k]||COMBAT_NAME[k]||k).join(", ");
+  const N=Object.fromEntries(GEAR_SLOTS);
+  const ORDER=["main","off","helmet","chest","gloves","legs","boots","amulet","ring1","ring2","belt"];
+  const uSlots=ORDER.filter(sl=>G.gear[sl]&&GEAR_BY_ID[G.gear[sl].id].unique), bSlots=ORDER.filter(sl=>G.gear[sl]&&!GEAR_BY_ID[G.gear[sl].id].unique);
+  let rowsG=uSlots.map(sl=>{ const g=GEAR_BY_ID[G.gear[sl].id];
+    const ia=itemAct(g), earlier=ia!=null&&ia<act.n, have=!!got[g.id];
+    const bon=Object.entries(g.b||{}).map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`).join(" · ");
+    return `<div class="gg${have?" done":""}"><button type="button" class="got" data-got="${g.id}" aria-pressed="${have}" aria-label="${have?"Got":"Mark as found"}: ${esc(g.n)}">${have?"✓":""}</button>${gearIcon(g.glyph,g.attr,true,34,g.icon)}
+      <div data-tip="gear:${g.id}" tabindex="0"><b style="color:var(--r-unique)">${esc(g.n)}</b><small>${N[sl]}${g.lvl?` · Lv ${g.lvl}`:""}${earlier?` · from ${ACT_NAME(ia)}, keep using it`:""}${bon?` · ${esc(bon)}`:""}</small>
+      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+", location not recorded":"Location not recorded"))}</small></div></div>`; }).join("");
+  if(bSlots.length){ const rar=G.gear[bSlots[0]].rarity;
+    const names=bSlots.map(sl=>GEAR_BY_ID[G.gear[sl].id].n.toLowerCase());
+    rowsG+=`<div class="gg"><span class="got ph" aria-hidden="true"></span>${gearIcon(GEAR_BY_ID[G.gear[bSlots[0]].id].glyph,null,false,34,"")}<div><b style="color:${RARITY_COLOR[rar]}">${rar} or better rolled gear</b>
+      <small>${esc(names.join(", "))}</small>
+      <small class="gwhere">No unique beats an at-level rolled item in these slots. Look for ${esc(lookTxt)}.</small></div></div>`; }
+  const nGot=GEAR_SLOTS.filter(([sl])=>G.gear[sl]&&GEAR_BY_ID[G.gear[sl].id].unique&&got[G.gear[sl].id]).length;
+  h+=`<div class="gh">Gear goals for Act ${act.n} <span>${nGot}/${G.uniques} uniques found</span></div><div class="ggear">${rowsG}</div>`;
+  // level by level
+  h+=`<div class="gh">Level by level</div>`;
+  for(let L=act.from;L<=act.to;L++){ const r=D.rows[L-1]; const parts=[];
+    if(L===1) parts.push(`<div class="gnote">Character creation. Pick these, plus your race's free talent.</div>`);
+    if(r.attrs.length) parts.push(`<div><span class="gk">Attributes</span>${plus(r.attrs,ATTR_LONG)}</div>`);
+    if(r.combat.length) parts.push(`<div><span class="gk">Combat</span>${plus(r.combat,COMBAT_NAME)}</div>`);
+    if(r.civil.length) parts.push(`<div><span class="gk">Civil</span>${plus(r.civil,CIVIL_NAME)}</div>`);
+    if(r.talents.length) parts.push(`<div><span class="gk">Talent</span>${r.talents.map(t=>`<span data-tip="talent:${t}" tabindex="0">${esc(TALENT_BY_ID[t].n)}</span>`).join(", ")}</div>`);
+    if(r.learn.length) parts.push(`<div><span class="gk">${L===1?"Skills":"Learn"}</span>${r.learn.map(id=>{const s=SKILL_BY_ID[id];return `<span data-tip="skill:${id}" tabindex="0">${esc(s.n)}${s.sp?` <em class="gsrc">Source</em>`:""}</span>`;}).join(", ")}</div>`);
+    if(r.drop.length) parts.push(`<div><span class="gk">Unmemorise</span>${r.drop.map(id=>esc(SKILL_BY_ID[id].n)).join(", ")}</div>`);
+    h+=`<div class="glv"><div class="glv-n">Lv ${L}</div><div class="glv-b">${parts.join("")||`<div class="gnote">Nothing new to spend.</div>`}</div></div>`; }
+  h+=`<p class="note">Skills listed are the ones to keep memorised. Buy the skillbooks from traders as they appear; if one isn't stocked yet, take the next skill on the list and come back. Item levels and locations come from the game files; a few uniques have no recorded location and are left out.</p>`;
+  $("guideBody").innerHTML=h;
 }
 function gearSheet(){
   const {tot,grants}=gearBonuses(state);
@@ -1771,7 +1894,7 @@ function refreshTipAfterRender(){
 
 // ---------- phone tabs ----------
 const PHONE=matchMedia("(max-width:760px)");
-const MGROUP={stepArch:"builds",stepChar:"char",stepPreset:"char",stepAttr:"char",stepCombat:"char",stepCivil:"char",stepTalents:"char",stepSkills:"skills",stepGear:"gear",sheet:"sheet"};
+const MGROUP={stepArch:"builds",stepChar:"char",stepPreset:"char",stepAttr:"char",stepCombat:"char",stepCivil:"char",stepTalents:"char",stepSkills:"skills",stepGear:"gear",stepGuide:"guide",sheet:"sheet"};
 Object.entries(MGROUP).forEach(([id,g])=>{ const el=$(id); if(el) el.dataset.mg=g; });
 document.querySelector(".msub").dataset.mg="char"; document.querySelector("main > footer").dataset.mg="sheet";
 function setMTab(t,scroll){ document.body.dataset.mtab=t; document.querySelectorAll("#mtabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.mtab===t?"page":"false"));
@@ -1782,7 +1905,7 @@ function updateMTabDots(){ const D=derive(); const left=(D.attrBudget-D.attrUsed
   set("char",left>0?left:0); set("skills",memLeft>0?memLeft:0); set("gear",0); }
 $("mtabs").addEventListener("click",e=>{ const b=e.target.closest("[data-mtab]"); if(b){ e.stopPropagation(); setMTab(b.dataset.mtab,true); } });
 let mt="builds"; try{ mt=localStorage.getItem(STORE_KEY+"-mtab")||"builds"; }catch(e){}
-setMTab(MGROUP[mt]?mt:(["builds","char","skills","gear","sheet"].includes(mt)?mt:"builds"));
+setMTab(MGROUP[mt]?mt:(["builds","char","skills","gear","guide","sheet"].includes(mt)?mt:"builds"));
 
 // ---------- events ----------
 document.addEventListener("click",e=>{
@@ -1831,6 +1954,11 @@ document.addEventListener("click",e=>{
   else if(b.id==="btnExample"){ state=exampleBuild(); }
   else if(b.id==="hideBanner"){ state.example=false; }
   else if(b.id==="btnRespread"&&state.archetype){ const keep={origin:state.origin,race:state.race,party:state.party,gear:state.gear}; state=buildArchetype(ARCH_BY_ID[state.archetype],state.level,keep); state.example=true; toast("Re-spread"); }
+  else if(ds.guideact){ ui.guideAct=+ds.guideact; }
+  else if(ds.got){ const A=ARCH_BY_ID[state.archetype]; const o=loadGot(); const m=o[A.id]=o[A.id]||{}; if(m[ds.got]) delete m[ds.got]; else m[ds.got]=1; saveGot(o); }
+  else if(ds.guideload){ const A=ARCH_BY_ID[state.archetype]; const act=ACTS.find(x=>x.n===+ds.guideload); const Dg=guideData(A);
+    const st=JSON.parse(JSON.stringify(Dg.rows[act.to-1].st)); st.name=state.name||A.n; st.gear=JSON.parse(JSON.stringify(guideActGear(A,act).gear)); st.example=true; st.archLevel=act.to; state=st;
+    toast(`Level ${act.to} ${A.n} loaded with Act ${act.n} gear`); }
   else if(b.id==="btnAutoGear"){ const r=autoGear(state); state.gear=r.gear; toast(`Gear picked for level ${state.level}: ${r.uniques} unique item${r.uniques===1?"":"s"}`); }
   else if(b.id==="btnSave"){ const a=loadSaves(); const i=a.findIndex(s=>s.name===state.name); const copy=JSON.parse(JSON.stringify({...state,example:false})); i>=0?a[i]=copy:a.push(copy); writeSaves(a); toast("Saved"); }
   else if(b.id==="btnCopy"){ const txt=buildText(); const box=$("exportBox");
