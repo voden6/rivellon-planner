@@ -38,6 +38,7 @@
 - An 11-slot loadout with all 215 unique items and every base item type.
 - Filter by type, attribute and act, and sort by level or act.
 - Full item details, including the skills an item grants and where it's found.
+- **Auto-pick best gear** fills every slot for your build with the best items you could have found by your level, based on your attributes and abilities.
 
 <p align="center">
   <img src="docs/equipment.png" alt="Equipment loadout with item details and granted skills" width="640">

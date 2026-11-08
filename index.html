@@ -388,6 +388,7 @@ a{color:var(--accent)}
 
       <section class="step" id="stepGear">
         <div class="step-head"><div><div class="kicker">Step 8</div><h2>Equipment</h2></div><span class="budget" id="gearBudget"></span></div>
+        <div class="row" style="margin:0 0 10px;align-items:center"><button class="btn primary" type="button" id="btnAutoGear">Auto-pick best gear</button><span class="note" style="margin:0;flex:1 1 220px">Fills every slot for this build with the best items you could have found by your level, judged by your attributes and abilities. Base items carry no bonuses until you add the ones your copy rolled.</span></div>
         <div class="inv">
           <div class="doll" id="doll"></div>
           <div class="gpanel">
@@ -1074,6 +1075,92 @@ function gearBonuses(st){
 function slotAccepts(slot,g){ if(slot==="off"&&g.unique&&g.slot==="main"&&g.hands===1) return true; return SLOT_GROUP[slot]===g.slot; }
 function offBlocked(st){ const m=st.gear?.main&&GEAR_BY_ID[st.gear.main.id]; return !!(m&&m.hands===2); }
 
+// ---------- auto gear ----------
+// Scores every item against the build's own attributes and abilities, then fills each slot with the best one
+// the hero could have found by their level. One attribute or ability point is worth about 3 points; a score
+// is only a way to rank items against each other, not a damage number.
+const AUTO_WEAR={str:"Heavy",fin:"Light",int:"Robe"};
+const AUTO_1H={str:["Sword","Axe","Mace"],fin:["Dagger"],int:["Wand"]};
+const AUTO_2H={str:["Sword","Axe","Mace"],fin:["Spear"],int:["Staff"]};
+const AUTO_ARMOUR=["helmet","chest","gloves","legs","boots"];
+function autoPrimary(st){ const at=st.attrs||{}; return ["str","fin","int"].reduce((b,k)=>(at[k]||0)>(at[b]||0)?k:b,"str"); }
+function autoWeights(st){
+  const at=st.attrs||{}, cb=st.combat||{}, W={};
+  const aMax=Math.max(1,...["str","fin","int"].map(k=>at[k]||0)), cMax=Math.max(1,...Object.values(cb));
+  ["str","fin","int"].forEach(k=>{ W[k]=3*(at[k]||0)/aMax; });
+  W.con=Math.min(3.5,Math.max(.8,3*(at.con||0)/aMax));
+  W.mem=.7+2*(at.mem||0)/aMax;
+  W.wit=1+1.5*(at.wit||0)/aMax;
+  Object.entries(cb).forEach(([k,v])=>{ if(v>0) W[k]=Math.max(.5,3*v/cMax); });
+  return W;
+}
+function autoFx(fx,tank){
+  let s=0;
+  for(const f of fx||[]){ let m;
+    if(m=f.match(/^\+(\d+)% Critical Chance/)) s+=.3*m[1];
+    else if(m=f.match(/^\+(\d+)% Vitality/)) s+=(tank?.25:.12)*m[1];
+    else if(m=f.match(/^\+(\d+)% \w+ resistance/)) s+=.05*m[1];
+    else if(m=f.match(/^\+(\d+)% Accuracy/)) s+=.08*m[1];
+    else if(m=f.match(/^\+(\d+)% Life Steal/)) s+=.25*m[1];
+    else if(m=f.match(/^\+(\d+)% block chance/)) s+=(tank?.15:.05)*m[1];
+    else if(m=f.match(/^\+(\d+) Initiative/)) s+=.05*m[1];
+    else if(/^Extra (weapon|armour-piercing) damage/.test(f)) s+=2;
+    else if(/^Extra \w+ damage/.test(f)) s+=1.2;
+    else if(/While equipped: Muted/.test(f)) s-=8;
+    else if(m=f.match(/^-(\d+(?:\.\d+)?)m Movement/)) s-=.5*m[1]; }
+  return s;
+}
+function autoGear(st){
+  const W=autoWeights(st), prim=autoPrimary(st), cb=st.combat||{}, L=Math.max(1,st.level||1);
+  const tank=(st.attrs?.con||0)>(st.attrs?.[prim]||0)||(cb.retri||0)>=5;
+  const have=new Set((st.skills||[]).map(id=>SKILL_BY_ID[id]?.n).filter(Boolean));
+  const gets=g=>!g.unique||(g.lvl||0)<=L+1;
+  const isWeapon=g=>(g.slot==="main"||g.slot==="off")&&g.cat!=="Shield";
+  const score=g=>{
+    if(!g.unique) return isWeapon(g)?(g.hands===2?1.2:.8)*L+1:g.slot==="amulet"||g.slot==="ring"||g.slot==="belt"?1:.35*L+1;
+    let s=autoFx(g.fx,tank);
+    for(const [k,v] of Object.entries(g.b||{})) s+=v*(W[k]||0);
+    for(const n of g.grants||[]) s+=have.has(n)?1.5:.4;
+    const lvl=g.lvl||0;
+    return s+(isWeapon(g)?(g.hands===2?1.2:.8)*lvl:(g.slot==="amulet"||g.slot==="ring"||g.slot==="belt")?0:.35*lvl);
+  };
+  const used=new Set();
+  const top=(slot,ok,n=1)=>ALL_GEAR.filter(g=>slotAccepts(slot,g)&&gets(g)&&ok(g)&&!used.has(g.id)).sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n)).slice(0,n);
+  const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); gear[slot]={id:g.id,rarity:"Rare",bonuses:[]}; };
+  const gear={};
+  // weapons: decide the fighting style from the abilities, then compare the loadouts that fit it
+  const wa={dual:cb.dual||0,ranged:cb.ranged||0,single:cb.single||0,twohand:cb.twohand||0};
+  const top1=Object.entries(wa).sort((a,b)=>b[1]-a[1])[0];
+  const kind=g=>g.cat.replace(/^2H /,"");
+  const hand=(cats,h)=>g=>cats.includes(kind(g))&&g.hands===h;
+  // the archetype's own weapon text narrows the choice (a crossbow build gets a crossbow, a two-axe build gets axes)
+  const wt=(st.archetype&&ARCH_BY_ID[st.archetype]?.weapon)||"";
+  const only=cats=>{ const f=cats.filter(c=>new RegExp(c==="Bow"?"(?<!cross)bow":c,"i").test(wt)); return f.length?f:cats; };
+  let style=top1[1]>0?top1[0]:null;
+  if(!style&&/^Two (daggers|one-handed|wands)/i.test(wt)) style="dual";
+  let opts;
+  if(style==="ranged") opts=[{main:hand(only(["Bow","Crossbow"]),2)}];
+  else if(style==="twohand") opts=[{main:hand(only(AUTO_2H[prim]),2)}];
+  else if(style==="dual") opts=[{main:hand(only(AUTO_1H[prim]),1),off:hand(only(AUTO_1H[prim]),1)}];
+  else if(prim==="int"){ const staff=/staff/i.test(wt), wand=/wand/i.test(wt);
+    opts=[]; if(staff||!wand) opts.push({main:hand(AUTO_2H.int,2)}); if(wand||!staff) opts.push({main:hand(AUTO_1H.int,1),off:g=>g.cat==="Shield"}); }
+  else opts=[{main:hand(only(AUTO_1H[prim]),1),off:g=>g.cat==="Shield"}];
+  let bestO=null;
+  for(const o of opts){
+    const m=top("main",o.main)[0]; if(!m) continue;
+    let tot=score(m), off=null;
+    if(o.off){ used.add(m.id); off=top("off",o.off)[0]; used.delete(m.id); if(off) tot+=score(off); }
+    if(!bestO||tot>bestO.tot) bestO={tot,m,off};
+  }
+  if(bestO){ put(gear,"main",bestO.m); put(gear,"off",bestO.off); }
+  AUTO_ARMOUR.forEach(sl=>put(gear,sl,top(sl,g=>g.cat===AUTO_WEAR[prim])[0]));
+  put(gear,"amulet",top("amulet",()=>true)[0]);
+  put(gear,"belt",top("belt",()=>true)[0]);
+  put(gear,"ring1",top("ring1",()=>true)[0]);
+  put(gear,"ring2",top("ring2",()=>true)[0]);
+  return {gear,uniques:Object.values(gear).filter(e=>GEAR_BY_ID[e.id].unique).length};
+}
+
 // ---------- state ----------
 const STORE_KEY="rivellon-planner-v1";
 let state, ui={gact:"all",school:"all",type:"all",q:"",role:"all",astat:"all",arange:"all",aschool:"all",atier:"all",afam:"all",admg:"all",arace:"all",aorigin:"all",aparty:"all",asort:"tier",aq:"",apage:1,archLevel:16,gslot:"main",gcat:"all",gattr:"all",gsrc:"all",gsort:"lvl",gq:""};
@@ -1744,6 +1831,7 @@ document.addEventListener("click",e=>{
   else if(b.id==="btnExample"){ state=exampleBuild(); }
   else if(b.id==="hideBanner"){ state.example=false; }
   else if(b.id==="btnRespread"&&state.archetype){ const keep={origin:state.origin,race:state.race,party:state.party,gear:state.gear}; state=buildArchetype(ARCH_BY_ID[state.archetype],state.level,keep); state.example=true; toast("Re-spread"); }
+  else if(b.id==="btnAutoGear"){ const r=autoGear(state); state.gear=r.gear; toast(`Gear picked for level ${state.level}: ${r.uniques} unique item${r.uniques===1?"":"s"}`); }
   else if(b.id==="btnSave"){ const a=loadSaves(); const i=a.findIndex(s=>s.name===state.name); const copy=JSON.parse(JSON.stringify({...state,example:false})); i>=0?a[i]=copy:a.push(copy); writeSaves(a); toast("Saved"); }
   else if(b.id==="btnCopy"){ const txt=buildText(); const box=$("exportBox");
     const done=()=>toast("Copied");
