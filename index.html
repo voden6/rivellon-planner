@@ -881,6 +881,18 @@ ARCHETYPES.push(
    "war10 twohand7 geo3 persev2","str6 con1 mem1",CIV_FIGHT,"executioner picture opportunist comeback",
    "battering-ram battle-stomp crippling-blow fortify blitz-attack enrage whirlwind onslaught overpower phoenix-dive")
 );
+// ---- full-party mage and rogue builds (no Lone Wolf needed) ----
+ARCHETYPES.push(
+ A("shadowstep-assassin","Shadowstep Assassin","single","fin","melee","Two daggers",4,"Poison and bleeds around you barely matter to an undead.","Cloak and Dagger and Backlash put you behind targets. Teleportation and Nether Swap pull enemies out of position, and Blessed Smoke Cloud turns the party invisible for an opening strike.","Planner-original build for full parties",
+   "scound10 dual7 war5 aero3","fin6 wit2 mem1 con1",CIV_SNEAK,"guerrilla executioner hothead comeback morning",
+   "backlash cloak-and-dagger adrenaline teleportation throwing-knife nether-swap smoke-cover chloroform corrupted-blade daggers-drawn terrifying-cruelty mortal-blow blessed-smoke-cloud rupture-tendons"),
+ A("vampiric-duelist","Vampiric Duelist","single","fin","melee","Two daggers",2,"Skip the Hydrosophist heals; they hurt an undead.","Dagger rogue that keeps itself up with Vampiric Hunger. Its aura gives the whole party life steal, which helps most in a full party.","Planner-original build for full parties",
+   "scound10 dual7 war6 hydro3","fin6 wit1 mem1 con2",CIV_SNEAK,"guerrilla executioner hothead comeback morning",
+   "backlash vampiric-hunger adrenaline throwing-knife cloak-and-dagger vampiric-hunger-aura armour-of-frost chloroform corrupted-blade daggers-drawn terrifying-cruelty mortal-blow rupture-tendons"),
+ A("vacuum-warlock","Vacuum Warlock","control","int","caster","Staff or wand",3,"Necromancer lifesteal heals you, and the kit has no heals to hurt you.","Single-target mage built for Honor Mode. Vacuum Touch silences and suffocates one enemy at a time, and Torturer makes the suffocation ignore armour and last longer. Few spells leave surfaces or hit allies.","Planner-original build for full parties",
+   "aero8 necro8 lead3 persev2","int5 mem3 con1 wit1",CIV_MAGE,"torturer faroutman savage comeback morning",
+   "vacuum-touch electric-discharge shocking-touch decaying-touch mosquito-swarm death-wish silencing-stare teleportation nether-swap blood-sucker bone-cage uncanny-evasion")
+);
 // tier, class, races that suit it, origin, damage type override
 const META_RAW={
  "spectral-duelist":"S warrior human,lizard,undead","death-knight":"S warrior human,undead","shapeshifter":"S warrior human,lizard","ancestral-lancer":"A warrior elf,human",
@@ -905,7 +917,8 @@ const META_RAW={
  "bone-fortress":"B tank undead","flesh-bulwark":"B tank human","petrify-warlord":"A warrior human,dwarf","chloroform-jailer":"B rogue elf,human",
  "mind-thief":"C mage human - magic","haste-weaver":"B support human,undead","field-medic":"C support elf,human - mixed","warlord-bard":"C support human",
  "fane-chronomancer":"A mage undead fane magic","redprince-dragon":"A battlemage lizard redprince mixed","sebille-needle":"S rogue elf sebille","ifan-warden":"B summoner human ifan mixed",
- "lohse-siren":"A mage human lohse magic","beast-reaver":"A warrior dwarf beast"
+ "lohse-siren":"A mage human lohse magic","beast-reaver":"A warrior dwarf beast",
+ "shadowstep-assassin":"A rogue elf,human,undead","vampiric-duelist":"A rogue human,elf","vacuum-warlock":"B mage undead,dwarf - mixed"
 };
 const TIERS=["S","A","B","C","D"], TIER_TEXT={S:"S tier",A:"A tier",B:"B tier",C:"C tier",D:"D tier"};
 const FAM_TEXT={warrior:"Warrior",rogue:"Rogue",ranger:"Ranger",mage:"Mage",battlemage:"Battlemage",summoner:"Summoner",tank:"Tank",support:"Support"};
