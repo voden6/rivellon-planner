@@ -244,6 +244,7 @@ a{color:var(--accent)}
 .bst b{font-size:16px;margin-right:4px}
 @media (max-width:760px){ .bstats{grid-template-columns:repeat(3,minmax(0,1fr))} }
 .gup{font-style:normal;font-size:12px;color:var(--good);font-family:var(--mono)}
+.glw{display:block;font-style:normal;font-size:11px;color:var(--accent)}
 .bpills{display:flex;flex-wrap:wrap;gap:5px}
 .bpill{border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:13px;background:var(--panel)}
 .bpill.new{border-color:var(--good);color:var(--good)}
@@ -621,7 +622,7 @@ const TALENTS = [
   ["iceking","Ice King","+15% Water resistance, +10% maximum Water resistance, -15% Fire resistance.",{needs:["hydro",1],excl:"demon"}],
   ["leech","Leech","Heals you while you stand in blood."],
   ["livingarmour","Living Armour","35% of healing you receive from skills and consumables is added to Magic Armour.",{undeadNote:"Healing hurts you as undead, so this gives you little."}],
-  ["lonewolf","Lone Wolf","+2 max AP, +2 AP recovery, +30% Vitality, +60% Physical and Magic Armour. Doubles points invested in attributes and combat abilities (not Polymorph). Only with one companion or alone. This planner doesn't apply the doubling.",{party:2,excl:"glass"}],
+  ["lonewolf","Lone Wolf","+2 max AP, +2 AP recovery, +30% Vitality, +60% Physical and Magic Armour. Doubles points invested in attributes and combat abilities (not Polymorph). Only with one companion or alone. Lone Wolf archetypes here already plan for the doubling.",{party:2,excl:"glass"}],
   ["mnemonic","Mnemonic","+3 Memory."],
   ["morning","Morning Person","Resurrect at full Vitality."],
   ["opportunist","Opportunist","You can make attacks of opportunity."],
@@ -685,7 +686,7 @@ const ARCHETYPES=[
  A("shieldwall","Shieldwall Tank","tank","str","melee","One-handed weapon and shield",3,"Geomancer armour restores work on you.","Taunts, soaks hits for the party and keeps everyone's Physical Armour up.","Fighter pairing, PC Gamer",
    "war8 geo5 retri5 persev4 single2","str3 con3 mem1 wit1",CIV_FIGHT,"picture comeback stench morning walkitoff",
    "provoke fortify bouncing-shield battering-ram deflective-barrier mend-metal guardian-angel challenge reactive-armour crippling-blow overpower earthquake living-wall"),
- A("masochist","Armoured Masochist","tank","con","melee","One-handed weapon and shield",2,"Leans on surviving big hits without normal heals; carry poison potions.","Shackles a target, provokes enemies and mirrors the pain back. Guardian Angel pulls party damage to you.","Armoured Masochist, PCGamesN",
+ A("masochist","Armoured Masochist","tank","con","melee","One-handed weapon and shield",3,"Leans on surviving big hits without normal heals; carry poison potions.","Shackles a target, provokes enemies and mirrors the pain back. Guardian Angel pulls party damage to you.","Armoured Masochist, PCGamesN",
    "war8 necro6 retri5 persev3 single1","con4 str3 mem1 wit1",CIV_FIGHT,"comeback picture stench walkitoff morning",
    "shackles-of-pain provoke death-wish living-on-the-edge blood-sucker guardian-angel bone-cage battering-ram crippling-blow challenge last-rites overpower"),
  A("thorn-tank","Thorn Warden","tank","con","melee","One-handed weapon and shield",3,"Reflected damage doesn't need healing.","Retribution maxed so every hit taken hurts the attacker, backed by earth armour restores.","Retribution tank builds from the community",
@@ -721,19 +722,19 @@ const ARCHETYPES=[
    "hunt10 ranged7 war6","fin6 wit1 mem1 con1",CIV_LUCK,"executioner hothead elemranger arrowrecovery morning",
    "pin-down ballistic-shot sky-shot elemental-arrowheads tactical-retreat glitter-dust marksman-s-fang barrage assassinate farsight enrage ricochet"),
  A("phantom-sniper","Phantom Sniper","single","fin","ranged","Bow or crossbow",3,"Invisible between shots.","Shoots, vanishes with Chameleon Cloak, repositions and shoots again from stealth.","Huntsman and Polymorph stealth builds",
-   "hunt9 ranged9 poly5","fin6 wit1 mem1",CIV_SNEAK,"guerrilla hothead executioner arrowrecovery morning",
+   "hunt9 ranged9 poly5","fin6 wit1 mem1",CIV_SNEAK,"guerrilla hothead arrowrecovery comeback morning",
    "chameleon-cloak ballistic-shot pin-down sky-shot tactical-retreat spread-your-wings assassinate marksman-s-fang glitter-dust flay-skin skin-graft farsight"),
  A("shadow-marksman","Shadow Marksman","single","fin","ranged","Crossbow",3,"Stealth keeps you safe.","Crossbow sniper with Scoundrel mobility and crit power. Shadow's Eye is the dream weapon.","Huntsman and Scoundrel combos",
-   "hunt9 ranged8 scound6","fin6 wit2 mem1",CIV_SNEAK,"guerrilla executioner hothead arrowrecovery morning",
+   "hunt9 ranged8 scound6","fin6 wit2 mem1",CIV_SNEAK,"guerrilla hothead arrowrecovery comeback morning",
    "ballistic-shot pin-down adrenaline sky-shot cloak-and-dagger tactical-retreat assassinate marksman-s-fang barrage farsight glitter-dust"),
  A("blight-archer","Blight Archer","single","fin","ranged","Bow",4,"Necromancer points give lifesteal on every arrow.","Archer who heals by hurting, with bleeding and disease from Necromancer.","Necro-archer hybrids from the community",
-   "hunt9 ranged8 necro6","fin6 int1 wit1 mem1",CIV_LUCK,"executioner hothead torturer arrowrecovery morning",
+   "hunt9 ranged8 necro6","fin6 int1 wit1 mem1",CIV_LUCK,"hothead torturer arrowrecovery comeback morning",
    "pin-down ballistic-shot mosquito-swarm sky-shot tactical-retreat infect death-wish marksman-s-fang barrage assassinate shackles-of-pain grasp-of-the-starved"),
  A("trapper","Master Trapper","control","fin","ranged","Bow or crossbow",3,"Ranged and armour-based.","Roots and cripples with earth magic; Reactive Shot punishes anyone who moves.","Master Trapper, PCGamesN",
    "hunt8 geo6 ranged9","fin6 con1 mem1 wit1",CIV_LUCK,"elemranger duckduck hothead arrowrecovery morning",
    "pin-down reactive-shot impalement worm-tremor tactical-retreat fossil-strike elemental-arrowheads earthquake ballistic-shot sky-shot arrow-spray living-wall arrow-storm assassinate"),
  A("ranger-summoner","Ranger Summoner","summon","fin","ranged","Bow",3,"Your summon tanks so you rarely need healing.","Summons an Incarnate to hold enemies while you shoot from high ground.","Ranger Summoner, GamesRadar",
-   "hunt8 summon8 ranged7","fin5 int1 mem1 wit1",CIV_LUCK,"executioner arrowrecovery hothead elemranger morning",
+   "hunt8 summon8 ranged7","fin5 int1 mem1 wit1",CIV_LUCK,"arrowrecovery hothead elemranger comeback morning",
    "conjure-incarnate pin-down farsight-infusion tactical-retreat ballistic-shot elemental-totem sky-shot power-infusion marksman-s-fang assassinate door-to-eternity"),
  A("fire-ranger","Fire Ranger","area","fin","ranged","Bow",3,"Watch your own fire; otherwise easy.","Bow plus fire. Elemental Arrowheads on fire, Haste for tempo, explosions on oil.","Ranger preset, PC Gamer",
    "hunt9 ranged7 pyro7","fin5 int1 wit1 mem1",CIV_LUCK,"elemranger hothead arrowrecovery demon morning",
@@ -770,7 +771,7 @@ const ARCHETYPES=[
    "hydro8 aero6 dual7 lead2","int6 mem1 wit1 con1",CIV_MAGE,"savage faroutman elemaff hothead comeback",
    "electric-discharge hail-strike shocking-touch armour-of-frost rain global-cooling ice-fan teleportation uncanny-evasion chain-lightning deep-freeze"),
  A("mage-army","One Mage Army","summon","int","caster","Staff or wand",3,"Poison surfaces from Contamination power a poison Incarnate and heal you.","Summoning to 10 for the Champion, plus totems and a charmed enemy. Your army fights.","One Mage Army, PCGamesN",
-   "summon10 geo4 necro3 lead5 persev1","int4 mem2 con1 wit1",CIV_MAGE,"faroutman comeback elemaff morning petpal",
+   "summon10 geo4 necro5 lead3 persev1","int4 mem2 con1 wit1",CIV_MAGE,"faroutman comeback elemaff morning petpal",
    "conjure-incarnate elemental-totem dimensional-bolt farsight-infusion power-infusion contamination dominate-mind raise-bloated-corpse supercharger cannibalise door-to-eternity planar-gateway fortify ethereal-storm totems-of-the-necromancer"),
  A("totem-master","Totem Master","summon","int","caster","Staff or wand",3,"Totems do the fighting; you stay safe.","Plants elemental totems on fire surfaces and supercharges them for burst.","Summoning and Pyrokinetic combos",
    "summon10 pyro6 lead5 persev2","int4 mem2 con1 wit1",CIV_MAGE,"faroutman comeback demon elemaff morning",
@@ -853,7 +854,7 @@ ARCHETYPES.push(
  A("glass-cannon-mage","Glass Cannon Mage","area","int","caster","Staff",2,"No armour protection from statuses; you rely on going first.","Glass Cannon starts every turn at full AP. Two big spells every turn, at the cost of being easy to disable.","Glass Cannon builds",
    "pyro10 geo6 aero3","int6 wit2 mem1",CIV_MAGE,"glass faroutman savage elemaff",
    "fossil-strike searing-daggers haste fireball laser-ray impalement earthquake supernova teleportation pyroclastic-eruption epidemic-of-fire"),
- A("static-lancer","Static Lancer","single","int","caster","Wand",2,"No healing, but nothing to stop you either.","Wand basic attacks plus single-target lightning. Pressure Spike and Superconductor clean up.","Aerotheurge builds",
+ A("static-lancer","Static Lancer","area","int","caster","Wand",2,"No healing, but nothing to stop you either.","Wand basic attacks plus lightning: Electric Discharge for one target, then Pressure Spike, Chain Lightning and Thunderstorm for groups.","Aerotheurge builds",
    "aero10 scound4 lead2","int6 wit2 mem1",CIV_MAGE,"faroutman savage elemaff comeback",
    "electric-discharge shocking-touch blinding-radiance teleportation adrenaline chain-lightning pressure-spike nether-swap superconductor closed-circuit thunderstorm"),
  // summoners
@@ -893,7 +894,7 @@ ARCHETYPES.push(
    "summon8 aero6 hydro3","int5 mem2 con1",CIV_MAGE,"faroutman comeback walkitoff",
    "conjure-incarnate electric-discharge elemental-totem dominate-mind teleportation nether-swap hail-strike winter-blast chain-lightning"),
  // support
- A("haste-weaver","Haste Weaver","support","int","caster","Staff or wand",3,"No heals, so it suits an undead.","Support without healing: Haste, Peace of Mind and Infusions on your strongest friend.","Support builds",
+ A("haste-weaver","Haste Weaver","support","int","caster","Staff or wand",3,"No heal spells. Soul Mate copies healing to you, which hurts an undead, so cast it on a living friend.","Support without healing: Haste, Peace of Mind and Infusions on your strongest friend.","Support builds",
    "pyro6 summon6 lead5 aero3","int4 mem3 con1",CIV_MAGE,"faroutman comeback walkitoff morning",
    "haste peace-of-mind searing-daggers power-infusion elemental-totem fire-infusion teleportation flaming-tongues shadow-infusion soul-mate"),
  A("field-medic","Field Medic","support","fin","ranged","Bow",1,"Heals; an undead medic hurts itself on self-casts.","Huntsman and Hydrosophist medic: First Aid, Restoration and Cryotherapy from the back line.","Combat medic builds",
@@ -952,7 +953,7 @@ ARCHETYPES.push(
    "hunt10 war8 ranged5","fin6 wit1 mem1 con1",CIV_LUCK,"executioner elemranger hothead arrowrecovery comeback",
    "pin-down ballistic-shot elemental-arrowheads sky-shot ricochet marksman-s-fang tactical-retreat assassinate barrage reactive-shot farsight"),
  A("ifan-shadowhunter","Ifan: Shadow Hunter","single","fin","ranged","Crossbow",3,"Stealth keeps him safe between shots.","Crossbow with Scoundrel for Adrenaline, Cloak and Dagger and a bigger crit multiplier. Shoots from stealth, then vanishes.","Ifan origin builds",
-   "hunt9 ranged7 scound6","fin6 wit2 mem1",CIV_SNEAK,"guerrilla executioner hothead arrowrecovery morning",
+   "hunt9 ranged7 scound6","fin6 wit2 mem1",CIV_SNEAK,"guerrilla hothead arrowrecovery comeback morning",
    "ballistic-shot pin-down adrenaline sky-shot cloak-and-dagger tactical-retreat assassinate marksman-s-fang barrage farsight elemental-arrowheads"),
  A("sebille-huntress","Sebille: Blood Huntress","single","fin","ranged","Bow",3,"An elf, so heals work; Flesh Sacrifice adds damage.","Bow plus Necromancer for lifesteal on every arrow. Flesh Sacrifice and Breaking the Chains for burst on the target that matters.","Sebille origin builds",
    "hunt9 war6 necro5 ranged3","fin6 int1 wit1 mem1",CIV_LUCK,"executioner elemranger arrowrecovery comeback morning",
@@ -982,9 +983,9 @@ const META_RAW={
  "warrior-healer":"C support human,dwarf","shadow-assassin":"S rogue elf,human,undead","glass-assassin":"A rogue elf,human","plague-witch":"A rogue undead,elf",
  "venom-duelist":"B rogue undead - mixed","neutraliser":"A rogue human,elf","sniper":"A ranger elf,human,undead","phantom-sniper":"A ranger elf,human",
  "shadow-marksman":"A ranger elf,human","blight-archer":"B ranger undead - mixed","trapper":"C ranger dwarf - mixed","ranger-summoner":"B summoner elf - mixed",
- "fire-ranger":"B ranger lizard,human - mixed","plaguebone":"A mage undead - magic","bloodmancer":"B mage undead,elf","lich":"A summoner undead",
+ "fire-ranger":"B ranger lizard,human - mixed","plaguebone":"A mage undead - magic","bloodmancer":"B mage undead,elf - physical","lich":"A summoner undead - physical",
  "wizard":"A mage lizard,human - magic","sorcerer":"A mage human,dwarf - magic","storm-caller":"A mage dwarf,human - magic","weather":"A mage dwarf - magic",
- "steam-mage":"B mage human - magic","archmage":"C mage human - magic","wand-gunslinger":"C mage human - magic","mage-army":"A summoner human",
+ "steam-mage":"B mage human - magic","archmage":"C mage human - magic","wand-gunslinger":"C mage human - magic","mage-army":"A summoner human - mixed",
  "totem-master":"B summoner dwarf","earth-warden":"B support dwarf","cleric":"B support elf,human",
  "lw-executioner":"S warrior human,lizard,undead - - lw","lw-assassin":"S rogue elf,human,undead - - lw","lw-sniper":"S ranger elf,human,undead - - lw",
  "lw-pyro":"S mage lizard,human - magic lw","lw-summoner":"A summoner human,undead - - lw",
@@ -992,13 +993,13 @@ const META_RAW={
  "spear-dancer":"A warrior elf,human,undead","berserker":"A warrior human,dwarf","blade-and-board":"B warrior human,dwarf","whirlwind-reaper":"A warrior human,lizard",
  "knife-thrower":"B rogue elf,human","night-stalker":"A rogue undead,elf","edge-walker":"A warrior undead,human","earth-ranger":"C ranger dwarf - mixed",
  "fire-lance":"A mage lizard,human - magic","savage-sorcerer":"A mage human - magic","earthshaker":"A mage undead,dwarf - magic","frost-mage":"B mage dwarf - magic",
- "glass-cannon-mage":"B mage lizard,human - magic","static-lancer":"C mage human - magic","necro-lord":"A summoner undead","sky-shepherd":"B summoner human",
+ "glass-cannon-mage":"B mage lizard,human - magic","static-lancer":"C mage human - magic","necro-lord":"A summoner undead - physical","sky-shepherd":"B summoner human",
  "fire-shepherd":"B summoner lizard","juggernaut":"B tank dwarf,undead","frost-bulwark":"C tank dwarf","aegis-commander":"B tank human,dwarf",
  "bone-fortress":"B tank undead","flesh-bulwark":"B tank human","petrify-warlord":"A warrior human,dwarf","chloroform-jailer":"B rogue elf,human",
  "mind-thief":"C mage human - magic","haste-weaver":"B support human,undead","field-medic":"C support elf,human - mixed","warlord-bard":"C support human",
  "fane-chronomancer":"A mage undead fane magic","redprince-dragon":"A battlemage lizard redprince mixed","sebille-needle":"S rogue elf sebille","ifan-warden":"B summoner human ifan mixed",
  "lohse-siren":"A mage human lohse magic","beast-reaver":"A warrior dwarf beast",
- "fane-bonelord":"A summoner undead fane","fane-shadowblade":"A rogue undead fane","lohse-conductor":"B summoner human lohse","lohse-firebrand":"A mage human lohse magic",
+ "fane-bonelord":"A summoner undead fane physical","fane-shadowblade":"A rogue undead fane","lohse-conductor":"B summoner human lohse","lohse-firebrand":"A mage human lohse magic",
  "ifan-sniper":"A ranger human ifan","ifan-shadowhunter":"A ranger human ifan","sebille-huntress":"A ranger elf sebille","sebille-chimera":"A rogue elf sebille",
  "redprince-sovereign":"B tank lizard redprince","redprince-sorcerer":"A mage lizard redprince magic","beast-tidecaller":"A mage dwarf beast magic","beast-ironclad":"B tank dwarf beast",
  "shadowstep-assassin":"A rogue elf,human,undead","vampiric-duelist":"A rogue human,elf","vacuum-warlock":"B mage undead,dwarf - mixed"
@@ -1007,11 +1008,13 @@ const TIERS=["S","A","B","C","D"], TIER_TEXT={S:"S tier",A:"A tier",B:"B tier",C
 const FAM_TEXT={warrior:"Warrior",rogue:"Rogue",ranger:"Ranger",mage:"Mage",battlemage:"Battlemage",summoner:"Summoner",tank:"Tank",support:"Support"};
 const DMG_TEXT={physical:"Physical",magic:"Magic",mixed:"Mixed"};
 const RACE_TEXT={human:"Human",elf:"Elf",dwarf:"Dwarf",lizard:"Lizard",undead:"Undead"};
+const ORIGIN_RACE={fane:"undead",lohse:"human",ifan:"human",sebille:"elf",redprince:"lizard",beast:"dwarf"};
 const ORIGIN_TEXT={fane:"Fane",lohse:"Lohse",ifan:"Ifan",sebille:"Sebille",redprince:"Red Prince",beast:"Beast"};
 ARCHETYPES.forEach(a=>{ const [tier,fam,races,origin,dmg,lw]=(META_RAW[a.id]||"C warrior human").split(" ");
   a.tier=tier; a.fam=fam; a.races=races.split(","); a.origin=origin&&origin!=="-"?origin:null; a.lw=lw==="lw"||dmg==="lw";
   a.dmg=dmg&&dmg!=="-"&&dmg!=="lw"?dmg:(a.role==="tank"||a.role==="support"?"physical":/staff|wand/i.test(a.weapon)&&a.stat==="int"?"magic":"physical");
-  if(a.fit>=3&&!a.races.includes("undead")) a.races.push("undead"); });
+  if(a.origin) a.races=[ORIGIN_RACE[a.origin]];
+  else if(a.fit>=3&&!a.races.includes("undead")) a.races.push("undead"); });
 
 // ---- damage estimate from the game's skill numbers ----
 // Hits on one target for skills that strike several times (from the skill descriptions).
@@ -1048,9 +1051,9 @@ const FIT_TEXT={4:"Great",3:"Good",2:"Mixed",1:"Poor"};
 const RANGE_TEXT={melee:"Melee",ranged:"Ranged",caster:"Caster"};
 const STAT_TEXT={str:"Strength",fin:"Finesse",int:"Intelligence",con:"Constitution"};
 
-function spendProportional(plan,budget,cap){
+function spendProportional(plan,budget,cap,fillKeys){
   const out={}; plan.forEach(([k])=>out[k]=0); let spent=0;
-  const fill=[["persev",10],["lead",10],["retri",10],["single",10]];
+  const fill=(fillKeys||["persev","lead","retri","single"]).map(k=>[k,cap]);
   while(spent<budget){
     let best=null,bestR=Infinity;
     for(const [k,tgt] of plan){ if(tgt<=0||out[k]>=Math.min(tgt,cap)) continue; const r=out[k]/tgt; if(r<bestR){bestR=r;best=k;} }
@@ -1059,20 +1062,27 @@ function spendProportional(plan,budget,cap){
   }
   Object.keys(out).forEach(k=>{ if(!out[k]) delete out[k]; }); return out;
 }
+// General picks used once a build's own talent list runs out.
+const TALENT_FALLBACK=["hothead","comeback","mnemonic","walkitoff","morning","fivestar"];
+const talentOrder=a=>[...a.t,...TALENT_FALLBACK.filter(x=>!a.t.includes(x))];
 function buildArchetype(a,L,keep){
   const st={...blankBuild(),name:a.n,origin:keep.origin,race:keep.race,party:keep.party,level:L,preset:"battlemage",archetype:a.id,archLevel:L,gear:keep.gear?JSON.parse(JSON.stringify(keep.gear)):{}};
-  st.combat=spendProportional(a.plan,2+(L-1),10);
+  // Lone Wolf doubles invested points (not Polymorph), so the plan's targets are halved and capped at 5 (= 10).
+  const lw=!!a.lw, eff=(k,v)=>lw&&k!=="poly"?Math.min(10,2*v):v;
+  st.combat=lw?spendProportional(a.plan.map(([k,t])=>[k,k==="poly"?t:Math.ceil(t/2)]),2+(L-1),5,[...[...a.plan].sort((x,y)=>y[1]-x[1]).map(([k])=>k),"persev","lead","retri"])
+    :spendProportional(a.plan,2+(L-1),10);
   const slots=TALENT_LEVELS.filter(l=>l<=L).length;
-  for(const id of a.t){ if(st.talents.length>=slots) break; const t=TALENT_BY_ID[id]; if(!t) continue;
+  for(const id of talentOrder(a)){ if(st.talents.length>=slots) break; const t=TALENT_BY_ID[id]; if(!t||st.talents.includes(id)) continue;
     if(t.lvl&&L<t.lvl) continue; if(t.needs&&(st.combat[t.needs[0]]||0)<t.needs[1]) continue;
     if(t.excl&&st.talents.includes(t.excl)) continue; if(t.party&&keep.party>t.party) continue; st.talents.push(id); }
   const ab=3+2*(L-1)+(st.combat.poly||0)+(st.talents.includes("biggerbetter")?2:0);
-  st.attrs=spendProportional(a.aw.map(([k,w])=>[k,w*10]),ab,30);
+  // attributes top out at 40: 30 points normally, 15 with Lone Wolf; spare points go to Wits, Constitution, Memory
+  st.attrs=spendProportional(a.aw.map(([k,w])=>[k,w*10]),ab,lw?15:30,["wit","con","mem","str","fin","int"]);
   const vb=1+CIVIL_LEVELS.filter(l=>l<=L).length; let spent=0,i=0;
   while(spent<vb && i<200){ const k=a.v[i%a.v.length]; i++; if((st.civil[k]||0)<5){st.civil[k]=(st.civil[k]||0)+1;spent++;} }
   const gt=gearBonuses(st).tot;
   const memSlots=3+(st.attrs.mem||0)+(gt.mem||0)+(st.talents.includes("mnemonic")?3:0)+Math.floor(L/2); let used=0;
-  for(const id of a.k){ const s=SKILL_BY_ID[id]; if(!s) continue; if(!reqMet(s,k=>(st.combat[k]||0)+(gt[k]||0))) continue; if(used+s.mem>memSlots) continue; st.skills.push(id); used+=s.mem; }
+  for(const id of a.k){ const s=SKILL_BY_ID[id]; if(!s) continue; if(!reqMet(s,k=>eff(k,st.combat[k]||0)+(gt[k]||0))) continue; if(used+s.mem>memSlots) continue; st.skills.push(id); used+=s.mem; }
   return st;
 }
 
@@ -1268,7 +1278,7 @@ function buildGuide(a,keep){
   for(let L=1;L<=LEVELS;L++){
     const st=buildArchetype(a,L,keep);
     const slots=TALENT_LEVELS.filter(l=>l<=L).length;
-    for(const id of a.t){ if(tal.length>=slots) break; if(tal.includes(id)) continue; const t=TALENT_BY_ID[id]; if(!t) continue;
+    for(const id of talentOrder(a)){ if(tal.length>=slots) break; if(tal.includes(id)) continue; const t=TALENT_BY_ID[id]; if(!t) continue;
       if(t.lvl&&L<t.lvl) continue; if(t.needs&&(st.combat[t.needs[0]]||0)<t.needs[1]) continue;
       if(t.excl&&tal.includes(t.excl)) continue; if(t.party&&keep.party>t.party) continue; tal.push(id); }
     st.talents=[...tal];
@@ -1318,7 +1328,9 @@ function writeSaves(a){ try{localStorage.setItem(STORE_KEY+"-saves",JSON.stringi
 
 // ---------- derived ----------
 function gearTot(){ return gearBonuses(state).tot; }
-function lv(k){ return (state.combat[k]||0)+(gearTot()[k]||0); }
+function lwActive(st){ return st.talents.includes("lonewolf")&&st.party<=2; }
+// Lone Wolf doubles invested combat points (not Polymorph) up to 10, so skill requirements use the doubled value
+function lv(k){ const v=state.combat[k]||0; return (lwActive(state)&&k!=="poly"?Math.min(10,2*v):v)+(gearTot()[k]||0); }
 const sum=o=>Object.values(o).reduce((a,b)=>a+(b||0),0);
 function derive(){
   const L=state.level, asu=state.talents.includes("allskilled")?1:0;
@@ -1666,14 +1678,16 @@ function renderGuide(){
   const plus=(list,name)=>list.map(([k,v])=>`+${v} ${name[k]||k}`).join(", ");
   const startSt=act.from>1?D.rows[act.from-2].st:null;
   const gain=(k,m)=>{ const v=(end[m][k]||0)-((startSt&&startSt[m][k])||0); return v>0?` <em class="gup">+${v}</em>`:""; };
-  const attrRow=["str","fin","int","con","mem","wit"].map(k=>`<span class="bst"><small>${ATTR_LONG[k]}</small><b>${10+(end.attrs[k]||0)}</b>${gain(k,"attrs")}</span>`).join("");
-  const combRow=Object.entries(end.combat).sort((a,b)=>b[1]-a[1]).map(([k])=>`<span class="bst"><small>${COMBAT_NAME[k]}</small><b>${end.combat[k]}</b>${gain(k,"combat")}</span>`).join("");
+  const lwA=k=>A.lw?`<em class="glw">in game ${Math.min(40,10+2*(end.attrs[k]||0))}</em>`:"";
+  const lwC=k=>A.lw&&k!=="poly"?`<em class="glw">in game ${Math.min(10,2*end.combat[k])}</em>`:"";
+  const attrRow=["str","fin","int","con","mem","wit"].map(k=>`<span class="bst"><small>${ATTR_LONG[k]}</small><b>${10+(end.attrs[k]||0)}</b>${gain(k,"attrs")}${lwA(k)}</span>`).join("");
+  const combRow=Object.entries(end.combat).sort((a,b)=>b[1]-a[1]).map(([k])=>`<span class="bst"><small>${COMBAT_NAME[k]}</small><b>${end.combat[k]}</b>${gain(k,"combat")}${lwC(k)}</span>`).join("");
   const civRow=Object.entries(end.civil).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${CIVIL_NAME[k]} ${v}`).join(" · ");
   const prevTal=startSt?startSt.talents:[], prevSk=startSt?startSt.skills:[];
   const talRow=end.talents.map(t=>`<span class="bpill${prevTal.includes(t)?"":" new"}" data-tip="talent:${t}" tabindex="0">${esc(TALENT_BY_ID[t].n)}</span>`).join("");
   const skRow=end.skills.map(id=>`<span class="bpill${prevSk.includes(id)?"":" new"}" data-tip="skill:${id}" tabindex="0">${esc(SKILL_BY_ID[id].n)}</span>`).join("");
   let h=`<div class="gsum"><div class="gsum-h"><b>${esc(A.n)}</b><span>End of Act ${act.n} · level ${act.to}</span></div>
-    <p class="note" style="margin:4px 0 0">${act.note} Green numbers and highlighted names are what's new this act.</p>
+    <p class="note" style="margin:4px 0 0">${act.note} Green numbers and highlighted names are what's new this act.${A.lw?" Lone Wolf doubles what you put into attributes and combat abilities (except Polymorph), so the big numbers are what you invest and \"in game\" is what you end up with.":""}</p>
     <div class="bgrp">Attributes</div><div class="bstats">${attrRow}</div>
     <div class="bgrp">Combat abilities</div><div class="bstats">${combRow}</div>
     ${civRow?`<div class="bgrp">Civil</div><p class="bline">${civRow}</p>`:""}
@@ -1986,8 +2000,8 @@ document.addEventListener("click",e=>{
   if(PHONE.matches&&lastPointer==="touch"&&tipEl&&b===tipEl&&!b.dataset.gslot){
     if(tapArmed!==tipEl.dataset.tip){ showTip(tipEl); tapArmed=tipEl.dataset.tip; return; } }
   const ds=b.dataset;
-  if(ds.origin){ state.origin=ds.origin; const o=ORIGINS.find(x=>x.id===ds.origin); if(o.race){state.race=o.race; applyPreset(state,o.preset); state.name=o.n;} state.example=false; }
-  else if(ds.race){ state.race=ds.race; state.example=false; }
+  if(ds.origin){ state.origin=ds.origin; const o=ORIGINS.find(x=>x.id===ds.origin); if(o.race){state.race=o.race; applyPreset(state,o.preset); state.name=o.n;} state.example=false;  ui.aorigin=ds.origin==="custom"?"all":ds.origin; ui.arace=ds.origin==="custom"?ui.arace:ORIGIN_RACE[ds.origin]; ui.apage=1; }
+  else if(ds.race){ state.race=ds.race; state.example=false; const R=RACES.find(x=>x.id===ds.race); ui.arace=R.undead?"undead":R.base; if(ui.aorigin!=="all"&&ui.aorigin!=="none") ui.aorigin="all"; ui.apage=1; }
   else if(ds.preset){ applyPreset(state,ds.preset); state.example=false; state.archetype=null; }
   else if(ds.arch){ const A0=ARCH_BY_ID[ds.arch]; const O=A0.origin&&ORIGINS.find(o=>o.id===A0.origin);
     state=buildArchetype(A0,ui.archLevel,{origin:O?O.id:(state.origin!=="custom"?"custom":state.origin),race:O?O.race:state.race,party:A0.lw?Math.min(state.party,2):state.party,gear:state.gear});
