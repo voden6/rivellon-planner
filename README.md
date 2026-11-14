@@ -24,6 +24,7 @@
 - Ranked S to C tier, with a damage index for single-target and area damage calculated from the game's skill data.
 - Filter by tier, role, class, damage type, main stat, range, skill school, race, origin and party size.
 - Load any archetype at any level and every step fills in automatically, ready to edit.
+- Each build's popup explains its damage index (rank, which skills it comes from, what it scales with) and how to play it: a two-turn opener with AP costs, its combos, and which of its skills hit your own party.
 
 **Act-by-act playthrough guide**
 - For any loaded archetype: what to spend points on at every level, from character creation to level 22, including talents and which skills to learn or swap out.

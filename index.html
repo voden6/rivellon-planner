@@ -228,6 +228,13 @@ textarea#exportBox{width:100%;min-height:140px;margin-top:8px;background:var(--p
 .tip .th small{display:block;color:var(--muted);font-size:12px}
 .tip .stats{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-family:var(--mono);font-size:12px;margin:0 0 8px;padding:8px 0;border-block:1px solid var(--line)}
 .tip .stats dt{color:var(--muted)} .tip .stats dd{margin:0;font-variant-numeric:tabular-nums}
+.tip .tsec,.gsum .tsec{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:10px 0 4px}
+.gsum .tn{font-size:13px;color:var(--muted);margin:4px 0 0}
+.rotl{list-style:none;margin:0 0 4px;padding:0}
+.rotl li{font-size:13.5px;margin:3px 0;line-height:1.4}
+.rotl em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 3px}
+.tips{margin:4px 0 0;padding-left:18px}
+.tips li{font-size:13px;margin:3px 0;line-height:1.4}
 .tip p{margin:0 0 6px} .tip p:last-child{margin-bottom:0}
 .tip .tn{font-size:13px}
 [data-tip]{cursor:help} button[data-tip]{cursor:pointer}
@@ -986,7 +993,7 @@ const META_RAW={
  "fire-ranger":"B ranger lizard,human - mixed","plaguebone":"A mage undead - magic","bloodmancer":"B mage undead,elf - physical","lich":"A summoner undead - physical",
  "wizard":"A mage lizard,human - magic","sorcerer":"A mage human,dwarf - magic","storm-caller":"A mage dwarf,human - magic","weather":"A mage dwarf - magic",
  "steam-mage":"B mage human - magic","archmage":"C mage human - magic","wand-gunslinger":"C mage human - magic","mage-army":"A summoner human - mixed",
- "totem-master":"B summoner dwarf","earth-warden":"B support dwarf","cleric":"B support elf,human",
+ "totem-master":"B summoner dwarf","earth-warden":"B support dwarf","cleric":"B support elf,human - mixed",
  "lw-executioner":"S warrior human,lizard,undead - - lw","lw-assassin":"S rogue elf,human,undead - - lw","lw-sniper":"S ranger elf,human,undead - - lw",
  "lw-pyro":"S mage lizard,human - magic lw","lw-summoner":"A summoner human,undead - - lw",
  "warfare-ranger":"S ranger elf,human,undead","blood-ranger":"A ranger undead,elf","chimera-rogue":"S rogue elf,human,undead","greatblade-scoundrel":"S warrior human,lizard,undead",
@@ -1012,7 +1019,7 @@ const ORIGIN_RACE={fane:"undead",lohse:"human",ifan:"human",sebille:"elf",redpri
 const ORIGIN_TEXT={fane:"Fane",lohse:"Lohse",ifan:"Ifan",sebille:"Sebille",redprince:"Red Prince",beast:"Beast"};
 ARCHETYPES.forEach(a=>{ const [tier,fam,races,origin,dmg,lw]=(META_RAW[a.id]||"C warrior human").split(" ");
   a.tier=tier; a.fam=fam; a.races=races.split(","); a.origin=origin&&origin!=="-"?origin:null; a.lw=lw==="lw"||dmg==="lw";
-  a.dmg=dmg&&dmg!=="-"&&dmg!=="lw"?dmg:(a.role==="tank"||a.role==="support"?"physical":/staff|wand/i.test(a.weapon)&&a.stat==="int"?"magic":"physical");
+  a.dmg=dmg&&dmg!=="-"&&dmg!=="lw"?dmg:(a.role==="tank"?"physical":/staff|wand/i.test(a.weapon)&&a.stat==="int"?"magic":"physical");
   if(a.origin) a.races=[ORIGIN_RACE[a.origin]];
   else if(a.fit>=3&&!a.races.includes("undead")) a.races.push("undead"); });
 
@@ -1034,16 +1041,160 @@ function archScore(a,L){
   const weaponMult=(1+.05*(at(a.stat)-10))*(1+.05*(magicW?0:C("war")))*(1+.05*wAbil)*crit;
   const baseMult=el=>{ const sch=EL_SCHOOL[el]||"war"; return (1+.05*(at("int")-10))*(1+.05*C(sch))*(st.talents.includes("savage")?crit:1); };
   const opts=st.skills.map(id=>{ const d=SKILL_DMG[id]; const s=SKILL_BY_ID[id]; if(!d) return null;
-    const per=d.pct/100*(d.weapon?weaponMult:baseMult(d.el)); return {ap:Math.max(1,s.ap),one:per*d.hits,area:per*d.hits*(d.aoe?3:1),uses:s.cd<=1?2:1}; }).filter(Boolean);
+    const per=d.pct/100*(d.weapon?weaponMult:baseMult(d.el)); return {id,ap:Math.max(1,s.ap),one:per*d.hits,area:per*d.hits*(d.aoe?3:1),uses:s.cd<=1?2:1}; }).filter(Boolean);
   const turnAP=a.lw?12:st.talents.includes("glass")?12:8;
-  const run=key=>{ let ap=turnAP, tot=0; const pool=opts.flatMap(o=>Array(o.uses).fill(o)).sort((x,y)=>y[key]/y.ap-x[key]/x.ap);
-    for(const o of pool){ if(o.ap<=ap){ ap-=o.ap; tot+=o[key]; } } tot+=Math.floor(ap/2)*weaponMult; return tot; };
-  return {one:run("one"),area:run("area")};
+  const run=key=>{ let ap=turnAP, tot=0; const parts={}; const pool=opts.flatMap(o=>Array(o.uses).fill(o)).sort((x,y)=>y[key]/y.ap-x[key]/x.ap);
+    for(const o of pool){ if(o.ap<=ap){ ap-=o.ap; tot+=o[key]; parts[o.id]=(parts[o.id]||0)+o[key]; } }
+    const basic=Math.floor(ap/2)*weaponMult; tot+=basic; if(basic) parts._basic=basic; return [tot,parts]; };
+  const [one,oneParts]=run("one"), [area,areaParts]=run("area");
+  return {one,area,oneParts,areaParts,magicW};
 }
 let ARCH_SCORE={}, ARCH_SCORE_L=0;
 function scoreAll(L){ if(ARCH_SCORE_L===L) return; ARCH_SCORE={}; let m1=0,m2=0;
   ARCHETYPES.forEach(a=>{ const s=archScore(a,L); ARCH_SCORE[a.id]=s; m1=Math.max(m1,s.one); m2=Math.max(m2,s.area); });
-  ARCHETYPES.forEach(a=>{ const s=ARCH_SCORE[a.id]; s.oneN=Math.round(100*s.one/m1); s.areaN=Math.round(100*s.area/m2); }); ARCH_SCORE_L=L; }
+  ARCHETYPES.forEach(a=>{ const s=ARCH_SCORE[a.id]; s.oneN=Math.round(100*s.one/m1); s.areaN=Math.round(100*s.area/m2); });
+  const rank=k=>[...ARCHETYPES].sort((x,y)=>ARCH_SCORE[y.id][k]-ARCH_SCORE[x.id][k]).forEach((a,i)=>ARCH_SCORE[a.id][k+"Rank"]=i+1);
+  rank("one"); rank("area"); ARCH_SCORE_L=L; }
+
+// ---------- build notes: where the damage comes from, and how to play it ----------
+const SKILL_USE=(()=>{ const m={}; const set=(u,ids)=>ids.split(" ").forEach(id=>m[id]=u);
+  set("ap","adrenaline"); set("crit","enrage");
+  set("buff","haste peace-of-mind firebrand elemental-arrowheads farsight sparking-swings master-of-sparks thick-of-the-fight vampiric-hunger vampiric-hunger-aura siphon-poison venom-coating apotheosis challenge death-wish bull-horns spider-legs");
+  set("move","cloak-and-dagger phoenix-dive tactical-retreat spread-your-wings planar-gateway");
+  set("pull","teleportation nether-swap");
+  set("stealth","chameleon-cloak smoke-cover blessed-smoke-cloud");
+  set("summon","conjure-incarnate elemental-totem raise-bloated-corpse raise-bone-widow summon-fire-slug summon-hungry-flower totems-of-the-necromancer dominate-mind");
+  set("infuse","power-infusion farsight-infusion fire-infusion electric-infusion cursed-electric-infusion necrofire-infusion shadow-infusion warp-infusion ice-infusion water-infusion poison-infusion acid-infusion supercharger");
+  set("taunt","provoke");
+  set("guard","fortify armour-of-frost mend-metal heart-of-steel bone-cage deflective-barrier guardian-angel uncanny-evasion living-on-the-edge soothing-cold cryotherapy mass-cryotherapy arcane-stitch door-to-eternity flaming-tongues");
+  set("heal","restoration first-aid healing-ritual rallying-cry blood-sucker steam-lance soul-mate cryogenic-stasis last-rites cannibalise");
+  set("setup","rain raining-blood contamination black-shroud glitter-dust flaming-crescendo shackles-of-pain medusa-head");
+  set("reset","skin-graft"); return m; })();
+const CC_RE=/Knock|Frozen|Freeze|Stun|Sleep|Cripple|Petrif|chicken|Silence|Blind|Terrified|Atrophy|Charm|Entangle|Taunt|Shocked/i;
+const skillAP=id=>Math.max(0,SKILL_BY_ID[id].ap);
+// rough damage per cast, used only to order skills inside a turn
+function skillWorth(a,id){ const d=SKILL_DMG[id]; if(!d) return 0; const caster=a.stat==="int";
+  return d.pct/100*d.hits*(d.weapon?(caster&&a.range==="caster"?.7:1):(caster?1:.45))*(d.aoe&&a.role==="area"?2:1); }
+// Two turns of the build, in order, from its memorised skills at that level.
+function buildRotation(a,st){
+  const sk=st.skills.filter(id=>SKILL_BY_ID[id]), has=id=>sk.includes(id), use=id=>SKILL_USE[id];
+  const lw=st.talents.includes("lonewolf"), glass=st.talents.includes("glass");
+  const perTurn=lw?6:glass?6:4, maxAP=lw?8:6, weaponUser=a.range!=="caster"||!/staff|wand/i.test(a.weapon);
+  const used=new Set(), turns=[];
+  const pick=(t,id)=>{ if(!id||used.has(id)||skillAP(id)>t.ap) return false; t.ap-=skillAP(id); t.steps.push(id); used.add(id); return true; };
+  const first=(t,list)=>{ for(const id of list) if(has(id)&&pick(t,id)) return id; return null; };
+  const ofUse=u=>sk.filter(id=>use(id)===u);
+  const dmg=()=>sk.filter(id=>SKILL_DMG[id]&&!used.has(id)).sort((x,y)=>skillWorth(a,y)/Math.max(1,skillAP(y))-skillWorth(a,x)/Math.max(1,skillAP(x)));
+  const ccFirst=list=>a.role==="control"?[...list].sort((x,y)=>CC_RE.test(SKILL_BY_ID[y].d)-CC_RE.test(SKILL_BY_ID[x].d)):list;
+  const fill=t=>{ for(const id of ccFirst(dmg())) pick(t,id);
+    if(t.ap>=2&&weaponUser&&a.role!=="summon"&&a.role!=="support"){ t.steps.push("_basic"); t.ap-=2; } };
+  // turn 1
+  const t1={ap:perTurn,steps:[]}; turns.push(t1);
+  if(has("adrenaline")){ pick(t1,"adrenaline"); t1.ap+=2; }
+  if(a.role==="summon"){ first(t1,["conjure-incarnate","raise-bone-widow","elemental-totem","summon-fire-slug","summon-hungry-flower","raise-bloated-corpse"]); first(t1,ofUse("infuse").filter(id=>id!=="supercharger")); }
+  else if(a.role==="tank"){ first(t1,["provoke"]); first(t1,ofUse("guard")); }
+  else if(a.role==="support"){ first(t1,["haste","peace-of-mind","firebrand","rallying-cry"]); first(t1,ofUse("guard")); }
+  else {
+    if(has("rain")&&sk.some(id=>["aero","hydro"].includes(SKILL_BY_ID[id].s)&&SKILL_DMG[id])) pick(t1,"rain");
+    if(has("enrage")&&t1.ap>=4) pick(t1,"enrage");
+    if(/dagger/i.test(a.weapon)&&has("backlash")) pick(t1,"backlash");
+    else if(a.range==="melee"&&!has("backlash")) first(t1,["phoenix-dive","battering-ram","cloak-and-dagger"]);
+    if(a.range==="ranged"&&has("elemental-arrowheads")&&t1.ap>=4) pick(t1,"elemental-arrowheads");
+  }
+  fill(t1);
+  // turn 2: what's off cooldown, finisher last
+  const t2={ap:Math.min(maxAP,perTurn-(has("adrenaline")?2:0)+Math.max(0,t1.ap)),steps:[]}; turns.push(t2);
+  // only skills with no real cooldown come back next turn; cooldown -1 means once per fight
+  for(const s of t1.steps) if(s!=="_basic"&&SKILL_BY_ID[s].cd>=0&&SKILL_BY_ID[s].cd<=1) used.delete(s);
+  if(a.role==="summon"){ first(t2,ofUse("infuse").filter(id=>id!=="supercharger")); first(t2,["elemental-totem","totems-of-the-necromancer","raise-bloated-corpse","raise-bone-widow","summon-fire-slug"]); }
+  if(a.role==="tank") first(t2,ofUse("guard"));
+  const fin=has("mortal-blow")&&!used.has("mortal-blow")?"mortal-blow":null; if(fin) used.add(fin);
+  for(const id of ccFirst(dmg())){ if(fin&&t2.ap-skillAP(id)<skillAP(fin)) continue; pick(t2,id); }
+  if(fin){ used.delete(fin); pick(t2,fin); }
+  if(t2.ap>=2&&weaponUser&&a.role!=="summon"&&a.role!=="support"){ t2.steps.push("_basic"); t2.ap-=2; }
+  return {turns,perTurn,adren:has("adrenaline")};
+}
+const dmgSchoolName=k=>({war:"Warfare",scound:"Scoundrel",twohand:"Two-Handed",dual:"Dual Wielding",single:"Single-Handed",ranged:"Ranged",hunt:"Huntsman"}[k]||SCHOOLS[k]?.n||k);
+function damageNotes(a,L){
+  scoreAll(L); const sc=ARCH_SCORE[a.id], N=ARCHETYPES.length;
+  const parts=Object.entries(sc.one>=sc.area/1.5?sc.oneParts:sc.areaParts).sort((x,y)=>y[1]-x[1]);
+  const tot=parts.reduce((s,[,v])=>s+v,0)||1;
+  const top=parts.filter(([k])=>k!=="_basic").slice(0,3).map(([k,v])=>`${esc(SKILL_BY_ID[k].n)} ${Math.round(100*v/tot)}%`);
+  const basic=parts.find(([k])=>k==="_basic");
+  // what the number grows with
+  const grow=[STAT_TEXT[a.stat]]; const plan=Object.fromEntries(a.plan);
+  const usedIds=parts.map(([k])=>k).filter(k=>k!=="_basic");
+  const anyWeapon=usedIds.some(k=>SKILL_DMG[k].weapon)||!!basic, anyBase=usedIds.some(k=>!SKILL_DMG[k].weapon);
+  if(anyWeapon&&!sc.magicW&&plan.war) grow.push("Warfare");
+  if(anyWeapon) ["twohand","dual","single","ranged"].forEach(k=>{ if(plan[k]) grow.push(dmgSchoolName(k)); });
+  if(anyWeapon&&plan.scound) grow.push("Scoundrel (crit damage)");
+  if(anyBase) [...new Set(usedIds.filter(k=>!SKILL_DMG[k].weapon).map(k=>EL_SCHOOL[SKILL_DMG[k].el]||"war"))].forEach(k=>{ if(plan[k]&&!grow.includes(dmgSchoolName(k))) grow.push(dmgSchoolName(k)); });
+  if(plan.hunt&&a.range==="ranged") grow.push("Huntsman (from high ground)");
+  const caveat=[];
+  if(a.role==="summon"||a.k.some(id=>SKILL_USE[id]==="summon")) caveat.push("Summons and totems aren't counted, so it hits harder than this shows.");
+  if(a.role==="control") caveat.push("Its crowd control isn't counted; its real job is stopping enemies from acting.");
+  if(a.role==="tank"||a.role==="support") caveat.push("It's built to protect the party, so a low number is expected.");
+  if(a.lw) caveat.push("Includes Lone Wolf's doubled points and extra AP.");
+  if(/dagger/i.test(a.weapon)) caveat.push("Assumes average crits; backstabs always crit, so it does more from behind.");
+  return `<div class="tsec">Damage index · level ${L}</div>
+    <p class="tn">Single target <b>${sc.oneN}</b> (#${sc.oneRank} of ${N}) · Area <b>${sc.areaN}</b> (#${sc.areaRank} of ${N}). 100 is the strongest build at this level, over two turns of skills.</p>
+    ${top.length?`<p class="tn">Comes from: ${top.join(", ")}${basic?`, plus basic attacks with spare AP`:""}.</p>`:`<p class="tn">No damage skills memorised yet at this level.</p>`}
+    <p class="tn">Grows with ${grow.join(", ")}.${caveat.length?" "+caveat.join(" "):""}</p>`;
+}
+function playTips(a,st){
+  const sk=st.skills.filter(id=>SKILL_BY_ID[id]), has=id=>sk.includes(id), S=id=>SKILL_BY_ID[id], tips=[];
+  const nm=id=>esc(S(id).n), list=ids=>ids.map(nm).join(", ");
+  const elem=e=>sk.filter(id=>SKILL_DMG[id]&&SKILL_DMG[id].el===e);
+  // friendly fire, for Honor Mode
+  // the game text says "enemies" for skills that spare allies; these ones say "characters", "everyone" or hit an area
+  const ff=sk.filter(id=>SKILL_DMG[id]&&!["blitz-attack","chain-lightning","hail-strike","infect"].includes(id)&&!/enem|non-allied/i.test(S(id).d)&&/characters|everyone|explode|from impact|cone|Line of|large area|in its wake|where it lands|target area|arc\b/i.test(S(id).d));
+  if(ff.length) tips.push(`<b>Friendly fire:</b> ${list(ff)} ${ff.length>1?"also hit":"also hits"} your own party. Use ${ff.length>1?"them":"it"} before melee teammates close in, or angle ${ff.length>1?"them":"it"} away.`);
+  // armour
+  tips.push(a.dmg==="physical"?`<b>Physical damage:</b> strip Physical Armour first; Knocked Down, Crippled and the like only land once it's gone. Focus the same target as your party's other physical hitters.`
+    :a.dmg==="magic"?`<b>Magic damage:</b> strip Magic Armour first; Frozen, Stunned and the like only land once it's gone. Focus the same target as your party's other casters.`
+    :`<b>Mixed damage:</b> use weapon and physical skills on targets with little Physical Armour, and spells on targets with little Magic Armour.`);
+  // weapon
+  if(/dagger/i.test(a.weapon)) tips.push(`<b>Backstab:</b> dagger hits from behind always crit.${has("backlash")?" Backlash jumps you behind the target.":""}${has("cloak-and-dagger")?" Cloak and Dagger repositions without breaking sneaking.":""}`);
+  if(a.range==="ranged"&&/bow/i.test(a.weapon)) tips.push(`<b>High ground:</b> shoot from above for bonus damage${has("ballistic-shot")?"; Ballistic Shot also hits harder the farther away you are":""}.${has("tactical-retreat")?" Tactical Retreat gets you back up and Hastes you.":""}`);
+  // combos the kit can actually do
+  const air=elem("air"), water=elem("water"), fire=elem("fire"), oil=sk.filter(id=>/oil/i.test(S(id).d)&&id!=="fossil-strike"||id==="fossil-strike"), poison=sk.filter(id=>/poison/i.test(S(id).d)&&/puddle|cloud|surface|Turns water/i.test(S(id).d));
+  if(has("rain")&&(air.length||water.length)) tips.push(`<b>Rain first:</b> wet enemies are Stunned by air damage${air.length?` (${list(air.slice(0,2))})`:""} and Frozen by water damage${water.length?` (${list(water.slice(0,2))})`:""} once their Magic Armour is gone.`);
+  if(fire.length&&oil.length) tips.push(`<b>Oil and fire:</b> ${list(oil.slice(0,2))} leave oil that slows enemies; ${nm(fire[0])} sets it alight.`);
+  if(fire.length&&poison.length) tips.push(`<b>Poison explodes:</b> fire turns the poison from ${list(poison.slice(0,2))} into explosions. Big damage, but keep your party out of it.`);
+  if(has("grasp-of-the-starved")) tips.push(`<b>Grasp of the Starved</b> only hits enemies standing in blood: ${has("raining-blood")?"Raining Blood makes plenty":"bleeding enemies and corpses leave blood"}.`);
+  if(has("spontaneous-combustion")&&fire.length>1) tips.push(`<b>Spontaneous Combustion</b> cashes in Burning for extra damage, so set the target on fire first.`);
+  if(has("deep-freeze")) tips.push(`<b>Deep Freeze</b> kills Frozen enemies under 10% Vitality outright.`);
+  if(has("mortal-blow")) tips.push(`<b>Mortal Blow</b> kills outright under 20% Vitality and doubles damage while sneaking or invisible: save it to finish.`);
+  if(has("assassinate")) tips.push(`<b>Assassinate</b> does 50% more from stealth${has("chameleon-cloak")?"; Chameleon Cloak sets it up":""}.`);
+  if(has("enrage")) tips.push(`<b>Enrage</b> guarantees crits on attacks and weapon skills, but Mutes you, so cast spells before it.`);
+  if(has("skin-graft")) tips.push(`<b>Skin Graft</b> resets every cooldown once per fight: use it after your biggest turn to repeat it.`);
+  if(has("death-wish")) tips.push(`<b>Death Wish</b> adds damage equal to your missing Vitality${has("living-on-the-edge")?"; Living on the Edge keeps you alive at 1 while you use it":""}.`);
+  if(has("conjure-incarnate")) tips.push(`<b>Incarnate:</b> summon it onto a surface to pick its element, then buff it with infusions. At Summoning 10 it becomes an Incarnate Champion.`);
+  if(has("elemental-totem")) tips.push(`<b>Totems</b> take the element of the surface they stand on${has("supercharger")?"; Supercharger makes one hit hard, then it dies":""}.`);
+  if(has("teleportation")&&a.role!=="summon") tips.push(`<b>Teleportation</b> moves an enemy into your party's reach, onto a bad surface or off high ground.`);
+  // talents
+  const T=id=>st.talents.includes(id);
+  if(T("guerrilla")) tips.push(`<b>Guerrilla:</b> +40% damage while sneaking, so open every fight from sneak.`);
+  if(T("executioner")) tips.push(`<b>Executioner:</b> a kill gives 2 AP once per turn, so hit the weakest enemy first.`);
+  if(T("savage")) tips.push(`<b>Savage Sortilege:</b> spells can crit, so Wits matters.`);
+  if(T("torturer")){ const st2=["Bleeding","Burning","Poisoned","Decay","Diseased","Suffocat","Crippled"].filter(x=>sk.some(id=>new RegExp(x,"i").test(S(id).d))); tips.push(`<b>Torturer:</b> your ${st2.length?st2.join(", ").replace(/Suffocat/,"Suffocating"):"damage-over-time statuses"} ignore armour and last a turn longer.`); }
+  if(T("elemaff")) tips.push(`<b>Elemental Affinity:</b> stand in a surface of a spell's element to cast it for 1 AP less.`);
+  if(T("leech")) tips.push(`<b>Leech:</b> standing in blood heals you.`);
+  if(T("glass")) tips.push(`<b>Glass Cannon:</b> full AP every turn, but statuses land through your armour, so strike first.`);
+  if(T("hothead")) tips.push(`<b>Hothead:</b> +10% crit and accuracy only at full Vitality.`);
+  return tips;
+}
+function howToPlay(a,st,max=5){
+  const R=buildRotation(a,st), apTxt=id=>id==="_basic"?"Basic attack":esc(SKILL_BY_ID[id].n);
+  const turn=(t,i)=>t.steps.length?`<li><b>Turn ${i+1}</b> <span class="rot">${t.steps.map(id=>`${apTxt(id)} <em>${id==="_basic"?2:skillAP(id)}</em>`).join(" → ")}</span></li>`:"";
+  const tips=playTips(a,st);
+  // keep friendly fire and armour, then the most specific tips
+  const kept=[...tips.slice(0,2),...tips.slice(2).slice(0,Math.max(0,max-2))];
+  return `<div class="tsec">How to play · level ${st.level}</div>
+    <ul class="rotl">${R.turns.map(turn).join("")}</ul>
+    <p class="tn">${R.perTurn} AP a turn${R.adren?"; Adrenaline borrows 2 from the next turn":""}. Numbers are AP costs.</p>
+    <ul class="tips">${kept.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+}
 
 const ARCH_BY_ID=Object.fromEntries(ARCHETYPES.map(a=>[a.id,a]));
 const ROLE_TEXT={single:"Single target",area:"Area damage",control:"Control",tank:"Tank",support:"Support",summon:"Summoner"};
@@ -1693,7 +1844,8 @@ function renderGuide(){
     ${civRow?`<div class="bgrp">Civil</div><p class="bline">${civRow}</p>`:""}
     <div class="bgrp">Talents</div><div class="bpills">${talRow||`<span class="note" style="margin:0">None yet</span>`}</div>
     <div class="bgrp">Skills memorised</div><div class="bpills">${skRow}</div>
-    <button class="btn primary" type="button" data-guideload="${act.n}" style="margin-top:12px">Load this Act ${act.n} build with its gear</button></div>`;
+    <button class="btn primary" type="button" data-guideload="${act.n}" style="margin-top:12px">Load this Act ${act.n} build with its gear</button></div>
+    <div class="gsum" style="margin-top:10px">${howToPlay(A,end,8)}</div>`;
   // gear goals
   const lookTxt=G.look.map(k=>ATTR_LONG[k]||COMBAT_NAME[k]||k).join(", ");
   const N=Object.fromEntries(GEAR_SLOTS);
@@ -1903,14 +2055,14 @@ function tipHTML(key){
   if(kind==="gear"){ return gearTipHTML(GEAR_BY_ID[id],null); }
   if(kind==="slot"){ const eq=state.gear[id]; return eq?gearTipHTML(GEAR_BY_ID[eq.id],eq):""; }
   if(kind==="arch"){
-    const a=ARCH_BY_ID[id]; const L=ui.archLevel; const b=buildArchetype(a,L,{origin:state.origin,race:state.race,party:state.party,gear:state.gear});
+    const a=ARCH_BY_ID[id]; const L=ui.archLevel; const b=buildArchetype(a,L,{origin:state.origin,race:state.race,party:a.lw?Math.min(state.party,2):state.party,gear:state.gear}); b.level=L;
     const ab=Object.entries(b.combat).sort((x,y)=>y[1]-x[1]).map(([k,v])=>`${combatName(k)} ${v}`).join(", ");
     const at=ATTRS.filter(([k])=>b.attrs[k]).map(([k,n])=>`${n} ${10+b.attrs[k]}`).join(", ");
     scoreAll(L); const sc=ARCH_SCORE[a.id];
     return `<div class="th"><span class="tbadge tier${a.tier}" style="position:static;flex-shrink:0">${a.tier}</span><div><h4>${a.n}</h4><small>${a.tier} tier ${FAM_TEXT[a.fam]} · ${ROLE_TEXT[a.role]} · preview at level ${L}</small></div></div>
-    <dl class="stats">${row("Abilities",ab)}${row("Attributes",at)}${row("Talents",b.talents.map(t=>TALENT_BY_ID[t].n).join(", "))}${row("Skills",b.skills.map(id=>SKILL_BY_ID[id].n).join(", "))}${row("Damage",DMG_TEXT[a.dmg])}${row("Good races",a.races.map(r=>RACE_TEXT[r]).join(", "))}${row("Damage index",`Single ${sc.oneN} · Area ${sc.areaN}`)}</dl>
+    <dl class="stats">${row("Abilities",ab)}${row("Attributes",at)}${row("Talents",b.talents.map(t=>TALENT_BY_ID[t].n).join(", "))}${row("Skills",b.skills.map(id=>SKILL_BY_ID[id].n).join(", "))}${row("Damage",DMG_TEXT[a.dmg])}${row("Good races",a.races.map(r=>RACE_TEXT[r]).join(", "))}</dl>
     <p>${a.blurb}</p>${a.lw?`<p class="tn">Lone Wolf: only works with one companion or alone. Loading it sets your party to 2. The damage index includes the doubling.</p>`:""}<p class="tn warn">Undead: ${FIT_TEXT[a.fit]}. ${a.fitText}</p>
-    <p class="tn">Damage index: two turns of the build's memorised skills on one target (Area assumes 3 enemies per area skill), using the game's damage percentages and your ability and attribute bonuses. 100 is the strongest build at this level. Summon damage isn't counted.</p><p class="tn">Based on: ${a.src}.</p>`;
+    ${damageNotes(a,L)}${howToPlay(a,b,4)}<p class="tn" style="margin-top:8px">Based on: ${a.src}.</p>`;
   }
   if(kind==="talent"){
     const t=TALENT_BY_ID[id]; const reqs=[];
