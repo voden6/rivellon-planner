@@ -357,7 +357,7 @@ a{color:var(--accent)}
             <label class="field">Range<select id="archRange"></select></label>
             <label class="field">School<select id="archSchool"></select></label>
             <label class="field">Suits race<select id="archRace"></select></label>
-            <label class="field">Origin<select id="archOrigin"></select></label>
+            
             <label class="field">Party<select id="archParty"><option value="all">Any party size</option><option value="lw">Lone Wolf (1-2)</option><option value="party">Full party (3-4)</option></select></label>
           </div>
         </div>
@@ -675,10 +675,10 @@ const ARCHETYPES=[
  A("pyro-battlemage","Pyro Battlemage","area","str","melee","Two-handed weapon",3,"Fire hurts you like anyone else; keep fire resistance up.","Dives in with Phoenix Dive, spins with Whirlwind and lights the field with Firebrand and Supernova.","Pyro Battlemage, GamesRadar",
    "war10 pyro5 twohand7 persev1","str5 int1 con1 mem1",CIV_FIGHT,"demon picture executioner elemaff comeback",
    "phoenix-dive battering-ram crippling-blow whirlwind blitz-attack haste firebrand searing-daggers enrage supernova fireball onslaught flaming-crescendo overpower"),
- A("earth-knight","Earth Knight","area","str","melee","Two-handed mace",3,"Your own poison clouds heal you.","Knocks enemies down with Earthquake and Battle Stomp, then picks them apart.","Fighter pairing, PC Gamer",
+ A("earth-knight","Earth Knight","area","str","melee","Two-handed mace",3,"No heal spells; Fortify and Mend Metal restore armour, which is safe for undead.","Knocks enemies down with Earthquake and Battle Stomp, then picks them apart.","Fighter pairing, PC Gamer",
    "war9 geo6 twohand6 persev2","str5 con1 int1 mem1",CIV_FIGHT,"picture executioner opportunist comeback morning",
    "battle-stomp battering-ram impalement fortify crippling-blow earthquake blitz-attack mend-metal enrage reactive-armour worm-tremor overpower onslaught"),
- A("frost-knight","Frost Knight","control","str","melee","Two-handed weapon",3,"Armour of Frost is safe; skip the heals.","Freezes targets with Hail Strike and Global Cooling so the two-hander can finish them.","Warfare and Hydrosophist control combos",
+ A("frost-knight","Frost Knight","control","str","melee","Two-handed weapon",3,"No heal spells; Armour of Frost is safe for undead.","Freezes targets with Hail Strike and Global Cooling so the two-hander can finish them.","Warfare and Hydrosophist control combos",
    "war9 hydro5 twohand7 persev2","str5 int1 con1 mem1",CIV_FIGHT,"picture executioner iceking comeback morning",
    "hail-strike battering-ram crippling-blow armour-of-frost global-cooling blitz-attack winter-blast enrage ice-fan challenge deep-freeze onslaught overpower"),
  A("arcane-knight","Arcane Knight","single","int","melee","Staff",3,"Gear-based armour; no healing needed.","Intelligence warrior. A staff scales Warfare skills off Intelligence while you mix in lightning and fire.","Intelligence-staff Warfare builds from the community",
@@ -702,7 +702,7 @@ const ARCHETYPES=[
  A("flame-paladin","Flame Paladin","tank","str","melee","One-handed weapon and shield",3,"Support buffs, no healing spells.","Shield fighter who hastes and fire-brands the party while holding the line.","Warfare and Pyrokinetic support combos",
    "war8 pyro5 single6 persev4","str4 con3 mem1 int1",CIV_FIGHT,"picture comeback demon morning walkitoff",
    "provoke haste peace-of-mind firebrand bouncing-shield battering-ram deflective-barrier guardian-angel flaming-tongues crippling-blow challenge overpower"),
- A("field-commander","Field Commander","support","str","melee","One-handed weapon and shield",2,"Leadership helps everyone, but the heals hurt you.","Leadership aura for the whole party, with water magic for armour and control.","Leadership support builds from the community",
+ A("field-commander","Field Commander","support","str","melee","One-handed weapon and shield",3,"No heal spells; Armour of Frost, Soothing Cold and Arcane Stitch restore Magic Armour, which is safe for undead.","Leadership aura for the whole party, with water magic for armour and control.","Leadership support builds from the community",
    "lead10 war6 hydro5 single2","str4 con2 int1 mem1",CIV_FIGHT,"comeback picture morning walkitoff hothead",
    "armour-of-frost battering-ram hail-strike crippling-blow global-cooling soothing-cold guardian-angel enrage arcane-stitch challenge provoke"),
  A("warrior-healer","Warrior-Healer","support","str","melee","One-handed weapon and shield",1,"Your heals help allies but hurt you. Better on a living friend.","Paladin style: melee damage, armour restores and freezing control for the party.","Warrior-Healer pairing, PC Gamer",
@@ -715,7 +715,7 @@ const ARCHETYPES=[
  A("glass-assassin","Glass Cannon Assassin","single","fin","melee","Two daggers",2,"Full AP every turn, but no armour protection from statuses; risky on Honor Mode.","Maximum burst: Glass Cannon gives full AP each turn for back-to-back Daggers Drawn.","Glass Cannon rogue builds from the community",
    "scound10 war7 dual6","fin6 wit2 mem1",CIV_SNEAK,"glass executioner guerrilla hothead morning",
    "backlash adrenaline throwing-knife sawtooth-knife chloroform cloak-and-dagger rupture-tendons corrupted-blade daggers-drawn terrifying-cruelty mortal-blow enrage crippling-blow"),
- A("plague-witch","Plague Witch","single","fin","melee","Two daggers",4,"Thematic, and Torturer makes your bleeds and decay ignore armour.","Daggers plus Necromancer: bleeds, disease and decay stacked on one target, with lifesteal.","Witch pairing, PC Gamer",
+ A("plague-witch","Plague Witch","single","fin","melee","Two daggers",4,"Poison and disease around you barely matter to an undead, and Torturer makes your Bleeding ignore armour.","Daggers plus Necromancer: bleeds, disease and decay stacked on one target, with lifesteal.","Witch pairing, PC Gamer",
    "scound10 necro6 dual7","fin6 wit1 mem1 con1","persu sneak persu thief sneak persu lucky","torturer hothead guerrilla comeback morning",
    "mosquito-swarm backlash decaying-touch chloroform throwing-knife infect sawtooth-knife death-wish corrupted-blade daggers-drawn terrifying-cruelty mortal-blow grasp-of-the-starved black-shroud"),
  A("venom-duelist","Venom Duelist","single","fin","melee","Two daggers (poison)",4,"Contamination turns the floor into healing for you and damage for them.","Poison daggers with Geomancer. Fight on poison surfaces that heal you and hurt everyone else.","Undead poison synergy from community guides",
@@ -731,19 +731,19 @@ const ARCHETYPES=[
  A("phantom-sniper","Phantom Sniper","single","fin","ranged","Bow or crossbow",3,"Invisible between shots.","Shoots, vanishes with Chameleon Cloak, repositions and shoots again from stealth.","Huntsman and Polymorph stealth builds",
    "hunt9 ranged9 poly5","fin6 wit1 mem1",CIV_SNEAK,"guerrilla hothead arrowrecovery comeback morning",
    "chameleon-cloak ballistic-shot pin-down sky-shot tactical-retreat spread-your-wings assassinate marksman-s-fang glitter-dust flay-skin skin-graft farsight"),
- A("shadow-marksman","Shadow Marksman","single","fin","ranged","Crossbow",3,"Stealth keeps you safe.","Crossbow sniper with Scoundrel mobility and crit power. Shadow's Eye is the dream weapon.","Huntsman and Scoundrel combos",
+ A("shadow-marksman","Shadow Marksman","single","fin","ranged","Crossbow",3,"Stealth keeps you safe.","Crossbow sniper with Scoundrel mobility and crit power. Shadow's Eye, an Act 1 crossbow, is a strong early pick.","Huntsman and Scoundrel combos",
    "hunt9 ranged8 scound6","fin6 wit2 mem1",CIV_SNEAK,"guerrilla hothead arrowrecovery comeback morning",
    "ballistic-shot pin-down adrenaline sky-shot cloak-and-dagger tactical-retreat assassinate marksman-s-fang barrage farsight glitter-dust"),
- A("blight-archer","Blight Archer","single","fin","ranged","Bow",4,"Necromancer points give lifesteal on every arrow.","Archer who heals by hurting, with bleeding and disease from Necromancer.","Necro-archer hybrids from the community",
-   "hunt9 ranged8 necro6","fin6 int1 wit1 mem1",CIV_LUCK,"hothead torturer arrowrecovery comeback morning",
+ A("blight-archer","Blight Archer","single","fin","ranged","Bow",4,"Necromancer points give lifesteal on every arrow.","Archer who heals by hurting: Necromancer lifesteal on every arrow, with Infect, Death Wish and Grasp of the Starved.","Necro-archer hybrids from the community",
+   "hunt9 ranged8 necro6","fin6 int1 wit1 mem1",CIV_LUCK,"hothead elemranger arrowrecovery comeback morning",
    "pin-down ballistic-shot mosquito-swarm sky-shot tactical-retreat infect death-wish marksman-s-fang barrage assassinate shackles-of-pain grasp-of-the-starved"),
- A("trapper","Master Trapper","control","fin","ranged","Bow or crossbow",3,"Ranged and armour-based.","Roots and cripples with earth magic; Reactive Shot punishes anyone who moves.","Master Trapper, PCGamesN",
+ A("trapper","Master Trapper","control","fin","ranged","Bow or crossbow",3,"Ranged and armour-based.","Cripples with Pin Down and Impalement, slows with oil and Worm Tremor, and Reactive Shot punishes anyone who moves.","Master Trapper, PCGamesN",
    "hunt8 geo6 ranged9","fin6 con1 mem1 wit1",CIV_LUCK,"elemranger duckduck hothead arrowrecovery morning",
    "pin-down reactive-shot impalement worm-tremor tactical-retreat fossil-strike elemental-arrowheads earthquake ballistic-shot sky-shot arrow-spray living-wall arrow-storm assassinate"),
  A("ranger-summoner","Ranger Summoner","summon","fin","ranged","Bow",3,"Your summon tanks so you rarely need healing.","Summons an Incarnate to hold enemies while you shoot from high ground.","Ranger Summoner, GamesRadar",
    "hunt8 summon8 ranged7","fin5 int1 mem1 wit1",CIV_LUCK,"arrowrecovery hothead elemranger comeback morning",
    "conjure-incarnate pin-down farsight-infusion tactical-retreat ballistic-shot elemental-totem sky-shot power-infusion marksman-s-fang assassinate door-to-eternity"),
- A("fire-ranger","Fire Ranger","area","fin","ranged","Bow",3,"Watch your own fire; otherwise easy.","Bow plus fire. Elemental Arrowheads on fire, Haste for tempo, explosions on oil.","Ranger preset, PC Gamer",
+ A("fire-ranger","Fire Ranger","area","fin","ranged","Bow",3,"Watch your own fire; otherwise easy.","Bow plus fire. Elemental Arrowheads from a fire surface adds fire to every shot, Firebrand and Haste keep the tempo up, and Arrow Storm covers groups.","Ranger preset, PC Gamer",
    "hunt9 ranged7 pyro7","fin5 int1 wit1 mem1",CIV_LUCK,"elemranger hothead arrowrecovery demon morning",
    "elemental-arrowheads ricochet peace-of-mind pin-down haste sky-shot ballistic-shot firebrand marksman-s-fang arrow-spray barrage assassinate arrow-storm"),
 
@@ -754,7 +754,7 @@ const ARCHETYPES=[
    "necro10 geo5 lead6 persev2","int5 mem2 con1 wit1",CIV_MAGE,"torturer savage faroutman elemaff comeback",
    "mosquito-swarm decaying-touch poison-dart raise-bloated-corpse infect shackles-of-pain death-wish bone-cage silencing-stare raise-bone-widow black-shroud grasp-of-the-starved last-rites totems-of-the-necromancer"),
  A("lich","Lich Summoner","summon","int","caster","Staff or wand",4,"Corpses everywhere become your army; very on-theme.","Raises corpses and conjures an Incarnate, then fills the field with bone totems.","Summoning and Necromancer combos",
-   "summon9 necro8 lead6","int5 mem2 con1 wit1",CIV_MAGE,"faroutman comeback torturer morning elemaff",
+   "summon9 necro8 lead6","int5 mem2 con1 wit1",CIV_MAGE,"faroutman comeback walkitoff morning elemaff",
    "conjure-incarnate raise-bloated-corpse mosquito-swarm elemental-totem raise-bone-widow farsight-infusion power-infusion death-wish dominate-mind cannibalise bone-cage door-to-eternity totems-of-the-necromancer"),
  A("wizard","Oil and Flame Wizard","area","int","caster","Staff or wand",3,"Fire hurts you too; watch your own flames.","Lays oil with Geomancer, then lights it. Huge area damage plus some single-target spells.","Wizard pairing, PC Gamer",
    "pyro10 geo6 lead5 persev2","int5 mem2 con1 wit1",CIV_MAGE,"faroutman elemaff savage demon comeback",
@@ -762,16 +762,16 @@ const ARCHETYPES=[
  A("sorcerer","Storm Sorcerer","single","int","caster","Wand",3,"No healing in the kit.","Air and fire single-target caster: Electric Discharge, Fire Whip and Flaming Crescendo on priority targets.","Aerotheurge and Pyrokinetic pairings",
    "aero8 pyro8 lead5 persev2","int5 mem2 wit1 con1",CIV_MAGE,"savage faroutman elemaff demon comeback",
    "electric-discharge searing-daggers shocking-touch haste fire-whip teleportation flaming-crescendo chain-lightning spontaneous-combustion uncanny-evasion nether-swap closed-circuit"),
- A("storm-caller","Storm Caller","control","int","caster","Wand or staff",3,"Avoid the heal spells; Armour of Frost is safe.","Rain, then electrify: stuns whole groups with Electric Discharge and Dazing Bolt.","Stunlock Mage, GamesRadar",
+ A("storm-caller","Storm Caller","control","int","caster","Wand or staff",3,"No heal spells; Armour of Frost is safe for undead.","Rain, then electrify: stuns whole groups with Electric Discharge and Dazing Bolt.","Stunlock Mage, GamesRadar",
    "aero10 hydro6 lead5 persev2","int5 mem2 con1 wit1",CIV_MAGE,"faroutman savage elemaff comeback morning",
    "electric-discharge rain shocking-touch pressure-spike armour-of-frost teleportation dazing-bolt uncanny-evasion nether-swap chain-lightning superconductor closed-circuit thunderstorm"),
- A("weather","Weather Machine","control","int","caster","Staff or wand",3,"Avoid the heal spells; Armour of Frost is safe.","Soaks enemies with Rain, then freezes or electrifies them. Keeps groups locked down.","Weather Machine, PCGamesN",
+ A("weather","Weather Machine","control","int","caster","Staff or wand",3,"No heal spells; Armour of Frost and Arcane Stitch are safe for undead.","Soaks enemies with Rain, then freezes or electrifies them. Keeps groups locked down.","Weather Machine, PCGamesN",
    "hydro9 aero8 lead4 persev2","int5 mem2 con1 wit1",CIV_MAGE,"faroutman savage elemaff iceking comeback",
    "electric-discharge hail-strike rain armour-of-frost global-cooling winter-blast pressure-spike shocking-touch ice-fan teleportation uncanny-evasion chain-lightning deep-freeze closed-circuit arcane-stitch hail-storm thunderstorm"),
- A("steam-mage","Steam Elementalist","area","int","caster","Staff",3,"Fine; avoid the healing spells.","Fire and water together: steam clouds, freezes and explosions.","Pyrokinetic and Hydrosophist combos",
+ A("steam-mage","Steam Elementalist","area","int","caster","Staff",3,"No heal spells in the kit.","Fire and water together: steam clouds, freezes and explosions.","Pyrokinetic and Hydrosophist combos",
    "pyro8 hydro8 lead5 persev2","int5 mem2 con1 wit1",CIV_MAGE,"faroutman elemaff savage comeback morning",
    "searing-daggers hail-strike ignition rain haste fireball global-cooling ice-fan fire-whip winter-blast laser-ray deep-freeze epidemic-of-fire hail-storm meteor-shower"),
- A("archmage","Four-Element Archmage","area","int","caster","Staff",3,"Broad toolkit; just skip the heals.","Spreads points across all four elements to answer any resistance with the right element.","Elementalist builds from the community",
+ A("archmage","Four-Element Archmage","area","int","caster","Staff",3,"No heal spells in the kit.","Spreads points across all four elements to answer any resistance with the right element.","Elementalist builds from the community",
    "pyro6 geo5 hydro5 aero5 lead2","int5 mem3 con1 wit1",CIV_MAGE,"faroutman savage elemaff comeback morning",
    "searing-daggers electric-discharge poison-dart hail-strike fireball rain fossil-strike chain-lightning impalement global-cooling laser-ray earthquake closed-circuit"),
  A("wand-gunslinger","Wand Gunslinger","single","int","ranged","Two wands",3,"Ranged and simple.","Dual wands for cheap elemental basic attacks, with water and air spells between shots.","Dual-wand builds from the community",
@@ -799,13 +799,13 @@ ARCHETYPES.push(
  A("lw-assassin","Lone Wolf Assassin","single","fin","melee","Two daggers",4,"Poison and bleeds barely matter to an undead.","Doubled Scoundrel and Warfare. Backstab crits and two free AP a turn make every fight short.","Lone Wolf rogue builds, community guides",
    "scound10 war10 dual5 poly3","fin7 wit1 mem1",CIV_SNEAK,"lonewolf executioner guerrilla hothead comeback",
    "backlash throwing-knife adrenaline chicken-claw cloak-and-dagger crippling-blow rupture-tendons corrupted-blade daggers-drawn terrifying-cruelty mortal-blow sawtooth-knife"),
- A("lw-sniper","Lone Wolf Sniper","single","fin","ranged","Crossbow",4,"Ranged and out of reach; no healing in the kit.","Doubled Huntsman and Warfare from high ground. Ballistic Shot from range is the biggest single hit in the game.","Lone Wolf ranger builds, community guides",
+ A("lw-sniper","Lone Wolf Sniper","single","fin","ranged","Crossbow",4,"Ranged and out of reach; no healing in the kit.","Doubled Huntsman and Warfare from high ground. Ballistic Shot from long range is one of the hardest single hits in the game.","Lone Wolf ranger builds, community guides",
    "hunt10 war10 ranged7 poly3","fin7 wit1 mem1",CIV_LUCK,"lonewolf executioner elemranger arrowrecovery comeback",
    "ballistic-shot pin-down sky-shot elemental-arrowheads marksman-s-fang tactical-retreat assassinate ricochet barrage reactive-shot spread-your-wings farsight"),
  A("lw-pyro","Lone Wolf Pyromancer","area","int","caster","Staff or wand",3,"Fire hurts you; carry fire resistance.","Doubled Pyrokinetic and Geomancer. Oil, fire and explosions with enough AP to cast three spells a turn.","Lone Wolf mage builds, community guides",
    "pyro10 geo10 aero3","int7 wit1 mem1",CIV_MAGE,"lonewolf faroutman savage elemaff comeback",
    "fossil-strike ignition searing-daggers haste fireball laser-ray impalement earthquake supernova pyroclastic-eruption epidemic-of-fire meteor-shower"),
- A("lw-summoner","Lone Wolf Summoner","summon","int","caster","Staff or wand",4,"Summons tank for you.","Lone Wolf doubles Summoning, so a level 10 Incarnate shows up from your first point. Strong from Fort Joy onward.","Lone Wolf summoner builds, community guides",
+ A("lw-summoner","Lone Wolf Summoner","summon","int","caster","Staff or wand",4,"Summons tank for you.","Lone Wolf doubles Summoning, so 5 points reach Summoning 10 and the Incarnate Champion. Strong from Fort Joy onward.","Lone Wolf summoner builds, community guides",
    "summon10 aero4 geo3","int5 con2 mem2",CIV_MAGE,"lonewolf petpal faroutman comeback",
    "conjure-incarnate elemental-totem dimensional-bolt power-infusion farsight-infusion teleportation shadow-infusion planar-gateway supercharger cannibalise warp-infusion"),
  // physical damage
@@ -836,17 +836,17 @@ ARCHETYPES.push(
  A("knife-thrower","Knife Thrower","single","fin","ranged","Two daggers",3,"Fights from range, so little damage comes back.","A Scoundrel who throws instead of stabbing: Throwing Knife, Fan of Knives and Corrupted Blade on approach.","Thrown-dagger Scoundrel builds",
    "scound10 war7 dual3 poly2","fin6 wit1 mem1 con1",CIV_SNEAK,"executioner hothead guerrilla comeback morning",
    "throwing-knife fan-of-knives backlash adrenaline cloak-and-dagger chloroform spread-your-wings corrupted-blade sawtooth-knife mortal-blow daggers-drawn"),
- A("night-stalker","Night Stalker","single","fin","melee","Two daggers",4,"Necromancer lifesteal heals you.","Backstab rogue that drains with Blood Sucker and Mosquito Swarm, then executes with Death Wish.","Witch preset taken to its limit",
+ A("night-stalker","Night Stalker","single","fin","melee","Two daggers",4,"Necromancer lifesteal heals you.","Backstab rogue that drains with Blood Sucker and Mosquito Swarm, then finishes with Mortal Blow, boosted by Death Wish.","Witch preset taken to its limit",
    "scound8 war8 necro5 dual2","fin6 int1 mem1 wit1",CIV_SNEAK,"executioner guerrilla leech comeback morning",
    "backlash mosquito-swarm throwing-knife blood-sucker adrenaline death-wish cloak-and-dagger corrupted-blade bone-cage daggers-drawn mortal-blow grasp-of-the-starved"),
  A("edge-walker","Edge Walker","single","str","melee","Two-handed weapon",4,"Living on the Edge keeps you alive at 1 Vitality, no healing needed.","Fights at low Vitality on purpose: What a Rush for extra AP, Death Wish for bonus damage.","Death Wish berserker builds",
    "war10 necro6 twohand5","str6 con1 mem1 wit1",CIV_FIGHT,"whatarush executioner picture comeback morning",
    "battering-ram mosquito-swarm living-on-the-edge death-wish crippling-blow blood-sucker enrage blitz-attack onslaught overpower grasp-of-the-starved"),
- A("earth-ranger","Earthbound Ranger","control","fin","ranged","Bow",3,"Geomancer armour restores are safe for undead.","Wayfarer-style bow with Geomancer for armour and knockdowns. Splits damage, so it suits a mixed party.","Wayfarer preset",
+ A("earth-ranger","Earthbound Ranger","control","fin","ranged","Bow",3,"Geomancer armour restores are safe for undead.","Wayfarer-style bow with Geomancer for armour, oil and crippling. Splits damage, so it suits a mixed party.","Wayfarer preset",
    "hunt8 ranged6 geo5 war3","fin6 int1 mem1",CIV_LUCK,"elemranger arrowrecovery executioner comeback",
    "pin-down fossil-strike elemental-arrowheads fortify ricochet sky-shot impalement tactical-retreat dust-blast marksman-s-fang reactive-armour"),
  // magic damage
- A("fire-lance","Fire Lance","single","int","caster","Wand or staff",3,"Fire hurts you too; keep resistances up.","Single-target fire caster. Laser Ray, Fire Whip and Spontaneous Combustion focus one enemy.","Pyrokinetic single-target builds",
+ A("fire-lance","Fire Lance","single","int","caster","Wand or staff",3,"Fire hurts you too; keep resistances up.","Fire caster that focuses one enemy with Fire Whip, Spontaneous Combustion and Flaming Crescendo. Laser Ray hits everything in a line, so mind your party.","Pyrokinetic single-target builds",
    "pyro10 aero5 lead2","int6 wit1 mem2",CIV_MAGE,"faroutman savage elemaff demon comeback",
    "searing-daggers ignition haste fire-whip fireball shocking-touch laser-ray spontaneous-combustion teleportation chain-lightning flaming-crescendo"),
  A("savage-sorcerer","Savage Sorcerer","single","int","caster","Wand",3,"No healing in the kit.","Savage Sortilege lets spells crit, and Scoundrel raises the crit multiplier. Air and water burst.","Savage Sortilege crit mage builds",
@@ -855,7 +855,7 @@ ARCHETYPES.push(
  A("earthshaker","Earthshaker","area","int","caster","Staff or wand",4,"Your own poison surfaces heal you.","Pure Geomancer. Fossil Strike, Impalement and Pyroclastic Eruption, with Torturer to make poison ignore armour.","Geomancer builds",
    "geo10 pyro4 necro3","int6 mem2 wit1",CIV_MAGE,"torturer faroutman savage elemaff comeback",
    "fossil-strike poison-dart contamination impalement fortify earthquake poison-wave worm-tremor acid-spores reactive-armour pyroclastic-eruption"),
- A("frost-mage","Frost Mage","control","int","caster","Staff or wand",3,"Armour of Frost is safe; skip the heals.","Hydrosophist burst: Hail Strike, Winter Blast and Ice Fan, freezing whatever survives.","Hydrosophist damage builds",
+ A("frost-mage","Frost Mage","control","int","caster","Staff or wand",3,"Armour of Frost is safe; Steam Lance heals, so don't aim it at an undead.","Hydrosophist burst: Hail Strike, Winter Blast and Ice Fan, freezing whatever survives.","Hydrosophist damage builds",
    "hydro10 aero5 lead2","int6 mem2 wit1",CIV_MAGE,"iceking faroutman savage elemaff comeback",
    "hail-strike armour-of-frost winter-blast rain ice-fan global-cooling electric-discharge deep-freeze teleportation hail-storm steam-lance"),
  A("glass-cannon-mage","Glass Cannon Mage","area","int","caster","Staff",2,"No armour protection from statuses; you rely on going first.","Glass Cannon starts every turn at full AP. Two big spells every turn, at the cost of being easy to disable.","Glass Cannon builds",
@@ -878,7 +878,7 @@ ARCHETYPES.push(
  A("juggernaut","Retribution Juggernaut","tank","con","melee","One-handed weapon and shield",3,"Living on the Edge and Bone Cage instead of heals.","Maxes Retribution so every hit you take comes back. Provokes the room onto you.","Retribution tank builds",
    "war6 retri10 persev5 necro4","con4 str3 mem1",CIV_FIGHT,"picture stench comeback walkitoff morning",
    "provoke bouncing-shield deflective-barrier battering-ram bone-cage living-on-the-edge guardian-angel shackles-of-pain challenge thick-of-the-fight"),
- A("frost-bulwark","Frost Bulwark","tank","str","melee","One-handed weapon and shield",2,"Hydro armour restores are fine; its heals hurt you.","Shield tank who restores Magic Armour for the party and freezes anyone who reaches it.","Hydro tank builds",
+ A("frost-bulwark","Frost Bulwark","tank","str","melee","One-handed weapon and shield",3,"No heal spells; Armour of Frost and Soothing Cold restore Magic Armour, which is safe for undead.","Shield tank who restores Magic Armour for the party and freezes anyone who reaches it.","Hydro tank builds",
    "war7 hydro6 persev5 lead4","str4 con3 mem1",CIV_FIGHT,"picture iceking comeback walkitoff morning",
    "provoke armour-of-frost bouncing-shield hail-strike deflective-barrier winter-blast global-cooling guardian-angel soothing-cold challenge"),
  A("aegis-commander","Aegis Commander","tank","str","melee","One-handed weapon and shield",3,"Leadership protects the whole party, undead included.","Leadership tank. Dodge and resistances for everyone nearby, with Guardian Angel and Thick of the Fight.","Leadership builds",
@@ -907,7 +907,7 @@ ARCHETYPES.push(
  A("field-medic","Field Medic","support","fin","ranged","Bow",1,"Heals; an undead medic hurts itself on self-casts.","Huntsman and Hydrosophist medic: First Aid, Restoration and Cryotherapy from the back line.","Combat medic builds",
    "hydro7 hunt5 lead4 ranged3","fin4 int2 mem2",CIV_LUCK,"elemranger arrowrecovery comeback morning",
    "first-aid restoration armour-of-frost pin-down cryotherapy elemental-arrowheads healing-ritual mass-cryotherapy soothing-cold arcane-stitch"),
- A("warlord-bard","Warlord Bard","support","str","melee","One-handed weapon and shield",2,"Rallying Cry's Vitality part hurts an undead.","Leadership and Warfare for party buffs, Encourage-style auras and a shield.","Leadership support builds",
+ A("warlord-bard","Warlord Bard","support","str","melee","One-handed weapon and shield",2,"Rallying Cry's Vitality part hurts an undead.","Leadership and Warfare: dodge and resistances for everyone nearby, Rallying Cry, Guardian Angel and a shield.","Leadership support builds",
    "war7 lead10 summon3 persev2","str4 con2 mem2",CIV_FIGHT,"picture comeback walkitoff morning",
    "bouncing-shield battering-ram provoke deflective-barrier rallying-cry guardian-angel thick-of-the-fight challenge"),
  // origin builds
@@ -917,13 +917,13 @@ ARCHETYPES.push(
  A("redprince-dragon","Red Prince: Dragon Knight","area","str","melee","Two-handed weapon",3,"Lizards resist fire; Dragon's Blaze is free damage.","Warfare and Pyrokinetic with the Red Prince's Dragon's Blaze. Sparking Swings on a two-hander.","Red Prince origin builds",
    "war10 pyro5 twohand6","str6 int1 mem1",CIV_FIGHT,"demon picture executioner comeback",
    "battering-ram phoenix-dive sparking-swings crippling-blow whirlwind haste firebrand blitz-attack enrage supernova onslaught master-of-sparks"),
- A("sebille-needle","Sebille: Needle Assassin","single","fin","melee","Two daggers",3,"An elf, so heals work; Flesh Sacrifice adds damage.","Elf rogue with Flesh Sacrifice and Sebille's Breaking the Chains. Scoundrel and Warfare burst.","Sebille origin builds",
+ A("sebille-needle","Sebille: Needle Assassin","single","fin","melee","Two daggers",3,"Flesh Sacrifice trades some Vitality for extra damage.","Elf rogue with Flesh Sacrifice and Sebille's Breaking the Chains. Scoundrel and Warfare burst.","Sebille origin builds",
    "scound10 war8 dual4","fin6 wit1 mem1",CIV_SNEAK,"executioner guerrilla hothead comeback",
    "backlash throwing-knife adrenaline cloak-and-dagger crippling-blow rupture-tendons corrupted-blade daggers-drawn terrifying-cruelty mortal-blow"),
  A("ifan-warden","Ifan: Wolf Warden","summon","fin","ranged","Crossbow",3,"Ifan's wolf soaks hits.","Ifan's Summon Wolf with a crossbow and Summoning infusions on the wolf and Incarnate.","Ifan origin builds",
    "hunt7 summon7 ranged5 war3","fin5 int1 mem2",CIV_LUCK,"executioner elemranger arrowrecovery petpal comeback",
    "pin-down elemental-arrowheads conjure-incarnate ballistic-shot power-infusion sky-shot tactical-retreat farsight-infusion marksman-s-fang reactive-shot"),
- A("lohse-siren","Lohse: Storm Siren","control","int","caster","Wand",3,"Lohse is human; heals work.","Lohse's Maddening Song with air and water stuns. Built to keep enemies frozen and stunned.","Lohse origin builds",
+ A("lohse-siren","Lohse: Storm Siren","control","int","caster","Wand",3,"Encourage and Maddening Song add party support.","Lohse's Maddening Song with air and water stuns. Built to keep enemies frozen and stunned.","Lohse origin builds",
    "aero8 hydro7 lead3","int6 mem2 wit1",CIV_MAGE,"faroutman savage elemaff comeback",
    "electric-discharge hail-strike rain blinding-radiance winter-blast teleportation global-cooling chain-lightning deep-freeze superconductor"),
  A("beast-reaver","Beast: Dwarven Reaver","single","str","melee","Two-handed axe",3,"Dwarves are Sturdy; Beast's Maelstrom adds area damage.","Beast's Maelstrom and Petrifying Touch on a two-handed Warfare build.","Beast origin builds",
@@ -935,7 +935,7 @@ ARCHETYPES.push(
  A("shadowstep-assassin","Shadowstep Assassin","single","fin","melee","Two daggers",4,"Poison and bleeds around you barely matter to an undead.","Cloak and Dagger and Backlash put you behind targets. Teleportation and Nether Swap pull enemies out of position, and Blessed Smoke Cloud turns the party invisible for an opening strike.","Planner-original build for full parties",
    "scound10 dual7 war5 aero3","fin6 wit2 mem1 con1",CIV_SNEAK,"guerrilla executioner hothead comeback morning",
    "backlash cloak-and-dagger adrenaline teleportation throwing-knife nether-swap smoke-cover chloroform corrupted-blade daggers-drawn terrifying-cruelty mortal-blow blessed-smoke-cloud rupture-tendons"),
- A("vampiric-duelist","Vampiric Duelist","single","fin","melee","Two daggers",2,"Skip the Hydrosophist heals; they hurt an undead.","Dagger rogue that keeps itself up with Vampiric Hunger. Its aura gives the whole party life steal, which helps most in a full party.","Planner-original build for full parties",
+ A("vampiric-duelist","Vampiric Duelist","single","fin","melee","Two daggers",3,"No heal spells; Armour of Frost is safe for undead.","Dagger rogue that keeps itself up with Vampiric Hunger. Its aura gives the whole party life steal, which helps most in a full party.","Planner-original build for full parties",
    "scound10 dual7 war6 hydro3","fin6 wit1 mem1 con2",CIV_SNEAK,"guerrilla executioner hothead comeback morning",
    "backlash vampiric-hunger adrenaline throwing-knife cloak-and-dagger vampiric-hunger-aura armour-of-frost chloroform corrupted-blade daggers-drawn terrifying-cruelty mortal-blow rupture-tendons"),
  A("vacuum-warlock","Vacuum Warlock","control","int","caster","Staff or wand",3,"Necromancer lifesteal heals you, and the kit has no heals to hurt you.","Single-target mage built for Honor Mode. Vacuum Touch silences and suffocates one enemy at a time, and Torturer makes the suffocation ignore armour and last longer. Few spells leave surfaces or hit allies.","Planner-original build for full parties",
@@ -945,36 +945,36 @@ ARCHETYPES.push(
 // ---- more origin-character builds (three per origin) ----
 ARCHETYPES.push(
  A("fane-bonelord","Fane: Bone Lord","summon","int","caster","Staff or wand",4,"Fane is undead: corpses everywhere and no healing to hurt him.","Summoning and Necromancer around an Incarnate, Bone Widows and bloated corpses. Fane's Time Warp buys an extra turn for the army.","Fane origin builds",
-   "summon10 necro8 lead3","int5 con2 mem2",CIV_MAGE,"faroutman comeback torturer morning",
+   "summon10 necro8 lead3","int5 con2 mem2",CIV_MAGE,"faroutman comeback walkitoff morning",
    "conjure-incarnate raise-bloated-corpse mosquito-swarm elemental-totem raise-bone-widow power-infusion bone-cage death-wish cannibalise totems-of-the-necromancer last-rites"),
  A("fane-shadowblade","Fane: Shadowblade","single","fin","melee","Two daggers",4,"Poison and bleeds around him barely matter to an undead.","Fane as a dagger assassin. Chameleon Cloak and Cloak and Dagger get him behind targets; his Time Warp sets up a second burst turn.","Fane origin builds",
    "scound10 war7 dual5 poly2","fin6 wit1 mem1 con1",CIV_SNEAK,"guerrilla executioner hothead comeback morning",
    "backlash throwing-knife adrenaline chameleon-cloak cloak-and-dagger crippling-blow rupture-tendons corrupted-blade daggers-drawn terrifying-cruelty mortal-blow chicken-claw"),
- A("lohse-conductor","Lohse: Incarnate Conductor","summon","int","caster","Staff or wand",3,"Lohse is human; heals work.","Summoner with Aerotheurge. Teleport enemies onto the Incarnate, then Maddening Song whatever gets through.","Lohse origin builds",
+ A("lohse-conductor","Lohse: Incarnate Conductor","summon","int","caster","Staff or wand",3,"The Incarnate takes the hits so she doesn't have to.","Summoner with Aerotheurge. Teleport enemies onto the Incarnate, then Maddening Song whatever gets through.","Lohse origin builds",
    "summon10 aero6 lead3","int5 con2 mem2",CIV_MAGE,"faroutman comeback morning walkitoff",
    "conjure-incarnate electric-discharge elemental-totem teleportation power-infusion electric-infusion nether-swap farsight-infusion cursed-electric-infusion planar-gateway chain-lightning"),
- A("lohse-firebrand","Lohse: Fire Enchantress","single","int","caster","Wand or staff",3,"Lohse is human; heals work.","Single-target fire and lightning. Laser Ray, Fire Whip and Spontaneous Combustion on one enemy at a time, so it's safer for your party.","Lohse origin builds",
+ A("lohse-firebrand","Lohse: Fire Enchantress","single","int","caster","Wand or staff",3,"Stays at range; the party's healer covers her.","Single-target fire and lightning: Fire Whip, Spontaneous Combustion, Electric Discharge and Shocking Touch on one enemy at a time, so few of her spells touch your party.","Lohse origin builds",
    "pyro10 aero6 lead2","int6 wit1 mem2",CIV_MAGE,"faroutman savage elemaff comeback",
-   "searing-daggers ignition haste fire-whip shocking-touch laser-ray spontaneous-combustion teleportation electric-discharge flaming-crescendo uncanny-evasion"),
- A("ifan-sniper","Ifan: Mercenary Sniper","single","fin","ranged","Crossbow",3,"Ranged and out of reach; no healing in the kit.","Ifan's Lone Wolf mercenary past as a crossbow sniper. Huntsman and Warfare from high ground, with his Summon Wolf as a bodyguard.","Ifan origin builds",
+   "searing-daggers ignition haste fire-whip shocking-touch spontaneous-combustion teleportation electric-discharge flaming-crescendo uncanny-evasion"),
+ A("ifan-sniper","Ifan: Mercenary Sniper","single","fin","ranged","Crossbow",3,"Ranged and out of reach; no healing in the kit.","Ifan's mercenary past as a crossbow sniper. Huntsman and Warfare from high ground, with his Summon Wolf as a bodyguard.","Ifan origin builds",
    "hunt10 war8 ranged5","fin6 wit1 mem1 con1",CIV_LUCK,"executioner elemranger hothead arrowrecovery comeback",
    "pin-down ballistic-shot elemental-arrowheads sky-shot ricochet marksman-s-fang tactical-retreat assassinate barrage reactive-shot farsight"),
  A("ifan-shadowhunter","Ifan: Shadow Hunter","single","fin","ranged","Crossbow",3,"Stealth keeps him safe between shots.","Crossbow with Scoundrel for Adrenaline, Cloak and Dagger and a bigger crit multiplier. Shoots from stealth, then vanishes.","Ifan origin builds",
    "hunt9 ranged7 scound6","fin6 wit2 mem1",CIV_SNEAK,"guerrilla hothead arrowrecovery comeback morning",
    "ballistic-shot pin-down adrenaline sky-shot cloak-and-dagger tactical-retreat assassinate marksman-s-fang barrage farsight elemental-arrowheads"),
- A("sebille-huntress","Sebille: Blood Huntress","single","fin","ranged","Bow",3,"An elf, so heals work; Flesh Sacrifice adds damage.","Bow plus Necromancer for lifesteal on every arrow. Flesh Sacrifice and Breaking the Chains for burst on the target that matters.","Sebille origin builds",
+ A("sebille-huntress","Sebille: Blood Huntress","single","fin","ranged","Bow",3,"Flesh Sacrifice trades some Vitality for extra damage.","Bow plus Necromancer for lifesteal on every arrow. Flesh Sacrifice and Breaking the Chains for burst on the target that matters.","Sebille origin builds",
    "hunt9 war6 necro5 ranged3","fin6 int1 wit1 mem1",CIV_LUCK,"executioner elemranger arrowrecovery comeback morning",
    "pin-down ballistic-shot mosquito-swarm sky-shot blood-sucker death-wish marksman-s-fang tactical-retreat assassinate barrage grasp-of-the-starved"),
- A("sebille-chimera","Sebille: Chimera Blade","single","fin","melee","Two daggers",3,"An elf, so heals work.","Daggers with Polymorph for free attribute points, wings to reach targets and Chicken Claw on the biggest threat.","Sebille origin builds",
+ A("sebille-chimera","Sebille: Chimera Blade","single","fin","melee","Two daggers",3,"Polymorph armour skills and Skin Graft keep her going.","Daggers with Polymorph for free attribute points, wings to reach targets and Chicken Claw on the biggest threat.","Sebille origin builds",
    "scound10 war7 poly5 dual2","fin6 wit1 mem1 con1",CIV_SNEAK,"executioner guerrilla hothead comeback morning",
    "backlash chicken-claw tentacle-lash adrenaline throwing-knife cloak-and-dagger spread-your-wings rupture-tendons corrupted-blade daggers-drawn skin-graft mortal-blow"),
  A("redprince-sovereign","Red Prince: Shield Sovereign","tank","str","melee","One-handed weapon and shield",3,"Geomancer armour restores work for everyone.","Sword and board that taunts, holds the line and keeps the party's Physical Armour up. Demonic Stare and Dragon's Blaze add damage.","Red Prince origin builds",
    "war8 geo5 persev5 single3 lead2","str4 con3 mem1",CIV_FIGHT,"picture comeback walkitoff morning",
    "provoke fortify bouncing-shield battering-ram deflective-barrier mend-metal guardian-angel challenge reactive-armour crippling-blow living-wall"),
- A("redprince-sorcerer","Red Prince: Flame Sorcerer","single","int","caster","Wand or staff",3,"Lizards resist fire, so his own flames hurt him less.","Single-target fire mage. Dragon's Blaze, Laser Ray and Fire Whip, with Haste and teleports for tempo.","Red Prince origin builds",
+ A("redprince-sorcerer","Red Prince: Flame Sorcerer","single","int","caster","Wand or staff",3,"Lizards resist fire, so his own flames hurt him less.","Fire mage that focuses priority targets with Fire Whip and Spontaneous Combustion. Dragon's Blaze and Laser Ray hit a cone or a line, so mind your party.","Red Prince origin builds",
    "pyro10 aero5 lead3","int6 wit1 mem2",CIV_MAGE,"demon faroutman savage elemaff comeback",
    "searing-daggers ignition haste fire-whip fireball laser-ray spontaneous-combustion teleportation shocking-touch flaming-crescendo"),
- A("beast-tidecaller","Beast: Tidecaller","control","int","caster","Staff or wand",3,"Avoid the heal spells on undead friends; Armour of Frost is safe.","The pirate as a storm mage. Rain, freeze and stun with Hydrosophist and Aerotheurge, and Maelstrom for a burst of area damage.","Beast origin builds",
+ A("beast-tidecaller","Beast: Tidecaller","control","int","caster","Staff or wand",3,"No heal spells; Armour of Frost keeps the party's Magic Armour up.","The pirate as a storm mage. Rain, freeze and stun with Hydrosophist and Aerotheurge, and Maelstrom for a burst of area damage.","Beast origin builds",
    "hydro10 aero6 lead3","int6 mem2 wit1",CIV_MAGE,"iceking faroutman savage elemaff comeback",
    "hail-strike rain electric-discharge armour-of-frost winter-blast global-cooling teleportation ice-fan deep-freeze chain-lightning hail-storm"),
  A("beast-ironclad","Beast: Ironclad Captain","tank","str","melee","One-handed weapon and shield",3,"Dwarves are Sturdy; Geomancer armour restores keep him up.","Shield tank that provokes, stomps and petrifies with Petrifying Touch, keeping both armours up with earth magic.","Beast origin builds",
@@ -1177,7 +1177,10 @@ function playTips(a,st){
   if(T("guerrilla")) tips.push(`<b>Guerrilla:</b> +40% damage while sneaking, so open every fight from sneak.`);
   if(T("executioner")) tips.push(`<b>Executioner:</b> a kill gives 2 AP once per turn, so hit the weakest enemy first.`);
   if(T("savage")) tips.push(`<b>Savage Sortilege:</b> spells can crit, so Wits matters.`);
-  if(T("torturer")){ const st2=["Bleeding","Burning","Poisoned","Decay","Diseased","Suffocat","Crippled"].filter(x=>sk.some(id=>new RegExp(x,"i").test(S(id).d))); tips.push(`<b>Torturer:</b> your ${st2.length?st2.join(", ").replace(/Suffocat/,"Suffocating"):"damage-over-time statuses"} ignore armour and last a turn longer.`); }
+  if(T("torturer")){ // the statuses the talent lists: Acid, Bleeding, Burning, Death Wish, Entangled, Necrofire, Poisoned, Ruptured Tendons, Suffocating
+    const st2=[["Acid",/acid/i],["Bleeding",/bleed/i],["Burning",/burn|fire surface|fiery/i],["Necrofire",/necrofire/i],["Poisoned",/poison/i],["Suffocating",/suffocat/i],["Entangled",/entangl/i]].filter(([,re])=>sk.some(id=>re.test(S(id).d.replace(/(Removes|Cures|Clears|Douses?)[^.]*\.?/g,"")))).map(([n])=>n);
+    if(has("rupture-tendons")) st2.push("Ruptured Tendons"); if(has("death-wish")) st2.push("Death Wish");
+    const one=st2.length===1; tips.push(`<b>Torturer:</b> your ${st2.length?st2.join(", "):"Bleeding, Burning and Poisoned"} ${one?"ignores armour and lasts":"ignore armour and last"} a turn longer.`); }
   if(T("elemaff")) tips.push(`<b>Elemental Affinity:</b> stand in a surface of a spell's element to cast it for 1 AP less.`);
   if(T("leech")) tips.push(`<b>Leech:</b> standing in blood heals you.`);
   if(T("glass")) tips.push(`<b>Glass Cannon:</b> full AP every turn, but statuses land through your armour, so strike first.`);
@@ -1706,8 +1709,7 @@ function renderArch(){
   fillSel("archRange","Any range",Object.entries(RANGE_TEXT),ui.arange);
   fillSel("archSchool","Any school",COMBAT.flatMap(g=>g.items).map(([k,n])=>[k,n]),ui.aschool);
   fillSel("archRace","Any race",Object.entries(RACE_TEXT),ui.arace);
-  fillSel("archOrigin","Any origin",[["none","Custom characters"],...Object.entries(ORIGIN_TEXT)],ui.aorigin);
-  $("originQuick").innerHTML=[["all","All characters"],...Object.entries(ORIGIN_TEXT)].map(([k,n])=>`<button type="button" class="chip" data-oquick="${k}" aria-pressed="${ui.aorigin===k}">${k==="all"?n:n+` · ${ARCHETYPES.filter(a=>a.origin===k).length}`}</button>`).join("");
+  $("originQuick").innerHTML=[["all","All characters"],["none","Custom"],...Object.entries(ORIGIN_TEXT)].map(([k,n])=>`<button type="button" class="chip" data-oquick="${k}" aria-pressed="${ui.aorigin===k}">${k==="all"?n:n+` · ${ARCHETYPES.filter(a=>k==="none"?!a.origin:a.origin===k).length}`}</button>`).join("");
   $("archParty").value=ui.aparty; $("archSort").value=ui.asort; if($("archSearch").value!==ui.aq) $("archSearch").value=ui.aq;
   let list=ARCHETYPES.filter(archMatches);
   const sc=a=>ARCH_SCORE[a.id];
@@ -1720,7 +1722,7 @@ function renderArch(){
   $("archClear").hidden=!(ui.atier!=="all"||ui.role!=="all"||ui.afam!=="all"||ui.admg!=="all"||ui.astat!=="all"||ui.arange!=="all"||ui.aschool!=="all"||ui.arace!=="all"||ui.aorigin!=="all"||ui.aparty!=="all"||ui.aq);
   $("archCards").innerHTML=shown.length?shown.map(a=>{
     const schools=a.plan.filter(([k,t])=>SCHOOLS[k]&&t>=3).map(([k])=>k); const s=sc(a);
-    const tags=[a.lw?`<span class="atag lw">Lone Wolf</span>`:"",a.origin?`<span class="atag">${ORIGIN_TEXT[a.origin]}</span>`:"",a.fit>=4?`<span class="atag ud">Undead-friendly</span>`:""].join("");
+    const tags=[a.lw?`<span class="atag lw">Lone Wolf</span>`:"",a.origin?`<span class="atag">${ORIGIN_TEXT[a.origin]}</span>`:"",a.fit>=4&&(!a.origin||a.origin==="fane")?`<span class="atag ud">Undead-friendly</span>`:""].join("");
     return `<button type="button" class="pick acard" data-arch="${a.id}" data-tip="arch:${a.id}" aria-pressed="${state.archetype===a.id}">
       <span class="tbadge tier${a.tier}" aria-label="${a.tier} tier">${a.tier}</span>
       <div class="ah"><strong>${a.n}</strong></div>
@@ -2061,7 +2063,7 @@ function tipHTML(key){
     scoreAll(L); const sc=ARCH_SCORE[a.id];
     return `<div class="th"><span class="tbadge tier${a.tier}" style="position:static;flex-shrink:0">${a.tier}</span><div><h4>${a.n}</h4><small>${a.tier} tier ${FAM_TEXT[a.fam]} · ${ROLE_TEXT[a.role]} · preview at level ${L}</small></div></div>
     <dl class="stats">${row("Abilities",ab)}${row("Attributes",at)}${row("Talents",b.talents.map(t=>TALENT_BY_ID[t].n).join(", "))}${row("Skills",b.skills.map(id=>SKILL_BY_ID[id].n).join(", "))}${row("Damage",DMG_TEXT[a.dmg])}${row("Good races",a.races.map(r=>RACE_TEXT[r]).join(", "))}</dl>
-    <p>${a.blurb}</p>${a.lw?`<p class="tn">Lone Wolf: only works with one companion or alone. Loading it sets your party to 2. The damage index includes the doubling.</p>`:""}<p class="tn warn">Undead: ${FIT_TEXT[a.fit]}. ${a.fitText}</p>
+    <p>${a.blurb}</p>${a.lw?`<p class="tn">Lone Wolf: only works with one companion or alone. Loading it sets your party to 2. The damage index includes the doubling.</p>`:""}${a.origin&&a.origin!=="fane"?`<p class="tn">Race: ${ORIGIN_TEXT[a.origin]} is always ${RACE_TEXT[ORIGIN_RACE[a.origin]].toLowerCase()==="elf"?"an elf":"a "+RACE_TEXT[ORIGIN_RACE[a.origin]].toLowerCase()}. ${a.fitText}</p>`:`<p class="tn warn">Undead: ${FIT_TEXT[a.fit]}. ${a.fitText}</p>`}
     ${damageNotes(a,L)}${howToPlay(a,b,4)}<p class="tn" style="margin-top:8px">Based on: ${a.src}.</p>`;
   }
   if(kind==="talent"){
@@ -2216,7 +2218,7 @@ $("skillSearch").addEventListener("input",e=>{ui.q=e.target.value; render();});
 $("gearSearch").addEventListener("input",e=>{ui.gq=e.target.value; renderGear(); refreshTipAfterRender();});
 $("gearSort").addEventListener("change",e=>{ui.gsort=e.target.value; renderGear();});
 $("archSchool").addEventListener("change",e=>{ui.aschool=e.target.value; ui.apage=1; renderArch();});
-[["archFam","afam"],["archDmg","admg"],["archStat","astat"],["archRange","arange"],["archRace","arace"],["archOrigin","aorigin"],["archParty","aparty"]].forEach(([id,k])=>$(id).addEventListener("change",e=>{ui[k]=e.target.value; ui.apage=1; renderArch();}));
+[["archFam","afam"],["archDmg","admg"],["archStat","astat"],["archRange","arange"],["archRace","arace"],["archParty","aparty"]].forEach(([id,k])=>$(id).addEventListener("change",e=>{ui[k]=e.target.value; ui.apage=1; renderArch();}));
 $("archSort").addEventListener("change",e=>{ui.asort=e.target.value; ui.apage=1; renderArch();});
 $("archSearch").addEventListener("input",e=>{ui.aq=e.target.value; ui.apage=1; renderArch();});
 $("archClear").addEventListener("click",()=>{ Object.assign(ui,{atier:"all",role:"all",afam:"all",admg:"all",astat:"all",arange:"all",aschool:"all",arace:"all",aorigin:"all",aparty:"all",aq:"",apage:1}); renderArch(); });
