@@ -52,7 +52,7 @@
 
 ## Game data
 
-Skill, item, talent and stat values were extracted from the game's own data files. Item locations come from the game's level data where available. Tier rankings and the damage index are estimates meant for comparing builds, not exact in-game damage numbers.
+Skill, item, talent and stat values were extracted from the game's own data files. Item locations come from the game's level data, plus the [Fextralife](https://divinityoriginalsin2.wiki.fextralife.com/) and [dos2.wiki](https://dos2.wiki/) item pages for the uniques the act guide recommends (who drops it, which chest, which trader, which quest). Tier rankings and the damage index are estimates meant for comparing builds, not exact in-game damage numbers.
 
 Skill and item icons load automatically from `rivellon-icons.json` when it's present next to `index.html`. Without it, icons can be imported from your own installation with **Import game icons** in the Skills section.
 
