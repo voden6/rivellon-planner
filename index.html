@@ -235,6 +235,20 @@ a{color:var(--accent)}
 
 /* ---------- phone layout ---------- */
 .gsum{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.gsum-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;align-items:baseline}
+.gsum-h span{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.bgrp{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.bstats{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+.bst{display:block;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);min-width:0}
+.bst small{display:block;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bst b{font-size:16px;margin-right:4px}
+@media (max-width:760px){ .bstats{grid-template-columns:repeat(3,minmax(0,1fr))} }
+.gup{font-style:normal;font-size:12px;color:var(--good);font-family:var(--mono)}
+.bpills{display:flex;flex-wrap:wrap;gap:5px}
+.bpill{border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:13px;background:var(--panel)}
+.bpill.new{border-color:var(--good);color:var(--good)}
+.bline{margin:0;font-size:14px}
+
 .gh{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
 .gh span{text-transform:none;letter-spacing:0}
 .ggear{display:grid;gap:6px}
@@ -340,6 +354,7 @@ a{color:var(--accent)}
           </div>
         </div>
         <div class="arch-bar"><p class="note" id="archCount" style="margin:0"></p><button class="btn" type="button" id="archClear">Clear filters</button></div>
+        <div class="chips" id="originQuick" style="margin:0 0 10px" aria-label="Origin characters"></div>
         <div class="cards archs" id="archCards"></div>
         <nav class="pager" id="archPager" aria-label="Archetype pages"></nav>
       </section>
@@ -430,8 +445,8 @@ a{color:var(--accent)}
       </section>
 
       <section class="step" id="stepGuide">
-        <div class="step-head"><div><div class="kicker">Playthrough</div><h2>Act-by-act guide</h2></div></div>
-        <p class="note" style="margin:0 0 10px">For the loaded build: what to pick at every level, and the best gear to hunt for in each act with where to find it. Tick items off as you get them.</p>
+        <div class="step-head"><div><div class="kicker">Playthrough</div><h2>Act-by-act build guide</h2></div></div>
+        <p class="note" style="margin:0 0 10px">For the loaded build: your full character at the end of each act, what to pick at every level, and the best gear to hunt for in that act with where to find it. Tick items off as you get them.</p>
         <div class="chips" id="guideActs"></div>
         <div id="guideBody" style="margin-top:12px"></div>
       </section>
@@ -894,7 +909,7 @@ ARCHETYPES.push(
  A("redprince-dragon","Red Prince: Dragon Knight","area","str","melee","Two-handed weapon",3,"Lizards resist fire; Dragon's Blaze is free damage.","Warfare and Pyrokinetic with the Red Prince's Dragon's Blaze. Sparking Swings on a two-hander.","Red Prince origin builds",
    "war10 pyro5 twohand6","str6 int1 mem1",CIV_FIGHT,"demon picture executioner comeback",
    "battering-ram phoenix-dive sparking-swings crippling-blow whirlwind haste firebrand blitz-attack enrage supernova onslaught master-of-sparks"),
- A("sebille-needle","Sebille: Needle Assassin","single","fin","melee","Two daggers",3,"An elf, so heals work; Flesh Sacrifice adds damage.","Elf rogue with Flesh Sacrifice and Sebille's Breaking the Shackles. Scoundrel and Warfare burst.","Sebille origin builds",
+ A("sebille-needle","Sebille: Needle Assassin","single","fin","melee","Two daggers",3,"An elf, so heals work; Flesh Sacrifice adds damage.","Elf rogue with Flesh Sacrifice and Sebille's Breaking the Chains. Scoundrel and Warfare burst.","Sebille origin builds",
    "scound10 war8 dual4","fin6 wit1 mem1",CIV_SNEAK,"executioner guerrilla hothead comeback",
    "backlash throwing-knife adrenaline cloak-and-dagger crippling-blow rupture-tendons corrupted-blade daggers-drawn terrifying-cruelty mortal-blow"),
  A("ifan-warden","Ifan: Wolf Warden","summon","fin","ranged","Crossbow",3,"Ifan's wolf soaks hits.","Ifan's Summon Wolf with a crossbow and Summoning infusions on the wolf and Incarnate.","Ifan origin builds",
@@ -918,6 +933,45 @@ ARCHETYPES.push(
  A("vacuum-warlock","Vacuum Warlock","control","int","caster","Staff or wand",3,"Necromancer lifesteal heals you, and the kit has no heals to hurt you.","Single-target mage built for Honor Mode. Vacuum Touch silences and suffocates one enemy at a time, and Torturer makes the suffocation ignore armour and last longer. Few spells leave surfaces or hit allies.","Planner-original build for full parties",
    "aero8 necro8 lead3 persev2","int5 mem3 con1 wit1",CIV_MAGE,"torturer faroutman savage comeback morning",
    "vacuum-touch electric-discharge shocking-touch decaying-touch mosquito-swarm death-wish silencing-stare teleportation nether-swap blood-sucker bone-cage uncanny-evasion")
+);
+// ---- more origin-character builds (three per origin) ----
+ARCHETYPES.push(
+ A("fane-bonelord","Fane: Bone Lord","summon","int","caster","Staff or wand",4,"Fane is undead: corpses everywhere and no healing to hurt him.","Summoning and Necromancer around an Incarnate, Bone Widows and bloated corpses. Fane's Time Warp buys an extra turn for the army.","Fane origin builds",
+   "summon10 necro8 lead3","int5 con2 mem2",CIV_MAGE,"faroutman comeback torturer morning",
+   "conjure-incarnate raise-bloated-corpse mosquito-swarm elemental-totem raise-bone-widow power-infusion bone-cage death-wish cannibalise totems-of-the-necromancer last-rites"),
+ A("fane-shadowblade","Fane: Shadowblade","single","fin","melee","Two daggers",4,"Poison and bleeds around him barely matter to an undead.","Fane as a dagger assassin. Chameleon Cloak and Cloak and Dagger get him behind targets; his Time Warp sets up a second burst turn.","Fane origin builds",
+   "scound10 war7 dual5 poly2","fin6 wit1 mem1 con1",CIV_SNEAK,"guerrilla executioner hothead comeback morning",
+   "backlash throwing-knife adrenaline chameleon-cloak cloak-and-dagger crippling-blow rupture-tendons corrupted-blade daggers-drawn terrifying-cruelty mortal-blow chicken-claw"),
+ A("lohse-conductor","Lohse: Incarnate Conductor","summon","int","caster","Staff or wand",3,"Lohse is human; heals work.","Summoner with Aerotheurge. Teleport enemies onto the Incarnate, then Maddening Song whatever gets through.","Lohse origin builds",
+   "summon10 aero6 lead3","int5 con2 mem2",CIV_MAGE,"faroutman comeback morning walkitoff",
+   "conjure-incarnate electric-discharge elemental-totem teleportation power-infusion electric-infusion nether-swap farsight-infusion cursed-electric-infusion planar-gateway chain-lightning"),
+ A("lohse-firebrand","Lohse: Fire Enchantress","single","int","caster","Wand or staff",3,"Lohse is human; heals work.","Single-target fire and lightning. Laser Ray, Fire Whip and Spontaneous Combustion on one enemy at a time, so it's safer for your party.","Lohse origin builds",
+   "pyro10 aero6 lead2","int6 wit1 mem2",CIV_MAGE,"faroutman savage elemaff comeback",
+   "searing-daggers ignition haste fire-whip shocking-touch laser-ray spontaneous-combustion teleportation electric-discharge flaming-crescendo uncanny-evasion"),
+ A("ifan-sniper","Ifan: Mercenary Sniper","single","fin","ranged","Crossbow",3,"Ranged and out of reach; no healing in the kit.","Ifan's Lone Wolf mercenary past as a crossbow sniper. Huntsman and Warfare from high ground, with his Summon Wolf as a bodyguard.","Ifan origin builds",
+   "hunt10 war8 ranged5","fin6 wit1 mem1 con1",CIV_LUCK,"executioner elemranger hothead arrowrecovery comeback",
+   "pin-down ballistic-shot elemental-arrowheads sky-shot ricochet marksman-s-fang tactical-retreat assassinate barrage reactive-shot farsight"),
+ A("ifan-shadowhunter","Ifan: Shadow Hunter","single","fin","ranged","Crossbow",3,"Stealth keeps him safe between shots.","Crossbow with Scoundrel for Adrenaline, Cloak and Dagger and a bigger crit multiplier. Shoots from stealth, then vanishes.","Ifan origin builds",
+   "hunt9 ranged7 scound6","fin6 wit2 mem1",CIV_SNEAK,"guerrilla executioner hothead arrowrecovery morning",
+   "ballistic-shot pin-down adrenaline sky-shot cloak-and-dagger tactical-retreat assassinate marksman-s-fang barrage farsight elemental-arrowheads"),
+ A("sebille-huntress","Sebille: Blood Huntress","single","fin","ranged","Bow",3,"An elf, so heals work; Flesh Sacrifice adds damage.","Bow plus Necromancer for lifesteal on every arrow. Flesh Sacrifice and Breaking the Chains for burst on the target that matters.","Sebille origin builds",
+   "hunt9 war6 necro5 ranged3","fin6 int1 wit1 mem1",CIV_LUCK,"executioner elemranger arrowrecovery comeback morning",
+   "pin-down ballistic-shot mosquito-swarm sky-shot blood-sucker death-wish marksman-s-fang tactical-retreat assassinate barrage grasp-of-the-starved"),
+ A("sebille-chimera","Sebille: Chimera Blade","single","fin","melee","Two daggers",3,"An elf, so heals work.","Daggers with Polymorph for free attribute points, wings to reach targets and Chicken Claw on the biggest threat.","Sebille origin builds",
+   "scound10 war7 poly5 dual2","fin6 wit1 mem1 con1",CIV_SNEAK,"executioner guerrilla hothead comeback morning",
+   "backlash chicken-claw tentacle-lash adrenaline throwing-knife cloak-and-dagger spread-your-wings rupture-tendons corrupted-blade daggers-drawn skin-graft mortal-blow"),
+ A("redprince-sovereign","Red Prince: Shield Sovereign","tank","str","melee","One-handed weapon and shield",3,"Geomancer armour restores work for everyone.","Sword and board that taunts, holds the line and keeps the party's Physical Armour up. Demonic Stare and Dragon's Blaze add damage.","Red Prince origin builds",
+   "war8 geo5 persev5 single3 lead2","str4 con3 mem1",CIV_FIGHT,"picture comeback walkitoff morning",
+   "provoke fortify bouncing-shield battering-ram deflective-barrier mend-metal guardian-angel challenge reactive-armour crippling-blow living-wall"),
+ A("redprince-sorcerer","Red Prince: Flame Sorcerer","single","int","caster","Wand or staff",3,"Lizards resist fire, so his own flames hurt him less.","Single-target fire mage. Dragon's Blaze, Laser Ray and Fire Whip, with Haste and teleports for tempo.","Red Prince origin builds",
+   "pyro10 aero5 lead3","int6 wit1 mem2",CIV_MAGE,"demon faroutman savage elemaff comeback",
+   "searing-daggers ignition haste fire-whip fireball laser-ray spontaneous-combustion teleportation shocking-touch flaming-crescendo"),
+ A("beast-tidecaller","Beast: Tidecaller","control","int","caster","Staff or wand",3,"Avoid the heal spells on undead friends; Armour of Frost is safe.","The pirate as a storm mage. Rain, freeze and stun with Hydrosophist and Aerotheurge, and Maelstrom for a burst of area damage.","Beast origin builds",
+   "hydro10 aero6 lead3","int6 mem2 wit1",CIV_MAGE,"iceking faroutman savage elemaff comeback",
+   "hail-strike rain electric-discharge armour-of-frost winter-blast global-cooling teleportation ice-fan deep-freeze chain-lightning hail-storm"),
+ A("beast-ironclad","Beast: Ironclad Captain","tank","str","melee","One-handed weapon and shield",3,"Dwarves are Sturdy; Geomancer armour restores keep him up.","Shield tank that provokes, stomps and petrifies with Petrifying Touch, keeping both armours up with earth magic.","Beast origin builds",
+   "war8 geo5 persev5 single3","str4 con3 mem1",CIV_FIGHT,"picture comeback stench walkitoff morning",
+   "provoke fortify battle-stomp bouncing-shield battering-ram deflective-barrier mend-metal guardian-angel reactive-armour challenge earthquake")
 );
 // tier, class, races that suit it, origin, damage type override
 const META_RAW={
@@ -944,6 +998,9 @@ const META_RAW={
  "mind-thief":"C mage human - magic","haste-weaver":"B support human,undead","field-medic":"C support elf,human - mixed","warlord-bard":"C support human",
  "fane-chronomancer":"A mage undead fane magic","redprince-dragon":"A battlemage lizard redprince mixed","sebille-needle":"S rogue elf sebille","ifan-warden":"B summoner human ifan mixed",
  "lohse-siren":"A mage human lohse magic","beast-reaver":"A warrior dwarf beast",
+ "fane-bonelord":"A summoner undead fane","fane-shadowblade":"A rogue undead fane","lohse-conductor":"B summoner human lohse","lohse-firebrand":"A mage human lohse magic",
+ "ifan-sniper":"A ranger human ifan","ifan-shadowhunter":"A ranger human ifan","sebille-huntress":"A ranger elf sebille","sebille-chimera":"A rogue elf sebille",
+ "redprince-sovereign":"B tank lizard redprince","redprince-sorcerer":"A mage lizard redprince magic","beast-tidecaller":"A mage dwarf beast magic","beast-ironclad":"B tank dwarf beast",
  "shadowstep-assassin":"A rogue elf,human,undead","vampiric-duelist":"A rogue human,elf","vacuum-warlock":"B mage undead,dwarf - mixed"
 };
 const TIERS=["S","A","B","C","D"], TIER_TEXT={S:"S tier",A:"A tier",B:"B tier",C:"C tier",D:"D tier"};
@@ -1112,6 +1169,8 @@ const AUTO_ARMOUR=["helmet","chest","gloves","legs","boots"];
 function autoRarity(L){ return L<=3?"Uncommon":L<=8?"Rare":L<=12?"Epic":L<=18?"Legendary":"Divine"; }
 // Act an item comes from: the game's level data first, then the location note.
 function itemAct(g){ if(g.actN!=null) return g.actN; const m=(g.act||"").match(/Act (\d)/); return m?+m[1]:null; }
+// For uniques with no recorded place, guess the act from the item level so they still show up in the guide.
+function itemActGuess(g){ const k=itemAct(g); if(k!=null) return k; const l=g.lvl||0; return l<=9?1:l<=16?2:l<=18?3:4; }
 function autoPrimary(st){ const at=st.attrs||{}; return ["str","fin","int"].reduce((b,k)=>(at[k]||0)>(at[b]||0)?k:b,"str"); }
 function autoWeights(st){
   const at=st.attrs||{}, cb=st.combat||{}, W={};
@@ -1143,8 +1202,8 @@ function autoGear(st,opt={}){
   const W=autoWeights(st), prim=autoPrimary(st), cb=st.combat||{}, L=Math.max(1,st.level||1), maxAct=opt.maxAct??null;
   const tank=(st.attrs?.con||0)>(st.attrs?.[prim]||0)||(cb.retri||0)>=5;
   const have=new Set((st.skills||[]).map(id=>SKILL_BY_ID[id]?.n).filter(Boolean));
-  // with an act cap (the playthrough guide), only uniques with a known place in that act or earlier count
-  const gets=g=>!g.unique||((g.lvl||0)<=L+1&&(maxAct==null||(itemAct(g)!=null&&itemAct(g)<=maxAct)));
+  // with an act cap (the playthrough guide), only uniques from that act or earlier count
+  const gets=g=>!g.unique||((g.lvl||0)<=L+1&&(maxAct==null||itemActGuess(g)<=maxAct));
   const isWeapon=g=>(g.slot==="main"||g.slot==="off")&&g.cat!=="Shield";
   const score=g=>{
     if(!g.unique) return isWeapon(g)?(g.hands===2?1.2:.8)*L+1:g.slot==="amulet"||g.slot==="ring"||g.slot==="belt"?1:.35*L+1;
@@ -1485,6 +1544,7 @@ function renderArch(){
   fillSel("archSchool","Any school",COMBAT.flatMap(g=>g.items).map(([k,n])=>[k,n]),ui.aschool);
   fillSel("archRace","Any race",Object.entries(RACE_TEXT),ui.arace);
   fillSel("archOrigin","Any origin",[["none","Custom characters"],...Object.entries(ORIGIN_TEXT)],ui.aorigin);
+  $("originQuick").innerHTML=[["all","All characters"],...Object.entries(ORIGIN_TEXT)].map(([k,n])=>`<button type="button" class="chip" data-oquick="${k}" aria-pressed="${ui.aorigin===k}">${k==="all"?n:n+` · ${ARCHETYPES.filter(a=>a.origin===k).length}`}</button>`).join("");
   $("archParty").value=ui.aparty; $("archSort").value=ui.asort; if($("archSearch").value!==ui.aq) $("archSearch").value=ui.aq;
   let list=ARCHETYPES.filter(archMatches);
   const sc=a=>ARCH_SCORE[a.id];
@@ -1604,11 +1664,22 @@ function renderGuide(){
   const got=(loadGot()[A.id])||{};
   $("guideActs").innerHTML=ACTS.map(x=>`<button type="button" class="chip" data-guideact="${x.n}" aria-pressed="${x.n===act.n}">Act ${x.n} · ${x.name}</button>`).join("");
   const plus=(list,name)=>list.map(([k,v])=>`+${v} ${name[k]||k}`).join(", ");
-  const endAttrs=["str","fin","int","con","mem","wit"].filter(k=>end.attrs[k]).map(k=>`${ATTR_LONG[k]} ${10+end.attrs[k]}`).join(" · ");
-  const endComb=Object.entries(end.combat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${COMBAT_NAME[k]} ${v}`).join(" · ");
-  let h=`<div class="gsum"><b>${esc(A.n)} · Act ${act.n}, levels ${act.from}–${act.to}</b><p class="note" style="margin:4px 0 0">${act.note}</p>
-    <p class="note" style="margin:6px 0 0"><b>By level ${act.to}:</b> ${endAttrs}<br>${endComb}</p>
-    <button class="btn" type="button" data-guideload="${act.n}" style="margin-top:8px">Load the level ${act.to} build with this gear</button></div>`;
+  const startSt=act.from>1?D.rows[act.from-2].st:null;
+  const gain=(k,m)=>{ const v=(end[m][k]||0)-((startSt&&startSt[m][k])||0); return v>0?` <em class="gup">+${v}</em>`:""; };
+  const attrRow=["str","fin","int","con","mem","wit"].map(k=>`<span class="bst"><small>${ATTR_LONG[k]}</small><b>${10+(end.attrs[k]||0)}</b>${gain(k,"attrs")}</span>`).join("");
+  const combRow=Object.entries(end.combat).sort((a,b)=>b[1]-a[1]).map(([k])=>`<span class="bst"><small>${COMBAT_NAME[k]}</small><b>${end.combat[k]}</b>${gain(k,"combat")}</span>`).join("");
+  const civRow=Object.entries(end.civil).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${CIVIL_NAME[k]} ${v}`).join(" · ");
+  const prevTal=startSt?startSt.talents:[], prevSk=startSt?startSt.skills:[];
+  const talRow=end.talents.map(t=>`<span class="bpill${prevTal.includes(t)?"":" new"}" data-tip="talent:${t}" tabindex="0">${esc(TALENT_BY_ID[t].n)}</span>`).join("");
+  const skRow=end.skills.map(id=>`<span class="bpill${prevSk.includes(id)?"":" new"}" data-tip="skill:${id}" tabindex="0">${esc(SKILL_BY_ID[id].n)}</span>`).join("");
+  let h=`<div class="gsum"><div class="gsum-h"><b>${esc(A.n)}</b><span>End of Act ${act.n} · level ${act.to}</span></div>
+    <p class="note" style="margin:4px 0 0">${act.note} Green numbers and highlighted names are what's new this act.</p>
+    <div class="bgrp">Attributes</div><div class="bstats">${attrRow}</div>
+    <div class="bgrp">Combat abilities</div><div class="bstats">${combRow}</div>
+    ${civRow?`<div class="bgrp">Civil</div><p class="bline">${civRow}</p>`:""}
+    <div class="bgrp">Talents</div><div class="bpills">${talRow||`<span class="note" style="margin:0">None yet</span>`}</div>
+    <div class="bgrp">Skills memorised</div><div class="bpills">${skRow}</div>
+    <button class="btn primary" type="button" data-guideload="${act.n}" style="margin-top:12px">Load this Act ${act.n} build with its gear</button></div>`;
   // gear goals
   const lookTxt=G.look.map(k=>ATTR_LONG[k]||COMBAT_NAME[k]||k).join(", ");
   const N=Object.fromEntries(GEAR_SLOTS);
@@ -1619,7 +1690,7 @@ function renderGuide(){
     const bon=Object.entries(g.b||{}).map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`).join(" · ");
     return `<div class="gg${have?" done":""}"><button type="button" class="got" data-got="${g.id}" aria-pressed="${have}" aria-label="${have?"Got":"Mark as found"}: ${esc(g.n)}">${have?"✓":""}</button>${gearIcon(g.glyph,g.attr,true,34,g.icon)}
       <div data-tip="gear:${g.id}" tabindex="0"><b style="color:var(--r-unique)">${esc(g.n)}</b><small>${N[sl]}${g.lvl?` · Lv ${g.lvl}`:""}${earlier?` · from ${ACT_NAME(ia)}, keep using it`:""}${bon?` · ${esc(bon)}`:""}</small>
-      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+", location not recorded":"Location not recorded"))}</small></div></div>`; }).join("");
+      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+", exact spot unknown":"Location unknown"))}</small></div></div>`; }).join("");
   if(bSlots.length){ const rar=G.gear[bSlots[0]].rarity;
     const names=bSlots.map(sl=>GEAR_BY_ID[G.gear[sl].id].n.toLowerCase());
     rowsG+=`<div class="gg"><span class="got ph" aria-hidden="true"></span>${gearIcon(GEAR_BY_ID[G.gear[bSlots[0]].id].glyph,null,false,34,"")}<div><b style="color:${RARITY_COLOR[rar]}">${rar} or better rolled gear</b>
@@ -1638,7 +1709,7 @@ function renderGuide(){
     if(r.learn.length) parts.push(`<div><span class="gk">${L===1?"Skills":"Learn"}</span>${r.learn.map(id=>{const s=SKILL_BY_ID[id];return `<span data-tip="skill:${id}" tabindex="0">${esc(s.n)}${s.sp?` <em class="gsrc">Source</em>`:""}</span>`;}).join(", ")}</div>`);
     if(r.drop.length) parts.push(`<div><span class="gk">Unmemorise</span>${r.drop.map(id=>esc(SKILL_BY_ID[id].n)).join(", ")}</div>`);
     h+=`<div class="glv"><div class="glv-n">Lv ${L}</div><div class="glv-b">${parts.join("")||`<div class="gnote">Nothing new to spend.</div>`}</div></div>`; }
-  h+=`<p class="note">Skills listed are the ones to keep memorised. Buy the skillbooks from traders as they appear; if one isn't stocked yet, take the next skill on the list and come back. Item levels and locations come from the game files; a few uniques have no recorded location and are left out.</p>`;
+  h+=`<p class="note">Skills listed are the ones to keep memorised. Buy the skillbooks from traders as they appear; if one isn't stocked yet, take the next skill on the list and come back. Item levels and locations come from the game files. Uniques marked Location unknown have no recorded place; they are listed in the act that matches their item level.</p>`;
   $("guideBody").innerHTML=h;
 }
 function gearSheet(){
@@ -1918,7 +1989,10 @@ document.addEventListener("click",e=>{
   if(ds.origin){ state.origin=ds.origin; const o=ORIGINS.find(x=>x.id===ds.origin); if(o.race){state.race=o.race; applyPreset(state,o.preset); state.name=o.n;} state.example=false; }
   else if(ds.race){ state.race=ds.race; state.example=false; }
   else if(ds.preset){ applyPreset(state,ds.preset); state.example=false; state.archetype=null; }
-  else if(ds.arch){ const A0=ARCH_BY_ID[ds.arch]; state=buildArchetype(A0,ui.archLevel,{origin:state.origin,race:state.race,party:A0.lw?Math.min(state.party,2):state.party,gear:state.gear}); state.example=true; toast(`${A0.n} loaded${A0.lw?" (party set to 2)":""}${PHONE.matches?". See the Character tab":""}`); }
+  else if(ds.arch){ const A0=ARCH_BY_ID[ds.arch]; const O=A0.origin&&ORIGINS.find(o=>o.id===A0.origin);
+    state=buildArchetype(A0,ui.archLevel,{origin:O?O.id:(state.origin!=="custom"?"custom":state.origin),race:O?O.race:state.race,party:A0.lw?Math.min(state.party,2):state.party,gear:state.gear});
+    if(O) state.name=O.n; state.example=true; ui.guideAct=null;
+    toast(`${A0.n} loaded${A0.lw?" (party set to 2)":""}${O?` as ${O.n}`:""}. Act-by-act plan in the Guide${PHONE.matches?" tab":" section"}`); }
   else if(ds.atier){ ui.atier=ds.atier; ui.apage=1; }
   else if(ds.apage){ ui.apage=+ds.apage; renderArch(); $("stepArch").scrollIntoView({block:"start",behavior:"smooth"}); return; }
   else if(ds.role){ ui.role=ds.role; ui.apage=1; }
@@ -1954,6 +2028,7 @@ document.addEventListener("click",e=>{
   else if(b.id==="btnExample"){ state=exampleBuild(); }
   else if(b.id==="hideBanner"){ state.example=false; }
   else if(b.id==="btnRespread"&&state.archetype){ const keep={origin:state.origin,race:state.race,party:state.party,gear:state.gear}; state=buildArchetype(ARCH_BY_ID[state.archetype],state.level,keep); state.example=true; toast("Re-spread"); }
+  else if(ds.oquick){ ui.aorigin=ds.oquick; ui.apage=1; }
   else if(ds.guideact){ ui.guideAct=+ds.guideact; }
   else if(ds.got){ const A=ARCH_BY_ID[state.archetype]; const o=loadGot(); const m=o[A.id]=o[A.id]||{}; if(m[ds.got]) delete m[ds.got]; else m[ds.got]=1; saveGot(o); }
   else if(ds.guideload){ const A=ARCH_BY_ID[state.archetype]; const act=ACTS.find(x=>x.n===+ds.guideload); const Dg=guideData(A);
