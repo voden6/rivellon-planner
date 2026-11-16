@@ -232,6 +232,7 @@ textarea#exportBox{width:100%;min-height:140px;margin-top:8px;background:var(--p
 .gsum .tn{font-size:13px;color:var(--muted);margin:4px 0 0}
 .rotl{list-style:none;margin:0 0 4px;padding:0}
 .rotl li{font-size:13.5px;margin:3px 0;line-height:1.4}
+.rotl em.sp{color:var(--src);border-color:currentColor;margin-left:2px}
 .rotl em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 3px}
 .tips{margin:4px 0 0;padding-left:18px}
 .tips li{font-size:13px;margin:3px 0;line-height:1.4}
@@ -661,7 +662,7 @@ const ARCHETYPES=[
    "war10 twohand7 aero4 persev2","str6 wit1 mem1 con1",CIV_FIGHT,"executioner picture hothead comeback morning",
    "battering-ram crippling-blow shocking-touch teleportation nether-swap blitz-attack enrage challenge overpower onslaught electric-discharge uncanny-evasion phoenix-dive chain-lightning"),
  A("death-knight","Death Knight","single","str","melee","Two-handed weapon",4,"Necromancer lifesteal and Bone Cage cover the lack of healing.","Warfare plus Necromancer. Necro spells deal physical damage, so everything strips the same armour.","Inquisitor pairing, PC Gamer",
-   "war10 necro5 twohand6 persev2","str6 con1 mem1 wit1",CIV_FIGHT,"executioner picture opportunist comeback morning",
+   "war10 twohand8 necro5","str6 con1 mem1 wit1",CIV_FIGHT,"executioner picture opportunist comeback morning",
    "battering-ram mosquito-swarm crippling-blow decaying-touch blitz-attack death-wish bone-cage enrage infect challenge overpower onslaught grasp-of-the-starved last-rites"),
  A("shapeshifter","Shapeshifting Warrior","single","str","melee","Two-handed weapon",3,"Skin Graft and Heart of Steel sustain you without heals.","Polymorph's free attribute points on a Warfare brute. Disarm and chicken threats, then smash them.","Shapeshifting Warrior, GamesRadar",
    "war10 poly5 twohand7 persev1","str6 con1 mem1 wit1",CIV_FIGHT,"executioner picture opportunist comeback whatarush",
@@ -750,18 +751,18 @@ const ARCHETYPES=[
  A("plaguebone","Plaguebone Geomancer","area","int","caster","Staff or wand",4,"Built for undead. Your own poison surfaces heal you.","Floods the field with poison and raises the dead.","Undead Geomancer, GamesRadar",
    "geo10 necro6 lead5 persev2","int5 mem2 con1 wit1",CIV_MAGE,"torturer elemaff savage faroutman comeback",
    "poison-dart contamination fossil-strike mosquito-swarm raise-bloated-corpse impalement poison-wave bone-cage decaying-touch worm-tremor death-wish acid-spores earthquake summon-hungry-flower pyroclastic-eruption grasp-of-the-starved totems-of-the-necromancer"),
- A("bloodmancer","Bloodmancer","single","int","caster","Staff or wand",4,"Physical-damage caster whose lifesteal works on its own spells.","Necromancer-focused caster: Mosquito Swarm, Infect and Death Wish on one target at a time.","Necromancer caster builds",
-   "necro10 geo5 lead6 persev2","int5 mem2 con1 wit1",CIV_MAGE,"torturer savage faroutman elemaff comeback",
-   "mosquito-swarm decaying-touch poison-dart raise-bloated-corpse infect shackles-of-pain death-wish bone-cage silencing-stare raise-bone-widow black-shroud grasp-of-the-starved last-rites totems-of-the-necromancer"),
+ A("bloodmancer","Blood Mage","single","int","caster","Staff or wand",4,"No heal spells; Necromancer life steal is healing that doesn't hurt an undead.","Intelligence caster whose Necromancer spells deal physical damage, so Warfare boosts every one. Mosquito Swarm and Infect strip Physical Armour, Raining Blood sets up Grasp of the Starved, and Corpse Explosion punishes every kill, though it also hits allies near the corpse. Comes into its own in Act 2.","Warfare and Necromancer mage builds from the community",
+   "war10 necro5 scound4 hydro1 aero2 pyro1","int6 mem2 wit1",CIV_MAGE,"executioner elemaff savage hothead comeback",
+   "mosquito-swarm decaying-touch raining-blood adrenaline infect teleportation bone-cage death-wish grasp-of-the-starved corpse-explosion silencing-stare"),
  A("lich","Lich Summoner","summon","int","caster","Staff or wand",4,"Corpses everywhere become your army; very on-theme.","Raises corpses and conjures an Incarnate, then fills the field with bone totems.","Summoning and Necromancer combos",
    "summon9 necro8 lead6","int5 mem2 con1 wit1",CIV_MAGE,"faroutman comeback walkitoff morning elemaff",
    "conjure-incarnate raise-bloated-corpse mosquito-swarm elemental-totem raise-bone-widow farsight-infusion power-infusion death-wish dominate-mind cannibalise bone-cage door-to-eternity totems-of-the-necromancer"),
- A("wizard","Oil and Flame Wizard","area","int","caster","Staff or wand",3,"Fire hurts you too; watch your own flames.","Lays oil with Geomancer, then lights it. Huge area damage plus some single-target spells.","Wizard pairing, PC Gamer",
-   "pyro10 geo6 lead5 persev2","int5 mem2 con1 wit1",CIV_MAGE,"faroutman elemaff savage demon comeback",
-   "searing-daggers fossil-strike ignition haste fireball poison-dart impalement fire-whip flaming-crescendo peace-of-mind laser-ray spontaneous-combustion epidemic-of-fire earthquake meteor-shower pyroclastic-eruption"),
- A("sorcerer","Storm Sorcerer","single","int","caster","Wand",3,"No healing in the kit.","Air and fire single-target caster: Electric Discharge, Fire Whip and Flaming Crescendo on priority targets.","Aerotheurge and Pyrokinetic pairings",
-   "aero8 pyro8 lead5 persev2","int5 mem2 wit1 con1",CIV_MAGE,"savage faroutman elemaff demon comeback",
-   "electric-discharge searing-daggers shocking-touch haste fire-whip teleportation flaming-crescendo chain-lightning spontaneous-combustion uncanny-evasion nether-swap closed-circuit"),
+ A("wizard","Oil and Flame Wizard","area","int","caster","Staff or wand",3,"Fire hurts you too; watch your own flames.","Lays oil with Geomancer, then lights it. Pyroclastic Eruption and Supernova give huge area damage, plus some single-target spells.","Wizard pairing, PC Gamer",
+   "pyro10 geo10 scound1","int6 mem2 wit1",CIV_MAGE,"faroutman elemaff savage demon comeback",
+   "searing-daggers fossil-strike ignition haste fireball adrenaline impalement fire-whip laser-ray spontaneous-combustion earthquake epidemic-of-fire supernova pyroclastic-eruption meteor-shower"),
+ A("sorcerer","Storm Sorcerer","single","int","caster","Wand",3,"No healing in the kit.","Air and fire single-target caster: Electric Discharge, Fire Whip and Flaming Crescendo on priority targets, with Closed Circuit when enemies close in.","Aerotheurge and Pyrokinetic pairings",
+   "aero10 pyro10 scound1","int6 mem2 wit1",CIV_MAGE,"savage faroutman elemaff hothead comeback",
+   "electric-discharge searing-daggers shocking-touch haste fire-whip teleportation adrenaline flaming-crescendo chain-lightning spontaneous-combustion closed-circuit superconductor uncanny-evasion"),
  A("storm-caller","Storm Caller","control","int","caster","Wand or staff",3,"No heal spells; Armour of Frost is safe for undead.","Rain, then electrify: stuns whole groups with Electric Discharge and Dazing Bolt.","Stunlock Mage, GamesRadar",
    "aero10 hydro6 lead5 persev2","int5 mem2 con1 wit1",CIV_MAGE,"faroutman savage elemaff comeback morning",
    "electric-discharge rain shocking-touch pressure-spike armour-of-frost teleportation dazing-bolt uncanny-evasion nether-swap chain-lightning superconductor closed-circuit thunderstorm"),
@@ -836,9 +837,9 @@ ARCHETYPES.push(
  A("knife-thrower","Knife Thrower","single","fin","ranged","Two daggers",3,"Fights from range, so little damage comes back.","A Scoundrel who throws instead of stabbing: Throwing Knife, Fan of Knives and Corrupted Blade on approach.","Thrown-dagger Scoundrel builds",
    "scound10 war7 dual3 poly2","fin6 wit1 mem1 con1",CIV_SNEAK,"executioner hothead guerrilla comeback morning",
    "throwing-knife fan-of-knives backlash adrenaline cloak-and-dagger chloroform spread-your-wings corrupted-blade sawtooth-knife mortal-blow daggers-drawn"),
- A("night-stalker","Night Stalker","single","fin","melee","Two daggers",4,"Necromancer lifesteal heals you.","Backstab rogue that drains with Blood Sucker and Mosquito Swarm, then finishes with Mortal Blow, boosted by Death Wish.","Witch preset taken to its limit",
-   "scound8 war8 necro5 dual2","fin6 int1 mem1 wit1",CIV_SNEAK,"executioner guerrilla leech comeback morning",
-   "backlash mosquito-swarm throwing-knife blood-sucker adrenaline death-wish cloak-and-dagger corrupted-blade bone-cage daggers-drawn mortal-blow grasp-of-the-starved"),
+ A("night-stalker","Night Stalker","single","fin","melee","Two daggers",4,"Necromancer life steal is healing that doesn't hurt an undead.","Dagger battlemage: Necromancer 5 returns half the damage you deal to Vitality as healing. Backstabs and Daggers Drawn do the work, Mosquito Swarm and Death Wish add burst, and Mortal Blow finishes.","Witch preset taken to its limit",
+   "scound5 war5 dual8 necro5","fin6 wit1 mem1 con1",CIV_SNEAK,"executioner guerrilla hothead comeback morning",
+   "backlash mosquito-swarm throwing-knife adrenaline death-wish cloak-and-dagger rupture-tendons corrupted-blade bone-cage daggers-drawn mortal-blow sawtooth-knife"),
  A("edge-walker","Edge Walker","single","str","melee","Two-handed weapon",4,"Living on the Edge keeps you alive at 1 Vitality, no healing needed.","Fights at low Vitality on purpose: What a Rush for extra AP, Death Wish for bonus damage.","Death Wish berserker builds",
    "war10 necro6 twohand5","str6 con1 mem1 wit1",CIV_FIGHT,"whatarush executioner picture comeback morning",
    "battering-ram mosquito-swarm living-on-the-edge death-wish crippling-blow blood-sucker enrage blitz-attack onslaught overpower grasp-of-the-starved"),
@@ -849,9 +850,9 @@ ARCHETYPES.push(
  A("fire-lance","Fire Lance","single","int","caster","Wand or staff",3,"Fire hurts you too; keep resistances up.","Fire caster that focuses one enemy with Fire Whip, Spontaneous Combustion and Flaming Crescendo. Laser Ray hits everything in a line, so mind your party.","Pyrokinetic single-target builds",
    "pyro10 aero5 lead2","int6 wit1 mem2",CIV_MAGE,"faroutman savage elemaff demon comeback",
    "searing-daggers ignition haste fire-whip fireball shocking-touch laser-ray spontaneous-combustion teleportation chain-lightning flaming-crescendo"),
- A("savage-sorcerer","Savage Sorcerer","single","int","caster","Wand",3,"No healing in the kit.","Savage Sortilege lets spells crit, and Scoundrel raises the crit multiplier. Air and water burst.","Savage Sortilege crit mage builds",
-   "aero10 hydro5 scound3","int5 wit3 mem1",CIV_MAGE,"savage faroutman hothead elemaff comeback",
-   "electric-discharge shocking-touch hail-strike adrenaline teleportation winter-blast chain-lightning nether-swap superconductor ice-fan thunderstorm"),
+ A("savage-sorcerer","Savage Sorcerer","area","int","caster","Wand",3,"No healing in the kit.","Savage Sortilege lets spells crit, and Scoundrel raises the crit multiplier. Air and water burst: Closed Circuit, Pressure Spike and Winter Blast.","Savage Sortilege crit mage builds",
+   "aero10 hydro5 scound5","int5 wit3 mem2",CIV_MAGE,"savage faroutman hothead elemaff comeback",
+   "electric-discharge shocking-touch hail-strike adrenaline pressure-spike teleportation winter-blast dazing-bolt chain-lightning superconductor closed-circuit ice-fan nether-swap thunderstorm"),
  A("earthshaker","Earthshaker","area","int","caster","Staff or wand",4,"Your own poison surfaces heal you.","Pure Geomancer. Fossil Strike, Impalement and Pyroclastic Eruption, with Torturer to make poison ignore armour.","Geomancer builds",
    "geo10 pyro4 necro3","int6 mem2 wit1",CIV_MAGE,"torturer faroutman savage elemaff comeback",
    "fossil-strike poison-dart contamination impalement fortify earthquake poison-wave worm-tremor acid-spores reactive-armour pyroclastic-eruption"),
@@ -861,9 +862,9 @@ ARCHETYPES.push(
  A("glass-cannon-mage","Glass Cannon Mage","area","int","caster","Staff",2,"No armour protection from statuses; you rely on going first.","Glass Cannon starts every turn at full AP. Two big spells every turn, at the cost of being easy to disable.","Glass Cannon builds",
    "pyro10 geo6 aero3","int6 wit2 mem1",CIV_MAGE,"glass faroutman savage elemaff",
    "fossil-strike searing-daggers haste fireball laser-ray impalement earthquake supernova teleportation pyroclastic-eruption epidemic-of-fire"),
- A("static-lancer","Static Lancer","area","int","caster","Wand",2,"No healing, but nothing to stop you either.","Wand basic attacks plus lightning: Electric Discharge for one target, then Pressure Spike, Chain Lightning and Thunderstorm for groups.","Aerotheurge builds",
-   "aero10 scound4 lead2","int6 wit2 mem1",CIV_MAGE,"faroutman savage elemaff comeback",
-   "electric-discharge shocking-touch blinding-radiance teleportation adrenaline chain-lightning pressure-spike nether-swap superconductor closed-circuit thunderstorm"),
+ A("static-lancer","Static Lancer","area","int","caster","Wand",3,"No heal spells, and most of its area spells only hit enemies.","Area mage that is easy on your own party: Pressure Spike, Superconductor, Closed Circuit and Thunderstorm only hit enemies. Rain first so lightning stuns, and Savage Sortilege with Scoundrel makes the spells crit hard.","Aerotheurge builds",
+   "aero10 scound5 hydro1","int6 wit2 mem2",CIV_MAGE,"savage hothead faroutman elemaff comeback",
+   "rain electric-discharge shocking-touch adrenaline blinding-radiance pressure-spike teleportation chain-lightning superconductor closed-circuit nether-swap uncanny-evasion thunderstorm"),
  // summoners
  A("necro-lord","Necromancer Lord","summon","int","caster","Staff or wand",4,"Built for undead. Corpses everywhere and no healing needed.","Summoning plus Necromancer: Bone Widow, Bloated Corpses and Totems of the Necromancer around an Incarnate.","Necromancer summoner builds",
    "summon10 necro8 lead3","int5 con2 mem2",CIV_MAGE,"faroutman petpal comeback morning",
@@ -981,17 +982,23 @@ ARCHETYPES.push(
    "war8 geo5 persev5 single3","str4 con3 mem1",CIV_FIGHT,"picture comeback stench walkitoff morning",
    "provoke fortify battle-stomp bouncing-shield battering-ram deflective-barrier mend-metal guardian-angel reactive-armour challenge earthquake")
 );
+// ---- sword battlemage ----
+ARCHETYPES.push(
+ A("revenant-spellblade","Revenant Spellblade","single","str","melee","Two one-handed swords",4,"Built for undead: Necromancer life steal is healing that doesn't hurt you, and Bone Cage tops up your armour.","Sword battlemage: two one-handed swords with Warfare, and Necromancer for life steal, Bone Cage and Death Wish. Everything deals physical damage, so it strips the same armour as the rest of a melee party.","Planner-original build; Warfare with Necromancer is a common battlemage pairing",
+   "war10 dual8 necro5","str6 con1 mem1 wit1",CIV_FIGHT,"executioner picture hothead comeback opportunist",
+   "battering-ram crippling-blow mosquito-swarm blitz-attack bone-cage enrage death-wish whirlwind phoenix-dive challenge onslaught decaying-touch infect")
+);
 // tier, class, races that suit it, origin, damage type override
 const META_RAW={
  "spectral-duelist":"S warrior human,lizard,undead","death-knight":"S warrior human,undead","shapeshifter":"S warrior human,lizard","ancestral-lancer":"A warrior elf,human",
- "executioner":"A warrior human,lizard","pyro-battlemage":"B battlemage lizard - mixed","earth-knight":"B battlemage dwarf,undead - mixed","frost-knight":"B battlemage dwarf - mixed",
+ "executioner":"A warrior human,lizard","pyro-battlemage":"A battlemage lizard - mixed","earth-knight":"B battlemage dwarf,undead - mixed","frost-knight":"B battlemage dwarf - mixed",
  "arcane-knight":"B battlemage human - magic","hex-knight":"A warrior human,undead","incarnate-knight":"B summoner human","shieldwall":"A tank dwarf,human",
  "masochist":"C tank undead,dwarf","thorn-tank":"B tank dwarf","flame-paladin":"B tank lizard - mixed","field-commander":"B support human",
  "warrior-healer":"C support human,dwarf","shadow-assassin":"S rogue elf,human,undead","glass-assassin":"A rogue elf,human","plague-witch":"A rogue undead,elf",
  "venom-duelist":"B rogue undead - mixed","neutraliser":"A rogue human,elf","sniper":"A ranger elf,human,undead","phantom-sniper":"A ranger elf,human",
  "shadow-marksman":"A ranger elf,human","blight-archer":"B ranger undead - mixed","trapper":"C ranger dwarf - mixed","ranger-summoner":"B summoner elf - mixed",
- "fire-ranger":"B ranger lizard,human - mixed","plaguebone":"A mage undead - magic","bloodmancer":"B mage undead,elf - physical","lich":"A summoner undead - physical",
- "wizard":"A mage lizard,human - magic","sorcerer":"A mage human,dwarf - magic","storm-caller":"A mage dwarf,human - magic","weather":"A mage dwarf - magic",
+ "fire-ranger":"B ranger lizard,human - mixed","plaguebone":"A mage undead - magic","bloodmancer":"S mage undead,human - physical","lich":"A summoner undead - physical",
+ "wizard":"S mage lizard,human - magic","sorcerer":"A mage human,dwarf - magic","storm-caller":"A mage dwarf,human - magic","weather":"A mage dwarf - magic",
  "steam-mage":"B mage human - magic","archmage":"C mage human - magic","wand-gunslinger":"C mage human - magic","mage-army":"A summoner human - mixed",
  "totem-master":"B summoner dwarf","earth-warden":"B support dwarf","cleric":"B support elf,human - mixed",
  "lw-executioner":"S warrior human,lizard,undead - - lw","lw-assassin":"S rogue elf,human,undead - - lw","lw-sniper":"S ranger elf,human,undead - - lw",
@@ -999,14 +1006,14 @@ const META_RAW={
  "warfare-ranger":"S ranger elf,human,undead","blood-ranger":"A ranger undead,elf","chimera-rogue":"S rogue elf,human,undead","greatblade-scoundrel":"S warrior human,lizard,undead",
  "spear-dancer":"A warrior elf,human,undead","berserker":"A warrior human,dwarf","blade-and-board":"B warrior human,dwarf","whirlwind-reaper":"A warrior human,lizard",
  "knife-thrower":"B rogue elf,human","night-stalker":"A rogue undead,elf","edge-walker":"A warrior undead,human","earth-ranger":"C ranger dwarf - mixed",
- "fire-lance":"A mage lizard,human - magic","savage-sorcerer":"A mage human - magic","earthshaker":"A mage undead,dwarf - magic","frost-mage":"B mage dwarf - magic",
- "glass-cannon-mage":"B mage lizard,human - magic","static-lancer":"C mage human - magic","necro-lord":"A summoner undead - physical","sky-shepherd":"B summoner human",
+ "fire-lance":"B mage lizard,human - magic","savage-sorcerer":"A mage human - magic","earthshaker":"S mage undead,dwarf - magic","frost-mage":"B mage dwarf - magic",
+ "glass-cannon-mage":"A mage lizard,human - magic","static-lancer":"S mage human - magic","necro-lord":"A summoner undead - physical","sky-shepherd":"B summoner human",
  "fire-shepherd":"B summoner lizard","juggernaut":"B tank dwarf,undead","frost-bulwark":"C tank dwarf","aegis-commander":"B tank human,dwarf",
  "bone-fortress":"B tank undead","flesh-bulwark":"B tank human","petrify-warlord":"A warrior human,dwarf","chloroform-jailer":"B rogue elf,human",
  "mind-thief":"C mage human - magic","haste-weaver":"B support human,undead","field-medic":"C support elf,human - mixed","warlord-bard":"C support human",
- "fane-chronomancer":"A mage undead fane magic","redprince-dragon":"A battlemage lizard redprince mixed","sebille-needle":"S rogue elf sebille","ifan-warden":"B summoner human ifan mixed",
- "lohse-siren":"A mage human lohse magic","beast-reaver":"A warrior dwarf beast",
- "fane-bonelord":"A summoner undead fane physical","fane-shadowblade":"A rogue undead fane","lohse-conductor":"B summoner human lohse","lohse-firebrand":"A mage human lohse magic",
+ "fane-chronomancer":"S mage undead fane magic","redprince-dragon":"A battlemage lizard redprince mixed","sebille-needle":"S rogue elf sebille","ifan-warden":"B summoner human ifan mixed",
+ "lohse-siren":"A mage human lohse magic","beast-reaver":"A warrior dwarf beast","revenant-spellblade":"A battlemage undead,human",
+ "fane-bonelord":"A summoner undead fane physical","fane-shadowblade":"A rogue undead fane","lohse-conductor":"B summoner human lohse","lohse-firebrand":"B mage human lohse magic",
  "ifan-sniper":"A ranger human ifan","ifan-shadowhunter":"A ranger human ifan","sebille-huntress":"A ranger elf sebille","sebille-chimera":"A rogue elf sebille",
  "redprince-sovereign":"B tank lizard redprince","redprince-sorcerer":"A mage lizard redprince magic","beast-tidecaller":"A mage dwarf beast magic","beast-ironclad":"B tank dwarf beast",
  "shadowstep-assassin":"A rogue elf,human,undead","vampiric-duelist":"A rogue human,elf","vacuum-warlock":"B mage undead,dwarf - mixed"
@@ -1030,6 +1037,8 @@ const SKILL_DMG={}; SKILLS.forEach(s=>{ const m=(s.d||"").match(/(\d+)% (weapon|
   SKILL_DMG[s.id]={pct:+m[1],weapon:m[2]==="weapon",el:m[3]||null,hits:HITS[s.id]||1,aoe:s.t==="aoe"||s.t==="multi"}; });
 SKILL_DMG["ballistic-shot"]&&(SKILL_DMG["ballistic-shot"].pct*=1.5); // +5% per metre at ~10 m
 const EL_SCHOOL={fire:"pyro",water:"hydro",air:"aero",earth:"geo",poison:"geo",physical:"war"};
+// Source points a character can hold by level: none until late Fort Joy, then 1, 2 and finally 3 during Reaper's Coast (estimate).
+const sourceCap=L=>L<8?0:L<11?1:L<14?2:3;
 function archScore(a,L){
   const st=buildArchetype(a,L,{origin:"custom",race:"human",party:a.lw?2:4,gear:{}});
   const lw=a.lw?2:1, cap=(k,v)=>Math.min(10,v*lw), C=k=>cap(k,st.combat[k]||0), at=k=>10+Math.min(30,(st.attrs[k]||0)*lw);
@@ -1041,11 +1050,17 @@ function archScore(a,L){
   const weaponMult=(1+.05*(at(a.stat)-10))*(1+.05*(magicW?0:C("war")))*(1+.05*wAbil)*crit;
   const baseMult=el=>{ const sch=EL_SCHOOL[el]||"war"; return (1+.05*(at("int")-10))*(1+.05*C(sch))*(st.talents.includes("savage")?crit:1); };
   const opts=st.skills.map(id=>{ const d=SKILL_DMG[id]; const s=SKILL_BY_ID[id]; if(!d) return null;
-    const per=d.pct/100*(d.weapon?weaponMult:baseMult(d.el)); return {id,ap:Math.max(1,s.ap),one:per*d.hits,area:per*d.hits*(d.aoe?3:1),uses:s.cd<=1?2:1}; }).filter(Boolean);
+    const per=d.pct/100*(d.weapon?weaponMult:baseMult(d.el)); return {id,ap:Math.max(1,s.ap),sp:s.sp||0,one:per*d.hits,area:per*d.hits*(d.aoe?3:1),uses:s.cd>=0&&s.cd<=1?2:1}; }).filter(Boolean);
   const turnAP=a.lw?12:st.talents.includes("glass")?12:8;
-  const run=key=>{ let ap=turnAP, tot=0; const parts={}; const pool=opts.flatMap(o=>Array(o.uses).fill(o)).sort((x,y)=>y[key]/y.ap-x[key]/x.ap);
-    for(const o of pool){ if(o.ap<=ap){ ap-=o.ap; tot+=o[key]; parts[o.id]=(parts[o.id]||0)+o[key]; } }
-    const basic=Math.floor(ap/2)*weaponMult; tot+=basic; if(basic) parts._basic=basic; return [tot,parts]; };
+  // best two turns within the AP and the Source the character can hold (exact search; spare AP goes to basic attacks)
+  const SP=sourceCap(L);
+  const run=key=>{ const pool=opts.flatMap(o=>Array(o.uses).fill(o)).filter(o=>o.sp<=SP);
+    let dp=Array.from({length:turnAP+1},()=>Array.from({length:SP+1},()=>({v:0,ids:[]})));
+    for(const o of pool){ const nx=dp.map(r=>r.slice());
+      for(let ap=o.ap;ap<=turnAP;ap++) for(let sp=o.sp;sp<=SP;sp++){ const c=dp[ap-o.ap][sp-o.sp]; if(c.v+o[key]>nx[ap][sp].v) nx[ap][sp]={v:c.v+o[key],ids:[...c.ids,o]}; }
+      dp=nx; }
+    let best=null; for(let ap=0;ap<=turnAP;ap++){ const c=dp[ap][SP]; const basic=Math.floor((turnAP-ap)/2)*weaponMult; if(!best||c.v+basic>best.tot) best={tot:c.v+basic,c,basic}; }
+    const parts={}; best.c.ids.forEach(o=>parts[o.id]=(parts[o.id]||0)+o[key]); if(best.basic) parts._basic=best.basic; return [best.tot,parts]; };
   const [one,oneParts]=run("one"), [area,areaParts]=run("area");
   return {one,area,oneParts,areaParts,magicW};
 }
@@ -1070,6 +1085,8 @@ const SKILL_USE=(()=>{ const m={}; const set=(u,ids)=>ids.split(" ").forEach(id=
   set("heal","restoration first-aid healing-ritual rallying-cry blood-sucker steam-lance soul-mate cryogenic-stasis last-rites cannibalise");
   set("setup","rain raining-blood contamination black-shroud glitter-dust flaming-crescendo shackles-of-pain medusa-head");
   set("reset","skin-graft"); return m; })();
+// damage skills whose description has no number to read
+const UNCOUNTED=["thunderstorm","blood-storm","corpse-explosion","mass-corpse-explosion","flaming-crescendo","ethereal-storm","totems-of-the-necromancer"];
 const CC_RE=/Knock|Frozen|Freeze|Stun|Sleep|Cripple|Petrif|chicken|Silence|Blind|Terrified|Atrophy|Charm|Entangle|Taunt|Shocked/i;
 const skillAP=id=>Math.max(0,SKILL_BY_ID[id].ap);
 // rough damage per cast, used only to order skills inside a turn
@@ -1080,8 +1097,8 @@ function buildRotation(a,st){
   const sk=st.skills.filter(id=>SKILL_BY_ID[id]), has=id=>sk.includes(id), use=id=>SKILL_USE[id];
   const lw=st.talents.includes("lonewolf"), glass=st.talents.includes("glass");
   const perTurn=lw?6:glass?6:4, maxAP=lw?8:6, weaponUser=a.range!=="caster"||!/staff|wand/i.test(a.weapon);
-  const used=new Set(), turns=[];
-  const pick=(t,id)=>{ if(!id||used.has(id)||skillAP(id)>t.ap) return false; t.ap-=skillAP(id); t.steps.push(id); used.add(id); return true; };
+  const used=new Set(), turns=[]; let spLeft=sourceCap(st.level||1); const spCap=spLeft;
+  const pick=(t,id)=>{ const sp=SKILL_BY_ID[id]?.sp||0; if(!id||used.has(id)||skillAP(id)>t.ap||sp>spLeft) return false; t.ap-=skillAP(id); spLeft-=sp; t.steps.push(id); used.add(id); return true; };
   const first=(t,list)=>{ for(const id of list) if(has(id)&&pick(t,id)) return id; return null; };
   const ofUse=u=>sk.filter(id=>use(id)===u);
   const dmg=()=>sk.filter(id=>SKILL_DMG[id]&&!used.has(id)).sort((x,y)=>skillWorth(a,y)/Math.max(1,skillAP(y))-skillWorth(a,x)/Math.max(1,skillAP(x)));
@@ -1096,6 +1113,7 @@ function buildRotation(a,st){
   else if(a.role==="support"){ first(t1,["haste","peace-of-mind","firebrand","rallying-cry"]); first(t1,ofUse("guard")); }
   else {
     if(has("rain")&&sk.some(id=>["aero","hydro"].includes(SKILL_BY_ID[id].s)&&SKILL_DMG[id])) pick(t1,"rain");
+    if(has("raining-blood")&&has("grasp-of-the-starved")&&SKILL_BY_ID["grasp-of-the-starved"].sp<=spLeft) pick(t1,"raining-blood"); // Grasp needs blood under the target
     if(has("enrage")&&t1.ap>=4) pick(t1,"enrage");
     if(/dagger/i.test(a.weapon)&&has("backlash")) pick(t1,"backlash");
     else if(a.range==="melee"&&!has("backlash")) first(t1,["phoenix-dive","battering-ram","cloak-and-dagger"]);
@@ -1108,11 +1126,11 @@ function buildRotation(a,st){
   for(const s of t1.steps) if(s!=="_basic"&&SKILL_BY_ID[s].cd>=0&&SKILL_BY_ID[s].cd<=1) used.delete(s);
   if(a.role==="summon"){ first(t2,ofUse("infuse").filter(id=>id!=="supercharger")); first(t2,["elemental-totem","totems-of-the-necromancer","raise-bloated-corpse","raise-bone-widow","summon-fire-slug"]); }
   if(a.role==="tank") first(t2,ofUse("guard"));
-  const fin=has("mortal-blow")&&!used.has("mortal-blow")?"mortal-blow":null; if(fin) used.add(fin);
+  const fin=has("mortal-blow")&&!used.has("mortal-blow")&&SKILL_BY_ID["mortal-blow"].sp<=spLeft?"mortal-blow":null; if(fin) used.add(fin);
   for(const id of ccFirst(dmg())){ if(fin&&t2.ap-skillAP(id)<skillAP(fin)) continue; pick(t2,id); }
   if(fin){ used.delete(fin); pick(t2,fin); }
   if(t2.ap>=2&&weaponUser&&a.role!=="summon"&&a.role!=="support"){ t2.steps.push("_basic"); t2.ap-=2; }
-  return {turns,perTurn,adren:has("adrenaline")};
+  return {turns,perTurn,adren:has("adrenaline"),spCap,spUsed:spCap-spLeft};
 }
 const dmgSchoolName=k=>({war:"Warfare",scound:"Scoundrel",twohand:"Two-Handed",dual:"Dual Wielding",single:"Single-Handed",ranged:"Ranged",hunt:"Huntsman"}[k]||SCHOOLS[k]?.n||k);
 function damageNotes(a,L){
@@ -1134,10 +1152,12 @@ function damageNotes(a,L){
   if(a.role==="summon"||a.k.some(id=>SKILL_USE[id]==="summon")) caveat.push("Summons and totems aren't counted, so it hits harder than this shows.");
   if(a.role==="control") caveat.push("Its crowd control isn't counted; its real job is stopping enemies from acting.");
   if(a.role==="tank"||a.role==="support") caveat.push("It's built to protect the party, so a low number is expected.");
+  const unc=UNCOUNTED.filter(id=>a.k.includes(id)).map(id=>SKILL_BY_ID[id].n);
+  if(unc.length) caveat.push(`${unc.join(", ")} ${unc.length>1?"aren't":"isn't"} counted (the game data gives no damage number), so it hits harder than this shows.`);
   if(a.lw) caveat.push("Includes Lone Wolf's doubled points and extra AP.");
   if(/dagger/i.test(a.weapon)) caveat.push("Assumes average crits; backstabs always crit, so it does more from behind.");
   return `<div class="tsec">Damage index · level ${L}</div>
-    <p class="tn">Single target <b>${sc.oneN}</b> (#${sc.oneRank} of ${N}) · Area <b>${sc.areaN}</b> (#${sc.areaRank} of ${N}). 100 is the strongest build at this level, over two turns of skills.</p>
+    <p class="tn">Single target <b>${sc.oneN}</b> (#${sc.oneRank} of ${N}) · Area <b>${sc.areaN}</b> (#${sc.areaRank} of ${N}). 100 is the strongest build at this level, over two turns of skills within the Source you can hold (${sourceCap(L)||"none yet"}).</p>
     ${top.length?`<p class="tn">Comes from: ${top.join(", ")}${basic?`, plus basic attacks with spare AP`:""}.</p>`:`<p class="tn">No damage skills memorised yet at this level.</p>`}
     <p class="tn">Grows with ${grow.join(", ")}.${caveat.length?" "+caveat.join(" "):""}</p>`;
 }
@@ -1189,13 +1209,14 @@ function playTips(a,st){
 }
 function howToPlay(a,st,max=5){
   const R=buildRotation(a,st), apTxt=id=>id==="_basic"?"Basic attack":esc(SKILL_BY_ID[id].n);
-  const turn=(t,i)=>t.steps.length?`<li><b>Turn ${i+1}</b> <span class="rot">${t.steps.map(id=>`${apTxt(id)} <em>${id==="_basic"?2:skillAP(id)}</em>`).join(" → ")}</span></li>`:"";
+  const spOf=id=>id==="_basic"?0:(SKILL_BY_ID[id].sp||0);
+  const turn=(t,i)=>t.steps.length?`<li><b>Turn ${i+1}</b> <span class="rot">${t.steps.map(id=>`${apTxt(id)} <em>${id==="_basic"?2:skillAP(id)}</em>${spOf(id)?`<em class="sp">${spOf(id)} SP</em>`:""}`).join(" → ")}</span></li>`:"";
   const tips=playTips(a,st);
   // keep friendly fire and armour, then the most specific tips
   const kept=[...tips.slice(0,2),...tips.slice(2).slice(0,Math.max(0,max-2))];
   return `<div class="tsec">How to play · level ${st.level}</div>
     <ul class="rotl">${R.turns.map(turn).join("")}</ul>
-    <p class="tn">${R.perTurn} AP a turn${R.adren?"; Adrenaline borrows 2 from the next turn":""}. Numbers are AP costs.</p>
+    <p class="tn">${R.perTurn} AP a turn${R.adren?"; Adrenaline borrows 2 from the next turn":""}. Numbers are AP costs; SP is Source. ${R.spCap?`You hold up to ${R.spCap} Source at this level, and this opener spends ${R.spUsed}.`:"No Source yet at this level."}</p>
     <ul class="tips">${kept.map(x=>`<li>${x}</li>`).join("")}</ul>`;
 }
 

@@ -20,8 +20,8 @@
 ## Features
 
 **Archetypes**
-- 101 ready-made builds across Warrior, Rogue, Ranger, Mage, Battlemage, Summoner, Tank and Support, including Lone Wolf builds and three for each origin character (Fane, Lohse, Ifan, Sebille, the Red Prince and Beast).
-- Ranked S to C tier, with a damage index for single-target and area damage calculated from the game's skill data.
+- 102 ready-made builds across Warrior, Rogue, Ranger, Mage, Battlemage, Summoner, Tank and Support, including Lone Wolf builds and three for each origin character (Fane, Lohse, Ifan, Sebille, the Red Prince and Beast).
+- Ranked S to C tier, with a damage index for single-target and area damage calculated from the game's skill data. The index covers two turns of skills within the Source points a character can hold at that level.
 - Filter by tier, role, class, damage type, main stat, range, skill school, race, origin and party size.
 - Load any archetype at any level and every step fills in automatically, ready to edit.
 - Each build's popup explains its damage index (rank, which skills it comes from, what it scales with) and how to play it: a two-turn opener with AP costs, its combos, and which of its skills hit your own party.
