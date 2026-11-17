@@ -456,6 +456,7 @@ a{color:var(--accent)}
       <section class="step" id="stepGuide">
         <div class="step-head"><div><div class="kicker">Playthrough</div><h2>Act-by-act build guide</h2></div></div>
         <p class="note" style="margin:0 0 10px">For the loaded build: your full character at the end of each act, what to pick at every level, and the best gear to hunt for in that act with where to find it. Tick items off as you get them.</p>
+        <div class="row" id="guideMates" style="margin:0 0 10px;gap:8px"></div>
         <div class="chips" id="guideActs"></div>
         <div id="guideBody" style="margin-top:12px"></div>
       </section>
@@ -784,7 +785,7 @@ const ARCHETYPES=[
  A("totem-master","Totem Master","summon","int","caster","Staff or wand",3,"Totems do the fighting; you stay safe.","Plants elemental totems on fire surfaces and supercharges them for burst.","Summoning and Pyrokinetic combos",
    "summon10 pyro6 lead5 persev2","int4 mem2 con1 wit1",CIV_MAGE,"faroutman comeback demon elemaff morning",
    "elemental-totem conjure-incarnate searing-daggers haste farsight-infusion supercharger fireball fire-infusion summon-fire-slug door-to-eternity cannibalise epidemic-of-fire ethereal-storm"),
- A("earth-warden","Earth Warden","support","int","caster","Staff or wand",1,"A healer; the heals hurt an undead.","Support caster who keeps both armours topped up and the party healed.","Cleric and support builds, PC Gamer",
+ A("earth-warden","Earth Warden","support","int","caster","Wand",1,"A healer; the heals hurt an undead.","Support caster who keeps both armours topped up and the party healed.","Cleric and support builds, PC Gamer",
    "hydro10 geo7 lead6","int4 mem2 con2 wit1",CIV_MAGE,"faroutman comeback morning walkitoff savage",
    "restoration armour-of-frost fortify healing-ritual mend-metal soothing-cold global-cooling cryogenic-stasis arcane-stitch rain hail-strike earthquake"),
  A("cleric","Blood Cleric","support","int","caster","Staff",1,"A healer whose heals hurt undead; better on a living friend.","Hydrosophist healing with Necromancer blood magic and lifesteal.","Cleric preset, PC Gamer",
@@ -1516,8 +1517,9 @@ function autoGear(st,opt={}){
     return s+(isWeapon(g)?(g.hands===2?1.2:.8)*lvl:(g.slot==="amulet"||g.slot==="ring"||g.slot==="belt")?.15*lvl:.35*lvl);
   };
   const used=new Set();
-  const top=(slot,ok,n=1)=>ALL_GEAR.filter(g=>slotAccepts(slot,g)&&gets(g)&&ok(g)&&!used.has(g.id)).sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n)).slice(0,n);
-  const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); gear[slot]={id:g.id,rarity:autoRarity(L),bonuses:[]}; };
+  const ex=opt.exclude||new Set();
+  const top=(slot,ok,n=1)=>ALL_GEAR.filter(g=>slotAccepts(slot,g)&&gets(g)&&ok(g)&&!used.has(g.id)&&!ex.has(g.id)).sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n)).slice(0,n);
+  let tot=0; const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); tot+=score(g); gear[slot]={id:g.id,rarity:autoRarity(L),bonuses:[]}; };
   const gear={};
   // weapons: decide the fighting style from the abilities, then compare the loadouts that fit it
   const wa={dual:cb.dual||0,ranged:cb.ranged||0,single:cb.single||0,twohand:cb.twohand||0};
@@ -1552,7 +1554,25 @@ function autoGear(st,opt={}){
   // what to look for on rolled gear: the main attribute and the two abilities the build leans on most
   const look=[prim,...Object.entries(cb).filter(([k])=>!["persev","lead","retri"].includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>k)];
   if(look.length<3) look.push("wit");
-  return {gear,uniques:Object.values(gear).filter(e=>GEAR_BY_ID[e.id].unique).length,look};
+  return {gear,uniques:Object.values(gear).filter(e=>GEAR_BY_ID[e.id].unique).length,look,tot};
+}
+// Teammates' builds at a level, for sharing out unique gear.
+function mateState(id,L){ const a=ARCH_BY_ID[id]; const st=buildArchetype(a,L,{origin:a.origin||"custom",race:"human",party:3,gear:{}}); return st; }
+// Gear for several builds that can't all hold the same unique: each contested unique goes to the build that would lose
+// more by taking its next-best item instead (a tie goes to the teammate). Returns one autoGear result per build, plus what each gave up.
+function sharedGear(sts,opt={}){
+  const ex=sts.map(()=>new Set()), clone=s=>JSON.parse(JSON.stringify(s));
+  const run=(k,extra)=>autoGear(clone(sts[k]),{...opt,exclude:extra?new Set([...ex[k],extra]):ex[k]});
+  let R=sts.map((s,k)=>run(k));
+  for(let it=0;it<60;it++){
+    const owner={}; let c=null;
+    R.forEach((r,k)=>Object.values(r.gear).forEach(e=>{ if(!GEAR_BY_ID[e.id].unique||c) return; if(owner[e.id]!=null) c=[e.id,owner[e.id],k]; else owner[e.id]=k; }));
+    if(!c) break;
+    const [id,i,j]=c, li=R[i].tot-run(i,id).tot, lj=R[j].tot-run(j,id).tot;
+    const loser=li>lj?j:lj>li?i:(i===0?i:j); ex[loser].add(id); R[loser]=run(loser);
+  }
+  R.forEach((r,k)=>{ r.gaveUp=[...ex[k]].map(id=>({id,to:R.findIndex((o,m)=>m!==k&&Object.values(o.gear).some(e=>e.id===id))})); });
+  return R;
 }
 
 // ---------- act-by-act playthrough guide ----------
@@ -1586,18 +1606,25 @@ function buildGuide(a,keep){
   }
   return rows;
 }
-const GOT_KEY="rivellon-planner-v1-got";
+const GOT_KEY="rivellon-planner-v1-got", MATES_KEY="rivellon-planner-v1-mates";
+// Teammates' archetypes (up to 3), kept across builds: the guide and auto-pick leave contested uniques to whoever needs them more.
+let MATES=(()=>{ try{ return (JSON.parse(localStorage.getItem(MATES_KEY))||[]).filter(id=>ARCH_BY_ID[id]); }catch(e){ return []; } })();
+function saveMates(){ try{localStorage.setItem(MATES_KEY,JSON.stringify(MATES))}catch(e){} }
 function loadGot(){ try{return JSON.parse(localStorage.getItem(GOT_KEY))||{}}catch(e){return {}} }
 function saveGot(o){ try{localStorage.setItem(GOT_KEY,JSON.stringify(o))}catch(e){} }
 let GUIDE_CACHE={key:"",rows:null,gear:{}};
 function guideKeep(A){ return {origin:state.origin,race:state.race,party:A.lw?Math.min(state.party,2):state.party,gear:{}}; }
 function guideData(A){
-  const keep=guideKeep(A), key=[A.id,keep.origin,keep.race,keep.party].join("|");
+  const keep=guideKeep(A), key=[A.id,keep.origin,keep.race,keep.party,...MATES].join("|");
   if(GUIDE_CACHE.key!==key) GUIDE_CACHE={key,keep,rows:buildGuide(A,keep),gear:{}};
   return GUIDE_CACHE;
 }
 function guideActGear(A,act){ const D=guideData(A);
-  return D.gear[act.n]||(D.gear[act.n]=autoGear(JSON.parse(JSON.stringify(D.rows[act.to-1].st)),{maxAct:act.n})); }
+  if(D.gear[act.n]) return D.gear[act.n];
+  const mates=MATES.filter(id=>ARCH_BY_ID[id]);
+  if(!mates.length) return D.gear[act.n]=autoGear(JSON.parse(JSON.stringify(D.rows[act.to-1].st)),{maxAct:act.n});
+  const R=sharedGear([D.rows[act.to-1].st,...mates.map(id=>mateState(id,act.to))],{maxAct:act.n});
+  R[0].mates=mates; return D.gear[act.n]=R[0]; }
 
 // ---------- state ----------
 const STORE_KEY="rivellon-planner-v1";
@@ -1966,7 +1993,12 @@ function renderGear(){
 const COMBAT_NAME=Object.fromEntries(COMBAT.flatMap(g=>g.items).map(i=>[i[0],i[1]]));
 const ATTR_LONG=Object.fromEntries(ATTRS.map(a=>[a[0],a[1]]));
 const CIVIL_NAME=Object.fromEntries(CIVIL.map(c=>[c[0],c[1]]));
+function renderMates(){
+  const n=Math.max(1,Math.min(3,(state.party||4)-1)), opts=[...ARCHETYPES].sort((x,y)=>x.n.localeCompare(y.n));
+  $("guideMates").innerHTML=`<span class="note" style="margin:0;flex:1 1 100%">Teammates' builds: their best uniques are shared out fairly, so you aren't both hunting the same item.</span>`+
+    Array.from({length:n},(_,i)=>`<label class="field" style="flex:1 1 160px">Teammate ${i+1}<select data-mate="${i}"><option value="">None</option>${opts.map(a=>`<option value="${a.id}"${MATES[i]===a.id?" selected":""}>${esc(a.n)}</option>`).join("")}</select></label>`).join(""); }
 function renderGuide(){
+  renderMates();
   const A=state.archetype&&ARCH_BY_ID[state.archetype];
   if(!A){ $("guideActs").innerHTML=""; $("guideBody").innerHTML=`<p class="note" style="margin:0">Load an archetype from Builds first. The guide follows that build from character creation to level ${LEVELS}.</p>`; return; }
   const D=guideData(A);
@@ -2012,6 +2044,8 @@ function renderGuide(){
       <small class="gwhere">No unique you can get by now beats an at-level roll in these slots. Blue, purple and better gear drops from chests and bosses, and these traders sell it: ${esc(act.shops)}. Stock changes as you level, so check back. Look for ${esc(lookTxt)}.</small></div></div>`; }
   const nGot=GEAR_SLOTS.filter(([sl])=>G.gear[sl]&&GEAR_BY_ID[G.gear[sl].id].unique&&got[G.gear[sl].id]).length;
   h+=`<div class="gh">Gear goals for Act ${act.n} <span>${nGot}/${G.uniques} uniques found</span></div><div class="ggear">${rowsG}</div>`;
+  if(G.mates&&G.gaveUp){ const left=G.gaveUp.filter(x=>x.to>0).map(x=>`${esc(GEAR_BY_ID[x.id].n)} (${esc(ARCH_BY_ID[G.mates[x.to-1]].n)})`);
+    h+=`<p class="note" style="margin:8px 0 0">${left.length?`Left for your teammates, who need them more: ${left.join(", ")}.`:"No conflicts with your teammates' gear this act."}</p>`; }
   // level by level
   h+=`<div class="gh">Level by level</div>`;
   for(let L=act.from;L<=act.to;L++){ const r=D.rows[L-1]; const parts=[];
@@ -2353,7 +2387,8 @@ document.addEventListener("click",e=>{
   else if(ds.guideload){ const A=ARCH_BY_ID[state.archetype]; const act=ACTS.find(x=>x.n===+ds.guideload); const Dg=guideData(A);
     const st=JSON.parse(JSON.stringify(Dg.rows[act.to-1].st)); st.name=state.name||A.n; st.gear=JSON.parse(JSON.stringify(guideActGear(A,act).gear)); st.example=true; st.archLevel=act.to; state=st;
     toast(`Level ${act.to} ${A.n} loaded with Act ${act.n} gear`); }
-  else if(b.id==="btnAutoGear"){ const r=autoGear(state); state.gear=r.gear; toast(`Gear picked for level ${state.level}: ${r.uniques} unique item${r.uniques===1?"":"s"}`); }
+  else if(b.id==="btnAutoGear"){ const mates=MATES.filter(id=>ARCH_BY_ID[id]);
+    const r=mates.length?sharedGear([state,...mates.map(id=>mateState(id,state.level))])[0]:autoGear(state); state.gear=r.gear; toast(`Gear picked for level ${state.level}: ${r.uniques} unique item${r.uniques===1?"":"s"}`); }
   else if(b.id==="btnSave"){ const a=loadSaves(); const i=a.findIndex(s=>s.name===state.name); const copy=JSON.parse(JSON.stringify({...state,example:false})); i>=0?a[i]=copy:a.push(copy); writeSaves(a); toast("Saved"); }
   else if(b.id==="btnCopy"){ const txt=buildText(); const box=$("exportBox");
     const done=()=>toast("Copied");
@@ -2377,7 +2412,8 @@ $("iconPaks").addEventListener("change",async e=>{ const fs=[...e.target.files];
   try{ toast("Reading the game files…"); const packs=fs.filter(f=>/\.json$/i.test(f.name)||f.type==="application/json"), paks=fs.filter(f=>!packs.includes(f)); let n=0; for(const f of packs) n+=await importPack(f); if(paks.length) n+=await importIcons(paks); const itemN=Object.values(ITEM_ICON).concat(BASE_GEAR.map(b=>b.icon)).filter((v,i,a)=>v&&a.indexOf(v)===i&&USER_ICONS[v.toLowerCase()]).length; toast(`Imported ${n} icons (${itemN} item icons)`); render(); }
   catch(err){ toast(err.message||"Couldn't read those files"); } });
 $("btnClearIcons").addEventListener("click",async()=>{ try{ await idbClear(); }catch(e){} for(const k of Object.keys(USER_ICONS)) delete USER_ICONS[k]; toast("Icons removed"); render(); });
-document.addEventListener("change",e=>{ if(e.target.id==="gRarity"&&state.gear[ui.gslot]){ state.gear[ui.gslot].rarity=e.target.value; render(); } });
+document.addEventListener("change",e=>{ if(e.target.dataset&&e.target.dataset.mate!=null){ const i=+e.target.dataset.mate; MATES[i]=e.target.value||undefined; MATES=MATES.filter(Boolean); saveMates(); GUIDE_CACHE={key:"",rows:null,gear:{}}; render(); return; }
+  if(e.target.id==="gRarity"&&state.gear[ui.gslot]){ state.gear[ui.gslot].rarity=e.target.value; render(); } });
 $("archLevel").innerHTML=Array.from({length:LEVELS},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
 $("archLevel").addEventListener("change",e=>{ui.archLevel=+e.target.value; renderArch();});
 $("charLevel").innerHTML=Array.from({length:LEVELS},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
