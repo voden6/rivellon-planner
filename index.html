@@ -754,7 +754,7 @@ const ARCHETYPES=[
    "poison-dart contamination fossil-strike mosquito-swarm raise-bloated-corpse impalement poison-wave bone-cage decaying-touch worm-tremor death-wish acid-spores earthquake summon-hungry-flower pyroclastic-eruption grasp-of-the-starved totems-of-the-necromancer"),
  A("bloodmancer","Blood Mage","single","int","caster","Staff",4,"No heal spells; Necromancer life steal is healing that doesn't hurt an undead.","Intelligence caster whose Necromancer spells deal physical damage, so Warfare boosts every one. Mosquito Swarm and Infect strip Physical Armour, Raining Blood sets up Grasp of the Starved, Blood Storm rains 12 bolts on enemies only, and Corpse Explosion punishes every kill, though it also hits allies near the corpse. Comes into its own in Act 2.","Warfare and Necromancer mage builds from the community",
    "necro5 war10 hydro3 scound4 pyro1","int8 mem1 wit1",CIV_MAGE,"executioner elemaff savage torturer comeback hothead",
-   "mosquito-swarm decaying-touch raining-blood adrenaline infect bone-cage grasp-of-the-starved corpse-explosion blood-storm death-wish silencing-stare"),
+   "mosquito-swarm decaying-touch raining-blood adrenaline infect bone-cage blood-sucker grasp-of-the-starved corpse-explosion blood-storm death-wish silencing-stare"),
  A("lich","Lich Summoner","summon","int","caster","Staff or wand",4,"Corpses everywhere become your army; very on-theme.","Raises corpses and conjures an Incarnate, then fills the field with bone totems.","Summoning and Necromancer combos",
    "summon9 necro8 lead6","int5 mem2 con1 wit1",CIV_MAGE,"faroutman comeback walkitoff morning elemaff",
    "conjure-incarnate raise-bloated-corpse mosquito-swarm elemental-totem raise-bone-widow farsight-infusion power-infusion death-wish dominate-mind cannibalise bone-cage door-to-eternity totems-of-the-necromancer"),
@@ -1372,6 +1372,15 @@ function buildArchetype(a,L,keep){
   const gt=gearBonuses(st).tot;
   const memSlots=3+(st.attrs.mem||0)+(gt.mem||0)+(st.talents.includes("mnemonic")?3:0)+Math.floor(L/2); let used=0;
   for(const id of a.k){ const s=SKILL_BY_ID[id]; if(!s) continue; if(!reqMet(s,k=>eff(k,st.combat[k]||0)+(gt[k]||0))) continue; if(used+s.mem>memSlots) continue; st.skills.push(id); used+=s.mem; }
+  // Character creation gives three skills. If the build's own list can't fill three yet, take the best other starter skills
+  // its points allow: damage first, skills of its main schools next, and nothing that would hurt an undead.
+  if(st.skills.length<3){ const order=a.plan.map(([k])=>k), undead=/undead/.test(keep.race||"")||a.fit>=3;
+    const kit=weaponKit(a), caster=a.range==="caster";
+    const wOk=s=>s.wreq==="DaggerWeapon"?kit.kind==="dagger":s.wreq==="ShieldWeapon"?!!kit.shield:s.wreq==="RangedWeapon"?kit.abil==="ranged":s.wreq==="MeleeWeapon"?kit.abil!=="ranged"&&!(kit.main.ranged):true;
+    const rank=s=>{ const i=order.indexOf(s.reqs[0][0]); return (i<0?99:i)+(caster&&s.wreq==="MeleeWeapon"?50:0); };
+    const cand=SKILLS.filter(s=>(s.tier==="Starter"||(L>1&&s.tier==="Novice"))&&!st.skills.includes(s.id)&&!s.sp&&wOk(s)&&reqMet(s,k=>eff(k,st.combat[k]||0)+(gt[k]||0))&&!(undead&&SKILL_NOTES[s.id]?.u))
+      .sort((x,y)=>rank(x)-rank(y)||(!!SKILL_DMG[y.id])-(!!SKILL_DMG[x.id])||(y.ap>0)-(x.ap>0));
+    for(const s of cand){ if(st.skills.length>=3) break; if(used+s.mem>memSlots) continue; st.skills.push(s.id); used+=s.mem; } }
   return st;
 }
 
