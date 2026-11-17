@@ -1320,8 +1320,39 @@ function spendProportional(plan,budget,cap,fillKeys){
 // General picks used once a build's own talent list runs out.
 const TALENT_FALLBACK=["hothead","comeback","mnemonic","walkitoff","morning","fivestar"];
 const talentOrder=a=>[...a.t,...TALENT_FALLBACK.filter(x=>!a.t.includes(x))];
+// The character-creation preset closest to the build: the one its source names, otherwise the best match on abilities, skills and main attribute.
+function presetFor(a){
+  const named=(a.src.match(/(\w+) preset/i)||[])[1]; const byName=named&&Object.keys(PRESETS).find(k=>PRESETS[k].n.toLowerCase()===named.toLowerCase());
+  if(byName) return byName;
+  const plan=Object.fromEntries(a.plan), sk=new Set(a.k); let best="battlemage",bv=-1e9;
+  const w=a.weapon.toLowerCase(), kind=/dagger/.test(w)?"dagger":/bow/.test(w)?"ranged":/staff|wand/.test(w)?"caster":/shield/.test(w)?"shield":/two-handed|spear/.test(w)?"twohand":"melee";
+  const PW={battlemage:"melee shield",cleric:"caster",conjurer:"caster",enchanter:"caster",fighter:"shield",inquisitor:"melee shield twohand",knight:"twohand",metamorph:"twohand",ranger:"ranged",rogue:"dagger",shadowblade:"dagger",wayfarer:"ranged",witch:"dagger caster",wizard:"caster"};
+  for(const [id,p] of Object.entries(PRESETS)){ const top=Object.entries(p.a).sort((x,y)=>y[1]-x[1])[0][0];
+    const v=p.c.reduce((s,k)=>s+(plan[k]?plan[k]:-3),0)+3*p.s.filter(n=>sk.has(n.toLowerCase().replace(/[^a-z]+/g,"-"))).length+(top===a.stat?4:0)+(PW[id].split(" ").includes(kind)?8:0);
+    if(v>bv){ bv=v; best=id; } }
+  return best; }
+const PRESET_OF={}; ARCHETYPES.forEach(a=>PRESET_OF[a.id]=presetFor(a));
+// Weapons that suit the build's weapon line, so a loaded build doesn't keep the last build's weapon.
+function weaponSuits(a,slot,g){ const w=a.weapon.toLowerCase(), cat=(g.cat||"").replace(/^2H /,""), two=g.hands===2||/^2H /.test(g.cat||"");
+  if(slot==="main"){
+    if(/dagger/.test(w)) return cat==="Dagger";
+    if(/two wands/.test(w)) return cat==="Wand";
+    if(/staff|wand/.test(w)) return (/staff/.test(w)&&cat==="Staff")||(/wand/.test(w)&&cat==="Wand");
+    if(/spear/.test(w)) return cat==="Spear";
+    if(/bow|crossbow/.test(w)) return (/\bbow/.test(w)&&cat==="Bow")||(/crossbow/.test(w)&&cat==="Crossbow");
+    if(/two-handed/.test(w)) return two&&["Sword","Axe","Mace"].includes(cat);
+    if(/one-handed|shield|swords|axes/.test(w)) return !two&&(a.stat==="int"?cat==="Wand":["Sword","Axe","Mace"].includes(cat));
+    return true; }
+  if(slot==="off"){
+    if(/shield/.test(w)) return cat==="Shield";
+    if(/two daggers/.test(w)) return cat==="Dagger";
+    if(/two wands/.test(w)) return cat==="Wand";
+    if(/two one-handed/.test(w)) return ["Sword","Axe","Mace"].includes(cat);
+    return false; }
+  return true; }
 function buildArchetype(a,L,keep){
-  const st={...blankBuild(),name:a.n,origin:keep.origin,race:keep.race,party:keep.party,level:L,preset:"battlemage",archetype:a.id,archLevel:L,gear:keep.gear?JSON.parse(JSON.stringify(keep.gear)):{}};
+  const st={...blankBuild(),name:(ORIGINS.find(o=>o.id===keep.origin&&o.race)||a).n,origin:keep.origin,race:keep.race,party:keep.party,level:L,preset:PRESET_OF[a.id]||presetFor(a),archetype:a.id,archLevel:L,gear:keep.gear?JSON.parse(JSON.stringify(keep.gear)):{}};
+  for(const sl of ["main","off"]){ const eq=st.gear[sl], g=eq&&GEAR_BY_ID[eq.id]; if(g&&!weaponSuits(a,sl,g)) delete st.gear[sl]; }
   // Lone Wolf doubles invested points (not Polymorph), so the plan's targets are halved and capped at 5 (= 10).
   const lw=!!a.lw, eff=(k,v)=>lw&&k!=="poly"?Math.min(10,2*v):v;
   st.combat=lw?spendProportional(a.plan.map(([k,t])=>[k,k==="poly"?t:Math.ceil(t/2)]),2+(L-1),5,[...[...a.plan].sort((x,y)=>y[1]-x[1]).map(([k])=>k),"persev","lead","retri"])
@@ -1791,6 +1822,8 @@ function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTim
 
 // ---------- archetype browser ----------
 const ARCH_PAGE=12;
+// An origin plays its own builds plus any general build that suits its race; "none" is the general builds only.
+const originCanPlay=(o,a)=>o==="none"?!a.origin:a.origin===o||(!a.origin&&a.races.includes(ORIGIN_RACE[o]));
 function archMatches(a){
   if(ui.atier!=="all"&&a.tier!==ui.atier) return false;
   if(ui.role!=="all"&&a.role!==ui.role) return false;
@@ -1800,7 +1833,7 @@ function archMatches(a){
   if(ui.arange!=="all"&&a.range!==ui.arange) return false;
   if(ui.aschool!=="all"&&!a.plan.some(([k,t])=>k===ui.aschool&&t>=3)) return false;
   if(ui.arace!=="all"&&!a.races.includes(ui.arace)) return false;
-  if(ui.aorigin!=="all"&&(ui.aorigin==="none"?a.origin:a.origin!==ui.aorigin)) return false;
+  if(ui.aorigin!=="all"&&!originCanPlay(ui.aorigin,a)) return false;
   if(ui.aparty==="lw"&&!a.lw) return false; if(ui.aparty==="party"&&a.lw) return false;
   const q=ui.aq.trim().toLowerCase();
   if(q){ const hay=(a.n+" "+a.blurb+" "+a.weapon+" "+FAM_TEXT[a.fam]+" "+a.k.join(" ")+" "+a.plan.map(([k])=>combatName(k)).join(" ")).toLowerCase(); if(!hay.includes(q)) return false; }
@@ -1818,13 +1851,14 @@ function renderArch(){
   fillSel("archRange","Any range",Object.entries(RANGE_TEXT),ui.arange);
   fillSel("archSchool","Any school",COMBAT.flatMap(g=>g.items).map(([k,n])=>[k,n]),ui.aschool);
   fillSel("archRace","Any race",Object.entries(RACE_TEXT),ui.arace);
-  $("originQuick").innerHTML=[["all","All characters"],["none","Custom"],...Object.entries(ORIGIN_TEXT)].map(([k,n])=>`<button type="button" class="chip" data-oquick="${k}" aria-pressed="${ui.aorigin===k}">${k==="all"?n:n+` · ${ARCHETYPES.filter(a=>k==="none"?!a.origin:a.origin===k).length}`}</button>`).join("");
+  $("originQuick").innerHTML=[["all","All characters"],["none","Custom"],...Object.entries(ORIGIN_TEXT)].map(([k,n])=>`<button type="button" class="chip" data-oquick="${k}" aria-pressed="${ui.aorigin===k}">${k==="all"?n:n+` · ${ARCHETYPES.filter(a=>originCanPlay(k,a)).length}`}</button>`).join("");
   $("archParty").value=ui.aparty; $("archSort").value=ui.asort; if($("archSearch").value!==ui.aq) $("archSearch").value=ui.aq;
   let list=ARCHETYPES.filter(archMatches);
   const sc=a=>ARCH_SCORE[a.id];
   const so={tier:(a,b)=>TIERS.indexOf(a.tier)-TIERS.indexOf(b.tier)||Math.max(sc(b).oneN,sc(b).areaN)-Math.max(sc(a).oneN,sc(a).areaN)||a.n.localeCompare(b.n),
     one:(a,b)=>sc(b).one-sc(a).one, area:(a,b)=>sc(b).area-sc(a).area, name:(a,b)=>a.n.localeCompare(b.n)};
   list.sort(so[ui.asort]||so.tier);
+  if(ui.aorigin!=="all"&&ui.aorigin!=="none") list.sort((x,y)=>(y.origin===ui.aorigin)-(x.origin===ui.aorigin)); // the character's own builds first
   const pages=Math.max(1,Math.ceil(list.length/ARCH_PAGE)); ui.apage=Math.min(Math.max(1,ui.apage),pages);
   const from=(ui.apage-1)*ARCH_PAGE, shown=list.slice(from,from+ARCH_PAGE);
   $("archCount").textContent=list.length?`${from+1}–${from+shown.length} of ${list.length} archetypes${list.length<ARCHETYPES.length?` (${ARCHETYPES.length} total)`:""}`:`0 of ${ARCHETYPES.length} archetypes`;
@@ -2264,13 +2298,18 @@ document.addEventListener("click",e=>{
   if(PHONE.matches&&lastPointer==="touch"&&tipEl&&b===tipEl&&!b.dataset.gslot){
     if(tapArmed!==tipEl.dataset.tip){ showTip(tipEl); tapArmed=tipEl.dataset.tip; return; } }
   const ds=b.dataset;
-  if(ds.origin){ state.origin=ds.origin; const o=ORIGINS.find(x=>x.id===ds.origin); if(o.race){state.race=o.race; applyPreset(state,o.preset); state.name=o.n;} state.example=false;  ui.aorigin=ds.origin==="custom"?"all":ds.origin; ui.arace=ds.origin==="custom"?ui.arace:ORIGIN_RACE[ds.origin]; ui.apage=1; }
+  if(ds.origin){ const o=ORIGINS.find(x=>x.id===ds.origin), A0=state.archetype&&ARCH_BY_ID[state.archetype];
+    // a loaded build the new origin can play is rebuilt for that origin instead of being reset to the origin's preset
+    if(o.race&&A0&&originCanPlay(o.id,A0)){ state=buildArchetype(A0,state.archLevel||state.level,{origin:o.id,race:o.race,party:state.party,gear:state.gear}); state.name=o.n; state.example=true; toast(`${A0.n} kept, now as ${o.n}`); }
+    else { state.origin=ds.origin; if(o.race){state.race=o.race; applyPreset(state,o.preset); state.name=o.n; state.archetype=null;} state.example=false; }  ui.aorigin=ds.origin==="custom"?"all":ds.origin; ui.arace=ds.origin==="custom"?ui.arace:ORIGIN_RACE[ds.origin]; ui.apage=1; }
   else if(ds.race){ state.race=ds.race; state.example=false; const R=RACES.find(x=>x.id===ds.race); ui.arace=R.undead?"undead":R.base; if(ui.aorigin!=="all"&&ui.aorigin!=="none") ui.aorigin="all"; ui.apage=1; }
   else if(ds.preset){ applyPreset(state,ds.preset); state.example=false; state.archetype=null; }
   else if(ds.arch){ const A0=ARCH_BY_ID[ds.arch]; const O=A0.origin&&ORIGINS.find(o=>o.id===A0.origin);
-    state=buildArchetype(A0,ui.archLevel,{origin:O?O.id:(state.origin!=="custom"?"custom":state.origin),race:O?O.race:state.race,party:A0.lw?Math.min(state.party,2):state.party,gear:state.gear});
-    if(O) state.name=O.n; state.example=true; ui.guideAct=null;
-    toast(`${A0.n} loaded${A0.lw?" (party set to 2)":""}${O?` as ${O.n}`:""}. Act-by-act plan in the Guide${PHONE.matches?" tab":" section"}`); }
+    // an origin character keeps playing any build that suits their race (Fane can load any undead build)
+    const keepO=!O&&state.origin!=="custom"&&A0.races.includes(ORIGIN_RACE[state.origin])?ORIGINS.find(o=>o.id===state.origin):null, OO=O||keepO;
+    state=buildArchetype(A0,ui.archLevel,{origin:OO?OO.id:"custom",race:OO?OO.race:state.race,party:A0.lw?Math.min(state.party,2):state.party,gear:state.gear});
+    if(OO) state.name=OO.n; state.example=true; ui.guideAct=null;
+    toast(`${A0.n} loaded${A0.lw?" (party set to 2)":""}${OO?` as ${OO.n}`:""}. Act-by-act plan in the Guide${PHONE.matches?" tab":" section"}`); }
   else if(ds.atier){ ui.atier=ds.atier; ui.apage=1; }
   else if(ds.apage){ ui.apage=+ds.apage; renderArch(); $("stepArch").scrollIntoView({block:"start",behavior:"smooth"}); return; }
   else if(ds.role){ ui.role=ds.role; ui.apage=1; }
