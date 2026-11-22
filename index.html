@@ -1515,7 +1515,11 @@ function autoGear(st,opt={}){
   // with an act cap (the playthrough guide), only uniques from that act or earlier count
   const gets=g=>!g.unique||((g.lvl||0)<=L+1&&(maxAct==null||itemActGuess(g)<=maxAct));
   const isWeapon=g=>(g.slot==="main"||g.slot==="off")&&g.cat!=="Shield";
-  const score=g=>{
+  // In the guide, a named unique you can actually go and get beats an unnamed roll whenever one is recent enough
+  // (within 8 levels); the guide flags it as a stand-in when an at-level roll would be stronger.
+  const NAMED=maxAct!=null?1000:0, fresh=g=>(g.lvl||0)>=L-8;
+  const score=g=>baseScore(g)+(g.unique&&NAMED&&fresh(g)&&g.where?NAMED:0); // only items with a known source count as findable
+  const baseScore=g=>{
     if(!g.unique) return isWeapon(g)?(g.hands===2?1.2:.8)*L+1:g.slot==="amulet"||g.slot==="ring"||g.slot==="belt"?1+.15*L:.35*L+1;
     let s=autoFx(g.fx,tank);
     for(const [k,v] of Object.entries(g.b||{})) s+=v*(W[k]||0);
@@ -1528,7 +1532,10 @@ function autoGear(st,opt={}){
   const used=new Set();
   const ex=opt.exclude||new Set();
   const top=(slot,ok,n=1)=>ALL_GEAR.filter(g=>slotAccepts(slot,g)&&gets(g)&&ok(g)&&!used.has(g.id)&&!ex.has(g.id)).sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n)).slice(0,n);
-  let tot=0; const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); tot+=score(g); gear[slot]={id:g.id,rarity:autoRarity(L),bonuses:[]}; };
+  let tot=0; const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); tot+=baseScore(g); gear[slot]={id:g.id,rarity:autoRarity(L),bonuses:[]};
+    // stand-in: a named item kept over a stronger at-level roll for this slot
+    if(NAMED&&g.unique){ const roll=ALL_GEAR.find(r=>!r.unique&&slotAccepts(slot,r)&&(slot==="main"||slot==="off"?r.cat===g.cat||r.cat===g.cat.replace(/^2H /,""):r.cat===g.cat||["amulet","belt","ring1","ring2"].includes(slot)));
+      if(roll&&baseScore(roll)>baseScore(g)+.5) gear[slot].standin=true; } };
   const gear={};
   // weapons: decide the fighting style from the abilities, then compare the loadouts that fit it
   const wa={dual:cb.dual||0,ranged:cb.ranged||0,single:cb.single||0,twohand:cb.twohand||0};
@@ -1596,6 +1603,8 @@ const ACTS=[
  {n:4,name:"Arx",from:19,to:22,note:"Endgame. Divine gear appears; level 22 needs nearly every fight and quest.",
   shops:"Traders Keyren, Aravae, Fionola and Non in Arx, Trader Adam and Trader Valia outside Lord Kemm's mansion, Lord Omyt on the second floor of the mansion, Cat the Appraiser, and the Unarmed Elf Trader outside the Cathedral"}
 ];
+// Which traders carry each armour weight, from the game's trader tables (mage, warrior, archer and rogue traders).
+const ROLL_SHOP={Robe:"Robes are stocked by magic traders, the ones selling staffs, wands and elemental skillbooks. ",Heavy:"Heavy armour is stocked by smiths and Warfare traders. ",Light:"Light armour is stocked by Huntsman and Scoundrel traders. ",Jewellery:"Rings, amulets and belts are sold by most equipment and magic traders. "};
 const guideActFor=L=>ACTS.find(x=>L<=x.to)||ACTS[ACTS.length-1];
 // One row per level: what to spend that level's points on. Talents, once taken, stay taken.
 function buildGuide(a,keep){
@@ -2045,12 +2054,12 @@ function renderGuide(){
     const bon=Object.entries(g.b||{}).map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`).join(" · ");
     return `<div class="gg${have?" done":""}"><button type="button" class="got" data-got="${g.id}" aria-pressed="${have}" aria-label="${have?"Got":"Mark as found"}: ${esc(g.n)}">${have?"✓":""}</button>${gearIcon(g.glyph,g.attr,true,34,g.icon)}
       <div data-tip="gear:${g.id}" tabindex="0"><b style="color:var(--r-unique)">${esc(g.n)}</b><small>${N[sl]}${g.lvl?` · Lv ${g.lvl}`:""}${earlier?` · from ${ACT_NAME(ia)}, keep using it`:""}${bon?` · ${esc(bon)}`:""}</small>
-      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+"; exact spot not found":"Location unknown"))}</small></div></div>`; }).join("");
+      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+"; exact spot not found":"Location unknown"))}</small>${G.gear[sl].standin?`<small class="gwhere">The best named item you can get for this slot. A ${esc(autoRarity(act.to))} roll at your level would be a bit stronger, so swap if one drops.</small>`:""}</div></div>`; }).join("");
   if(bSlots.length){ const rar=G.gear[bSlots[0]].rarity;
     const names=bSlots.map(sl=>GEAR_BY_ID[G.gear[sl].id].n.toLowerCase());
     rowsG+=`<div class="gg"><span class="got ph" aria-hidden="true"></span>${gearIcon(GEAR_BY_ID[G.gear[bSlots[0]].id].glyph,null,false,34,"")}<div><b style="color:${RARITY_COLOR[rar]}">${rar} or better rolled gear</b>
       <small>${esc(names.join(", "))}</small>
-      <small class="gwhere">No unique you can get by now beats an at-level roll in these slots. Blue, purple and better gear drops from chests and bosses, and these traders sell it: ${esc(act.shops)}. Stock changes as you level, so check back. Look for ${esc(lookTxt)}.</small></div></div>`; }
+      <small class="gwhere">There's no named ${esc(names.length>1?names.slice(0,-1).join(", ")+" or "+names[names.length-1]:names[0])} worth wearing by this point in the game, so these come from random loot and traders. ${esc([...new Set(bSlots.map(sl=>ROLL_SHOP[GEAR_BY_ID[G.gear[sl].id].cat]||(["amulet","ring1","ring2","belt"].includes(sl)?ROLL_SHOP.Jewellery:"")))].join(""))}This act's traders: ${esc(act.shops)}. Trader stock re-rolls every time you level up, so check back. Look for ${esc(lookTxt)}.</small></div></div>`; }
   const nGot=GEAR_SLOTS.filter(([sl])=>G.gear[sl]&&GEAR_BY_ID[G.gear[sl].id].unique&&got[G.gear[sl].id]).length;
   h+=`<div class="gh">Gear goals for Act ${act.n} <span>${nGot}/${G.uniques} uniques found</span></div><div class="ggear">${rowsG}</div>`;
   if(G.mates&&G.gaveUp){ const left=G.gaveUp.filter(x=>x.to>0).map(x=>`${esc(GEAR_BY_ID[x.id].n)} (${esc(ARCH_BY_ID[G.mates[x.to-1]].n)})`);
