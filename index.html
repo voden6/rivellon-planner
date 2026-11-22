@@ -1518,7 +1518,10 @@ function autoGear(st,opt={}){
   // In the guide, a named unique you can actually go and get beats an unnamed roll whenever one is recent enough
   // (within 8 levels); the guide flags it as a stand-in when an at-level roll would be stronger.
   const NAMED=maxAct!=null?1000:0, fresh=g=>(g.lvl||0)>=L-8;
-  const score=g=>baseScore(g)+(g.unique&&NAMED&&fresh(g)&&g.where?NAMED:0); // only items with a known source count as findable
+  // only items with a known source count as findable; when no recent one exists, an older named armour piece or jewel
+  // still beats a roll you'd have to hope for (weapons stay recent, since they set your damage)
+  const isWpn=g=>(g.slot==="main"||g.slot==="off")&&g.cat!=="Shield";
+  const score=g=>baseScore(g)+(g.unique&&NAMED&&g.where?(fresh(g)?NAMED:isWpn(g)?0:NAMED/2):0);
   const baseScore=g=>{
     if(!g.unique) return isWeapon(g)?(g.hands===2?1.2:.8)*L+1:g.slot==="amulet"||g.slot==="ring"||g.slot==="belt"?1+.15*L:.35*L+1;
     let s=autoFx(g.fx,tank);
@@ -1535,7 +1538,7 @@ function autoGear(st,opt={}){
   let tot=0; const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); tot+=baseScore(g); gear[slot]={id:g.id,rarity:autoRarity(L),bonuses:[]};
     // stand-in: a named item kept over a stronger at-level roll for this slot
     if(NAMED&&g.unique){ const roll=ALL_GEAR.find(r=>!r.unique&&slotAccepts(slot,r)&&(slot==="main"||slot==="off"?r.cat===g.cat||r.cat===g.cat.replace(/^2H /,""):r.cat===g.cat||["amulet","belt","ring1","ring2"].includes(slot)));
-      if(roll&&baseScore(roll)>baseScore(g)+.5) gear[slot].standin=true; } };
+      if(roll&&baseScore(roll)>baseScore(g)+.5) gear[slot].standin=true; if(!fresh(g)) gear[slot].old=true; } };
   const gear={};
   // weapons: decide the fighting style from the abilities, then compare the loadouts that fit it
   const wa={dual:cb.dual||0,ranged:cb.ranged||0,single:cb.single||0,twohand:cb.twohand||0};
@@ -2054,12 +2057,15 @@ function renderGuide(){
     const bon=Object.entries(g.b||{}).map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`).join(" · ");
     return `<div class="gg${have?" done":""}"><button type="button" class="got" data-got="${g.id}" aria-pressed="${have}" aria-label="${have?"Got":"Mark as found"}: ${esc(g.n)}">${have?"✓":""}</button>${gearIcon(g.glyph,g.attr,true,34,g.icon)}
       <div data-tip="gear:${g.id}" tabindex="0"><b style="color:var(--r-unique)">${esc(g.n)}</b><small>${N[sl]}${g.lvl?` · Lv ${g.lvl}`:""}${earlier?` · from ${ACT_NAME(ia)}, keep using it`:""}${bon?` · ${esc(bon)}`:""}</small>
-      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+"; exact spot not found":"Location unknown"))}</small>${G.gear[sl].standin?`<small class="gwhere">The best named item you can get for this slot. A ${esc(autoRarity(act.to))} roll at your level would be a bit stronger, so swap if one drops.</small>`:""}</div></div>`; }).join("");
+      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+"; exact spot not found":"Location unknown"))}</small>${G.gear[sl].old&&g.lvl&&!["amulet","ring1","ring2","belt"].includes(sl)?`<small class="gwhere">No newer named ${esc(g.cat.toLowerCase())} piece exists for this slot yet, so this is the best one you can find. At level ${act.to} it gives about ${Math.round(100*levelVitality(g.lvl)/levelVitality(act.to))}% of the armour of a new piece, so replace it with a ${esc(autoRarity(act.to))} roll from a trader when you can.</small>`:G.gear[sl].standin?`<small class="gwhere">The best named item you can get for this slot. A ${esc(autoRarity(act.to))} roll at your level would be a bit stronger, so swap if one drops.</small>`:""}</div></div>`; }).join("");
   if(bSlots.length){ const rar=G.gear[bSlots[0]].rarity;
     const names=bSlots.map(sl=>GEAR_BY_ID[G.gear[sl].id].n.toLowerCase());
     rowsG+=`<div class="gg"><span class="got ph" aria-hidden="true"></span>${gearIcon(GEAR_BY_ID[G.gear[bSlots[0]].id].glyph,null,false,34,"")}<div><b style="color:${RARITY_COLOR[rar]}">${rar} or better rolled gear</b>
       <small>${esc(names.join(", "))}</small>
-      <small class="gwhere">There's no named ${esc(names.length>1?names.slice(0,-1).join(", ")+" or "+names[names.length-1]:names[0])} worth wearing by this point in the game, so these come from random loot and traders. ${esc([...new Set(bSlots.map(sl=>ROLL_SHOP[GEAR_BY_ID[G.gear[sl].id].cat]||(["amulet","ring1","ring2","belt"].includes(sl)?ROLL_SHOP.Jewellery:"")))].join(""))}This act's traders: ${esc(act.shops)}. Trader stock re-rolls every time you level up, so check back. Look for ${esc(lookTxt)}.</small></div></div>`; }
+      <small class="gwhere">${(()=>{ const or=a=>a.length>1?a.slice(0,-1).join(", ")+" or "+a[a.length-1]:a[0];
+        const toMate=new Set((G.gaveUp||[]).filter(x=>x.to>0).map(x=>x.id)), mateSl=[], noneSl=[];
+        bSlots.forEach(sl=>{ const r=GEAR_BY_ID[G.gear[sl].id]; (ALL_GEAR.some(u=>toMate.has(u.id)&&slotAccepts(sl,u)&&(["amulet","ring1","ring2","belt"].includes(sl)||u.cat===r.cat))?mateSl:noneSl).push(r.n.toLowerCase()); });
+        return (noneSl.length?`There's no named ${esc(or(noneSl))} worth wearing by this point in the game. `:"")+(mateSl.length?`The named ${esc(mateSl.length>1?mateSl.slice(0,-1).join(", ")+" and "+mateSl[mateSl.length-1]:mateSl[0])} went to your teammates. `:"")+"These come from random loot and traders."; })()} ${esc([...new Set(bSlots.map(sl=>ROLL_SHOP[GEAR_BY_ID[G.gear[sl].id].cat]||(["amulet","ring1","ring2","belt"].includes(sl)?ROLL_SHOP.Jewellery:"")))].join(""))}This act's traders: ${esc(act.shops)}. Trader stock re-rolls every time you level up, so check back. Look for ${esc(lookTxt)}.</small></div></div>`; }
   const nGot=GEAR_SLOTS.filter(([sl])=>G.gear[sl]&&GEAR_BY_ID[G.gear[sl].id].unique&&got[G.gear[sl].id]).length;
   h+=`<div class="gh">Gear goals for Act ${act.n} <span>${nGot}/${G.uniques} uniques found</span></div><div class="ggear">${rowsG}</div>`;
   if(G.mates&&G.gaveUp){ const left=G.gaveUp.filter(x=>x.to>0).map(x=>`${esc(GEAR_BY_ID[x.id].n)} (${esc(ARCH_BY_ID[G.mates[x.to-1]].n)})`);
