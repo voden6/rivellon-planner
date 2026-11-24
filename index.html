@@ -419,7 +419,7 @@ a{color:var(--accent)}
       </section>
 
       <section class="step" id="stepSkills">
-        <div class="step-head"><div><div class="kicker">Step 7</div><h2>Skills &amp; spells</h2></div><div class="toolbar" style="align-items:center"><label class="btn" for="iconPaks">Import game icons</label><input type="file" id="iconPaks" multiple accept=".pak,.json,application/json" hidden><button class="btn" type="button" id="btnClearIcons" hidden>Remove icons</button><span class="budget" id="memBudget"></span></div></div>
+        <div class="step-head"><div><div class="kicker">Step 7</div><h2>Skills &amp; spells</h2></div><div class="toolbar" style="align-items:center"><label class="btn" for="iconPaks">Import game icons</label><input type="file" id="iconPaks" multiple accept=".pak,.json,application/json" hidden><button class="btn" type="button" id="btnClearIcons" hidden>Remove icons</button><button type="button" class="btn" id="btnFillMem">Fill free memory</button><span class="budget" id="memBudget"></span></div></div>
         <p class="note" id="iconHelp" style="margin:0 0 10px">To show the real skill and item icons, click <b>Import game icons</b> and select both <code>Icons.pak</code> and <code>Patch1.pak</code> from <code>Divinity Original Sin 2\DefEd\Data</code> in your Steam library. The page cuts the icons out in your browser and keeps them in this browser only; nothing is uploaded. On a phone, import <code>rivellon-icons.json</code> instead: a small icon pack made from those same files.</p>
         <div class="memory"><span>Memory</span><div class="membar" id="memBar"><div></div></div></div>
         <div class="filters">
@@ -2144,6 +2144,17 @@ function weaponAllows(s,st=state){
     return s.wreq==="DaggerWeapon"?k(m)==="Dagger"||k(o)==="Dagger":s.wreq==="ShieldWeapon"?!!(o&&o.cat==="Shield"):s.wreq==="RangedWeapon"?!!(m&&["Bow","Crossbow"].includes(k(m))):s.wreq==="StaffWeapon"?k(m)==="Staff":s.wreq==="MeleeWeapon"?!!(m&&!["Bow","Crossbow","Wand"].includes(k(m))):true; }
   const a=st.archetype&&ARCH_BY_ID[st.archetype]; if(!a) return true; const kit=weaponKit(a);
   return s.wreq==="DaggerWeapon"?kit.kind==="dagger":s.wreq==="ShieldWeapon"?!!kit.shield:s.wreq==="RangedWeapon"?kit.abil==="ranged":s.wreq==="StaffWeapon"?kit.kind==="staff":s.wreq==="MeleeWeapon"?kit.abil!=="ranged"&&!(kit.main&&kit.main.ranged):true; }
+// Fill spare memory with the best extra skills this build can use: its main schools first, damage before utility,
+// nothing that hurts an undead, no Source or area skills, no Provoke for casters. Only adds; never removes a skill.
+function fillMemory(){
+  const a=state.archetype&&ARCH_BY_ID[state.archetype]; const D=derive(); let free=D.memSlots-D.memUsed; if(free<=0) return 0;
+  const order=a?a.plan.map(([k])=>k):Object.entries(state.combat).sort((x,y)=>y[1]-x[1]).map(([k])=>k);
+  const undead=/undead/.test(state.race||""), caster=a?a.range==="caster":(state.attrs.int||0)>=(state.attrs.str||0)+(state.attrs.fin||0);
+  const rank=s=>{ const i=order.indexOf(s.reqs[0][0]); return (i<0?99:i)+(caster&&s.wreq==="MeleeWeapon"?50:0); };
+  const cand=SKILLS.filter(s=>!state.skills.includes(s.id)&&!s.sp&&s.t!=="aoe"&&!(caster&&s.id==="provoke")&&order.includes(s.reqs[0][0])&&reqMet(s,lv)&&weaponAllows(s)&&!(undead&&SKILL_NOTES[s.id]?.u))
+    .sort((x,y)=>rank(x)-rank(y)||(!!SKILL_DMG[y.id])-(!!SKILL_DMG[x.id])||(y.ap>0)-(x.ap>0));
+  let n=0; for(const s of cand){ if(s.mem>free) continue; state.skills.push(s.id); free-=s.mem; n++; if(free<=0) break; }
+  return n; }
 function gearChecks(sel){
   const out=[]; const m=state.gear.main&&GEAR_BY_ID[state.gear.main.id]; const o=state.gear.off&&GEAR_BY_ID[state.gear.off.id];
   const twoMelee=m&&m.hands===2&&!["Bow","Crossbow"].includes(m.cat); // staffs count as two-handed melee
@@ -2452,8 +2463,9 @@ document.addEventListener("click",e=>{
     else if(!reqMet(s,lv)){ toast(`Needs ${reqText(s)}`); return; }
     else if(!weaponAllows(s)){ toast(`${s.n} needs a ${WREQ[s.wreq].toLowerCase()}, and this build doesn't use one`); return; }
     else state.skills.push(ds.skill); }
-  else if(ds.load!==undefined){ state=clean(JSON.parse(JSON.stringify(loadSaves()[+ds.load]))); toast("Build loaded"); }
+  else if(ds.load!==undefined){ state=clean(JSON.parse(JSON.stringify(loadSaves()[+ds.load]))); if(state.archetype) fillMemory(); toast("Build loaded"); }
   else if(ds.del!==undefined){ const a=loadSaves(); a.splice(+ds.del,1); writeSaves(a); toast("Build deleted"); }
+  else if(b.id==="btnFillMem"){ const n=fillMemory(); toast(n?`Added ${n} skill${n>1?"s":""} to fill your memory`:"No free memory, or no other skill this build can use"); }
   else if(b.id==="btnFresh"){ state=blankBuild(); applyPreset(state,"battlemage"); }
   else if(b.id==="btnExample"){ state=exampleBuild(); }
   else if(b.id==="hideBanner"){ state.example=false; }
@@ -2496,6 +2508,8 @@ $("archLevel").addEventListener("change",e=>{ui.archLevel=+e.target.value; rende
 $("charLevel").innerHTML=Array.from({length:LEVELS},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
 
 state=load()||exampleBuild();
+// builds saved before memory filling existed: top up spare memory once on open (adds only, never removes)
+try{ if(state.archetype) fillMemory(); }catch(e){}
 render();
 loadStoredIcons();
 </script>
