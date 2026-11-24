@@ -1816,13 +1816,13 @@ function render(){
   $("typeChips").innerHTML=[["all","All"],["single","Single target"],["multi","Multi-target"],["aoe","Area"],["support","Support"],["summon","Summon"],["combo","Crafted combos"]].map(([k,n])=>`<button type="button" class="chip" data-type="${k}" aria-pressed="${ui.type===k}">${n}</button>`).join("");
   const q=ui.q.toLowerCase();
   $("showChips").innerHTML=[["all","Every skill"],["avail","Learnable now"],["mem","Memorised"]].map(([k,n])=>`<button type="button" class="chip" data-sshow="${k}" aria-pressed="${(ui.sshow||"all")===k}">${n}</button>`).join("");
-  const list=SKILLS.filter(s=>(ui.sshow!=="avail"||reqMet(s,lv))&&(ui.sshow!=="mem"||state.skills.includes(s.id))&&(ui.school==="all"||s.reqs.some(r=>r[0]===ui.school))&&(ui.type==="all"||(ui.type==="combo"?s.combo:s.t===ui.type))&&(!q||s.n.toLowerCase().includes(q)||s.d.toLowerCase().includes(q)));
+  const list=SKILLS.filter(s=>(ui.sshow!=="avail"||reqMet(s,lv)&&weaponAllows(s))&&(ui.sshow!=="mem"||state.skills.includes(s.id))&&(ui.school==="all"||s.reqs.some(r=>r[0]===ui.school))&&(ui.type==="all"||(ui.type==="combo"?s.combo:s.t===ui.type))&&(!q||s.n.toLowerCase().includes(q)||s.d.toLowerCase().includes(q)));
   $("skillList").innerHTML=list.length?list.map(s=>{
-    const on=state.skills.includes(s.id); const lock=!reqMet(s,lv);
+    const on=state.skills.includes(s.id); const lock=!reqMet(s,lv); const noW=!weaponAllows(s);
     const typeLabel={single:"Single",multi:"Multi",aoe:"Area",support:"Support",summon:"Summon"}[s.t];
     return `<button type="button" class="sk${lock?" locked":""}" data-skill="${s.id}" data-tip="skill:${s.id}" aria-pressed="${on}">
       ${icon(s.s,s.t,s.sp>0,40,s.n,s.icon)}<div class="t"><b>${s.n}</b><span>${s.d}</span>
-      <div class="meta"><span class="tag ${s.t}">${typeLabel}</span>${s.sp?`<span class="tag src">${s.sp} SP</span>`:""}<span>${s.ap} AP</span><span>${reqText(s)}</span><span>${s.mem} mem</span>${s.combo?`<span class="tag">Combo</span>`:""}${lock?`<span class="bad">locked</span>`:""}</div></div></button>`;}).join("")
+      <div class="meta"><span class="tag ${s.t}">${typeLabel}</span>${s.sp?`<span class="tag src">${s.sp} SP</span>`:""}<span>${s.ap} AP</span><span>${reqText(s)}</span><span>${s.mem} mem</span>${s.combo?`<span class="tag">Combo</span>`:""}${lock?`<span class="bad">locked</span>`:""}${!lock&&noW?`<span class="bad">needs ${esc(WREQ[s.wreq].toLowerCase())}</span>`:""}</div></div></button>`;}).join("")
     :`<p class="note">No skills match this filter.</p>`;
 
   const hasIcons=Object.keys(USER_ICONS).length>0;
@@ -2126,6 +2126,13 @@ function gearSheet(){
   return `<div class="group-title" style="margin-top:4px">Gear</div><div class="icons">${eqs.map(([sl])=>{const g=GEAR_BY_ID[state.gear[sl].id];return `<span data-tip="slot:${sl}" tabindex="0">${gearIcon(g.glyph,g.attr,g.unique,30,g.icon)}</span>`;}).join("")}</div>
   <dl>${t?`<dt>Gear bonus</dt><dd>${t}</dd>`:""}${grants.length?`<dt>Gear skills</dt><dd>${grants.map(g=>g[0]).join(", ")}</dd>`:""}</dl>`;
 }
+function weaponAllows(s,st=state){
+  if(!s.wreq||!WREQ[s.wreq]) return true;
+  const m=st.gear?.main&&GEAR_BY_ID[st.gear.main.id], o=st.gear?.off&&GEAR_BY_ID[st.gear.off.id];
+  if(m||o){ const k=x=>x&&x.cat.replace(/^2H /,"");
+    return s.wreq==="DaggerWeapon"?k(m)==="Dagger"||k(o)==="Dagger":s.wreq==="ShieldWeapon"?!!(o&&o.cat==="Shield"):s.wreq==="RangedWeapon"?!!(m&&["Bow","Crossbow"].includes(k(m))):s.wreq==="StaffWeapon"?k(m)==="Staff":s.wreq==="MeleeWeapon"?!!(m&&!["Bow","Crossbow","Wand"].includes(k(m))):true; }
+  const a=st.archetype&&ARCH_BY_ID[st.archetype]; if(!a) return true; const kit=weaponKit(a);
+  return s.wreq==="DaggerWeapon"?kit.kind==="dagger":s.wreq==="ShieldWeapon"?!!kit.shield:s.wreq==="RangedWeapon"?kit.abil==="ranged":s.wreq==="StaffWeapon"?kit.kind==="staff":s.wreq==="MeleeWeapon"?kit.abil!=="ranged"&&!(kit.main&&kit.main.ranged):true; }
 function gearChecks(sel){
   const out=[]; const m=state.gear.main&&GEAR_BY_ID[state.gear.main.id]; const o=state.gear.off&&GEAR_BY_ID[state.gear.off.id];
   const twoMelee=m&&m.hands===2&&!["Bow","Crossbow"].includes(m.cat); // staffs count as two-handed melee
@@ -2432,6 +2439,7 @@ document.addEventListener("click",e=>{
   else if(ds.skill){ const s=SKILL_BY_ID[ds.skill]; const i=state.skills.indexOf(ds.skill);
     if(i>=0) state.skills.splice(i,1);
     else if(!reqMet(s,lv)){ toast(`Needs ${reqText(s)}`); return; }
+    else if(!weaponAllows(s)){ toast(`${s.n} needs a ${WREQ[s.wreq].toLowerCase()}, and this build doesn't use one`); return; }
     else state.skills.push(ds.skill); }
   else if(ds.load!==undefined){ state=clean(JSON.parse(JSON.stringify(loadSaves()[+ds.load]))); toast("Build loaded"); }
   else if(ds.del!==undefined){ const a=loadSaves(); a.splice(+ds.del,1); writeSaves(a); toast("Build deleted"); }
