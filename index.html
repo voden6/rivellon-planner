@@ -282,6 +282,18 @@ a{color:var(--accent)}
 .gsrc{font-style:normal;font-size:11px;color:var(--src);border:1px solid currentColor;border-radius:4px;padding:0 4px}
 @media (max-width:760px){ .gk{display:block;min-width:0;margin-top:4px} }
 .mtabs,.msub{display:none}
+/* desktop: one section at a time, character sheet always beside it */
+@media (min-width:761px){
+  .dtabs{position:sticky;top:0;z-index:40;display:flex;gap:6px;padding:10px 0;margin:0 0 12px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .dtabs button{padding:9px 18px;border:1px solid var(--line);border-radius:999px;background:var(--panel-2);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+  .dtabs button[aria-current="page"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  body[data-mtab] main [data-mg]{display:none}
+  body[data-mtab="builds"] main [data-mg="builds"],body[data-mtab="sheet"] main [data-mg="builds"],body[data-mtab="char"] main [data-mg="char"],body[data-mtab="skills"] main [data-mg="skills"],body[data-mtab="gear"] main [data-mg="gear"],body[data-mtab="guide"] main [data-mg="guide"]{display:block}
+  body[data-mtab="char"] main .msub{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+  body[data-mtab="char"] main .msub a{padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px;background:var(--panel-2)}
+  main>footer{display:block!important}
+}
+@media (max-width:760px){ .dtabs{display:none} }
 @media (max-width:760px){
   body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
   .wrap{padding-inline:0}
@@ -344,6 +356,7 @@ a{color:var(--accent)}
     <div class="toolbar"><button class="btn primary" type="button" id="btnRespread" hidden></button><button class="btn" type="button" id="hideBanner">Dismiss</button></div>
   </div>
 
+  <nav class="dtabs" id="dtabs" aria-label="Sections"><button type="button" data-mtab="builds">Builds</button><button type="button" data-mtab="char">Character</button><button type="button" data-mtab="skills">Skills</button><button type="button" data-mtab="gear">Gear</button><button type="button" data-mtab="guide">Guide</button></nav>
   <div class="grid">
     <main>
       <section class="step" id="stepArch">
@@ -419,8 +432,7 @@ a{color:var(--accent)}
       </section>
 
       <section class="step" id="stepSkills">
-        <div class="step-head"><div><div class="kicker">Step 7</div><h2>Skills &amp; spells</h2></div><div class="toolbar" style="align-items:center"><label class="btn" for="iconPaks">Import game icons</label><input type="file" id="iconPaks" multiple accept=".pak,.json,application/json" hidden><button class="btn" type="button" id="btnClearIcons" hidden>Remove icons</button><button type="button" class="btn" id="btnFillMem">Fill free memory</button><span class="budget" id="memBudget"></span></div></div>
-        <p class="note" id="iconHelp" style="margin:0 0 10px">To show the real skill and item icons, click <b>Import game icons</b> and select both <code>Icons.pak</code> and <code>Patch1.pak</code> from <code>Divinity Original Sin 2\DefEd\Data</code> in your Steam library. The page cuts the icons out in your browser and keeps them in this browser only; nothing is uploaded. On a phone, import <code>rivellon-icons.json</code> instead: a small icon pack made from those same files.</p>
+        <div class="step-head"><div><div class="kicker">Step 7</div><h2>Skills &amp; spells</h2></div><div class="toolbar" style="align-items:center"><button type="button" class="btn" id="btnFillMem">Fill free memory</button><span class="budget" id="memBudget"></span></div></div>
         <div class="memory"><span>Memory</span><div class="membar" id="memBar"><div></div></div></div>
         <div class="filters">
           <div class="chips" id="schoolChips"></div>
@@ -451,7 +463,6 @@ a{color:var(--accent)}
                 <label class="field" style="flex:1 1 140px">Sort by<select id="gearSort"><option value="lvl">Highest level</option><option value="act">Act, earliest first</option><option value="actdesc">Act, latest first</option><option value="lvlasc">Lowest level</option><option value="bonus">Most bonuses</option><option value="name">Name</option></select></label>
               </div>
             </div>
-            <p class="note warn" id="gearIconNote" hidden style="margin:8px 0 0"></p>
             <p class="note" id="gearCount" style="margin:8px 0 0"></p>
             <div class="glist" id="gearList"></div>
           </div>
@@ -469,7 +480,7 @@ a{color:var(--accent)}
 
       <footer>
         Hover (or tap) anything for its full details. Skills and unique items are read from the stat files in your own DOS2 install: names, AP, Source cost, cooldown, memory, requirements, descriptions and item bonuses. Damage is shown as a percentage of base damage because the real number depends on level and gear. Item attribute bonuses are the base values; the game raises them a little with item level. Talents come from the wikis because they aren't in the stat files. Icons are original glyphs unless you import your own from the game files.
-        <div class="note" style="margin-top:8px">Version 2026-11-23b (named gear)</div>
+        <div class="note" style="margin-top:8px">Version 2026-11-23c</div>
       </footer>
     </main>
 
@@ -1836,10 +1847,6 @@ function render(){
   $("skillList").innerHTML=list.length?groups.map(([k,t,sub])=>{ const g=list.filter(s=>state_(s)===k); return g.length?`<div class="skhead"><span>${t} (${g.length})</span><small>${sub}</small></div>`+g.map(card).join(""):""; }).join("")
     :`<p class="note">No skills match this filter.</p>`;
 
-  const hasIcons=Object.keys(USER_ICONS).length>0;
-  const missing=hasIcons?Object.keys(ICONMAP.icons).filter(k=>!USER_ICONS[k.toLowerCase()]).length:0;
-  const help=$("iconHelp"); help.hidden=hasIcons&&missing<5; $("btnClearIcons").hidden=!hasIcons;
-  if(hasIcons&&missing>=5) help.innerHTML=`<b>${missing} icons are missing</b>, probably because they were saved by an earlier version of this page. Click <b>Import game icons</b> again and pick <code>Icons.pak</code> and <code>Patch1.pak</code> to add the item and racial icons.`;
   renderGear();
   renderGuide();
   renderSheet(D);
@@ -2041,8 +2048,6 @@ function renderGear(){
   $("gearAttrs").innerHTML=[["all","Any stat"],["str","Strength"],["fin","Finesse"],["int","Intelligence"],["con","Constitution"]].map(([k,n])=>`<button type="button" class="chip" data-gattr="${k}" aria-pressed="${ui.gattr===k}">${n}</button>`).join("");
   $("gearActs").innerHTML=[["all","Any act"],["1","Act 1"],["2","Act 2"],["3","Act 3"],["4","Act 4"],["none","Unknown"]].map(([k,n])=>`<button type="button" class="chip" data-gact="${k}" aria-pressed="${ui.gact===k}">${n}</button>`).join("");
   $("gearSort").value=ui.gsort;
-  { const has=Object.keys(USER_ICONS).length>0; const miss=has?[...new Set(ALL_GEAR.map(g=>g.icon).filter(Boolean))].filter(k=>!USER_ICONS[k.toLowerCase()]).length:0; const n=$("gearIconNote");
-    n.hidden=!miss; if(miss) n.innerHTML=`<b>${miss} item pictures aren't loaded in this browser</b>. Your saved icons are from an earlier version of this page. <label for="iconPaks" style="text-decoration:underline;cursor:pointer">Import your icons again</label> (Icons.pak + Patch1.pak, or rivellon-icons.json) to fill them in.`; }
   const q=ui.gq.toLowerCase();
   let list=pool.filter(g=>(ui.gact==="all"||(ui.gact==="none"?g.unique&&g.actN==null:g.actN===+ui.gact))&&(ui.gsrc==="all"||(ui.gsrc==="unique")===!!g.unique)&&(ui.gcat==="all"||g.cat===ui.gcat)&&(ui.gattr==="all"||g.attr===ui.gattr||(ui.gattr!=="all"&&g.b&&g.b[ui.gattr]))&&
     (!q||(g.n+" "+(g.fx||[]).join(" ")+" "+(g.grants||[]).join(" ")+" "+Object.keys(g.b||{}).map(bonusName).join(" ")).toLowerCase().includes(q)));
@@ -2403,12 +2408,13 @@ const PHONE=matchMedia("(max-width:760px)");
 const MGROUP={stepArch:"builds",stepChar:"char",stepPreset:"char",stepAttr:"char",stepCombat:"char",stepCivil:"char",stepTalents:"char",stepSkills:"skills",stepGear:"gear",stepGuide:"guide",sheet:"sheet"};
 Object.entries(MGROUP).forEach(([id,g])=>{ const el=$(id); if(el) el.dataset.mg=g; });
 document.querySelector(".msub").dataset.mg="char"; document.querySelector("main > footer").dataset.mg="sheet";
-function setMTab(t,scroll){ document.body.dataset.mtab=t; document.querySelectorAll("#mtabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.mtab===t?"page":"false"));
+function setMTab(t,scroll){ document.body.dataset.mtab=t; document.querySelectorAll("#mtabs button,#dtabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.mtab===t?"page":"false"));
   try{localStorage.setItem(STORE_KEY+"-mtab",t)}catch(e){} hideTip(); if(scroll) window.scrollTo({top:0}); }
 function updateMTabDots(){ const D=derive(); const left=(D.attrBudget-D.attrUsed)+(D.combatBudget-D.combatUsed)+(D.civilBudget-D.civilUsed)+(D.talentSlots-state.talents.length);
   const memLeft=D.memSlots-D.memUsed; const eq=GEAR_SLOTS.filter(([k])=>state.gear[k]).length;
   const set=(t,v)=>{ const d=document.querySelector(`#mtabs [data-mtab="${t}"] .dot`); if(!d) return; d.hidden=!v; d.textContent=v||""; };
   set("char",left>0?left:0); set("skills",memLeft>0?memLeft:0); set("gear",0); }
+$("dtabs").addEventListener("click",e=>{ const b=e.target.closest("[data-mtab]"); if(b){ e.stopPropagation(); setMTab(b.dataset.mtab,true); } });
 $("mtabs").addEventListener("click",e=>{ const b=e.target.closest("[data-mtab]"); if(b){ e.stopPropagation(); setMTab(b.dataset.mtab,true); } });
 let mt="builds"; try{ mt=localStorage.getItem(STORE_KEY+"-mtab")||"builds"; }catch(e){}
 setMTab(MGROUP[mt]?mt:(["builds","char","skills","gear","guide","sheet"].includes(mt)?mt:"builds"));
@@ -2497,10 +2503,6 @@ $("archSchool").addEventListener("change",e=>{ui.aschool=e.target.value; ui.apag
 $("archSort").addEventListener("change",e=>{ui.asort=e.target.value; ui.apage=1; renderArch();});
 $("archSearch").addEventListener("input",e=>{ui.aq=e.target.value; ui.apage=1; renderArch();});
 $("archClear").addEventListener("click",()=>{ Object.assign(ui,{atier:"all",role:"all",afam:"all",admg:"all",astat:"all",arange:"all",aschool:"all",arace:"all",aorigin:"all",aparty:"all",aq:"",apage:1}); renderArch(); });
-$("iconPaks").addEventListener("change",async e=>{ const fs=[...e.target.files]; e.target.value=""; if(!fs.length) return;
-  try{ toast("Reading the game files…"); const packs=fs.filter(f=>/\.json$/i.test(f.name)||f.type==="application/json"), paks=fs.filter(f=>!packs.includes(f)); let n=0; for(const f of packs) n+=await importPack(f); if(paks.length) n+=await importIcons(paks); const itemN=Object.values(ITEM_ICON).concat(BASE_GEAR.map(b=>b.icon)).filter((v,i,a)=>v&&a.indexOf(v)===i&&USER_ICONS[v.toLowerCase()]).length; toast(`Imported ${n} icons (${itemN} item icons)`); render(); }
-  catch(err){ toast(err.message||"Couldn't read those files"); } });
-$("btnClearIcons").addEventListener("click",async()=>{ try{ await idbClear(); }catch(e){} for(const k of Object.keys(USER_ICONS)) delete USER_ICONS[k]; toast("Icons removed"); render(); });
 document.addEventListener("change",e=>{ if(e.target.dataset&&e.target.dataset.mate!=null){ const i=+e.target.dataset.mate; MATES[i]=e.target.value||undefined; MATES=MATES.filter(Boolean); saveMates(); GUIDE_CACHE={key:"",rows:null,gear:{}}; render(); return; }
   if(e.target.id==="gRarity"&&state.gear[ui.gslot]){ state.gear[ui.gslot].rarity=e.target.value; render(); } });
 $("archLevel").innerHTML=Array.from({length:LEVELS},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
