@@ -1541,6 +1541,7 @@ function autoGear(st,opt={}){
   const W=autoWeights(st), prim=autoPrimary(st), cb=st.combat||{}, L=Math.max(1,st.level||1), maxAct=opt.maxAct??null;
   const tank=(st.attrs?.con||0)>(st.attrs?.[prim]||0)||(cb.retri||0)>=5;
   const have=new Set((st.skills||[]).map(id=>SKILL_BY_ID[id]?.n).filter(Boolean));
+  const undeadB=!!raceInfo(st.race,st.origin)?.undead;
   // with an act cap (the playthrough guide), only uniques from that act or earlier count
   const gets=g=>!g.unique||((g.lvl||0)<=L+1&&(maxAct==null||itemActGuess(g)<=maxAct));
   const isWeapon=g=>(g.slot==="main"||g.slot==="off")&&g.cat!=="Shield";
@@ -1557,7 +1558,7 @@ function autoGear(st,opt={}){
     if(!g.unique) return isWeapon(g)?(g.hands===2?1.2:.8)*L+1:g.slot==="amulet"||g.slot==="ring"||g.slot==="belt"?1+.15*L:.35*L+1;
     let s=autoFx(g.fx,tank);
     for(const [k,v] of Object.entries(g.b||{})) s+=v*(W[k]||0);
-    for(const n of g.grants||[]) s+=have.has(n)?1.5:.4;
+    for(const n of g.grants||[]) s+=undeadB&&SKILL_NOTES[sslug(n)]?.u?0:have.has(n)?1.5:.4;
     const lvl=g.lvl||0;
     // in the guide, prefer a named item with a known source over an unnamed roll of similar strength, if it isn't badly out of date
     if(lvl>=L-8) s+=2.5;
@@ -2206,7 +2207,7 @@ function gskIcon(s,size){ return icon(GSK_SCHOOL(s.icon),"single",s.sp>0,size,s.
 function gskMeta(s){ return [`${s.ap||0} AP`,s.sp?`${s.sp} Source`:"",s.cd>0?`${s.cd}-turn cooldown`:s.cd===1?"":"",s.range?`${s.range} m range`:"",s.area&&s.area!=="0"?`${s.area} m area`:"",s.req&&REQ_TEXT[s.req]?`Needs ${REQ_TEXT[s.req]}`:""].filter(Boolean).join(" · "); }
 const gskText=t=>esc(t||"").replace(/\?%/g,"(scales)%").replace(/ \?(?=\W)/g," (scales)");
 function gskBlock(ids){ return `<div class="gsk"><div class="group-title" style="margin:4px 0">Skills granted while equipped</div>${ids.map(id=>{ const s=GEAR_SKILLS[id];
-  return `<div class="gskr">${gskIcon(s,30)}<div><b>${esc(s.n)}</b><small>${gskMeta(s)}</small><span>${gskText(s.d)}${s.sd&&!/^Range: \d+m$/.test(s.sd)?" "+gskText(s.sd.replace(/^Range: \d+m\s*/,"")):""}</span></div></div>`;}).join("")}<p class="tn" style="margin-top:6px">No memory slot needed.</p></div>`; }
+  return `<div class="gskr">${gskIcon(s,30)}<div><b>${esc(s.n)}</b><small>${gskMeta(s)}</small><span>${gskText(s.d)}${s.sd&&!/^Range: \d+m$/.test(s.sd)?" "+gskText(s.sd.replace(/^Range: \d+m\s*/,"")):""}</span>${D_undead()&&SKILL_NOTES[sslug(s.n)]?.u?`<span class="warn">You're undead: this heals living teammates but damages you, so don't cast it on yourself.</span>`:""}</div></div>`;}).join("")}<p class="tn" style="margin-top:6px">No memory slot needed.</p></div>`; }
 function D_undead(){ return raceInfo(state.race,state.origin).undead; }
 
 // ---------- icon importer ----------
