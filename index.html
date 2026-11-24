@@ -1358,7 +1358,7 @@ function buildArchetype(a,L,keep){
   const st={...blankBuild(),name:(ORIGINS.find(o=>o.id===keep.origin&&o.race)||a).n,origin:keep.origin,race:keep.race,party:keep.party,level:L,preset:PRESET_OF[a.id]||presetFor(a),archetype:a.id,archLevel:L,gear:keep.gear?JSON.parse(JSON.stringify(keep.gear)):{}};
   for(const sl of ["main","off"]){ const eq=st.gear[sl], g=eq&&GEAR_BY_ID[eq.id]; if(g&&!weaponSuits(a,sl,g)) delete st.gear[sl]; }
   // Lone Wolf doubles invested points (not Polymorph), so the plan's targets are halved and capped at 5 (= 10).
-  const lw=!!a.lw, eff=(k,v)=>lw&&k!=="poly"?Math.min(10,2*v):v;
+  const lw=!!a.lw&&(keep.party||1)<=2, eff=(k,v)=>lw&&k!=="poly"?Math.min(10,2*v):v;
   st.combat=lw?spendProportional(a.plan.map(([k,t])=>[k,k==="poly"?t:Math.ceil(t/2)]),2+(L-1),5,[...[...a.plan].sort((x,y)=>y[1]-x[1]).map(([k])=>k),"persev","lead","retri"])
     :spendProportional(a.plan,2+(L-1),10);
   const slots=TALENT_LEVELS.filter(l=>l<=L).length;
@@ -1408,7 +1408,7 @@ function gearIcon(glyph,attr,unique,size=34,iconName=""){
   <rect x="0.5" y="0.5" width="39" height="39" rx="7" fill="url(#${id})" stroke="${unique?"#e5c26b":"rgba(255,255,255,.18)"}" stroke-width="${unique?2:1}"/>
   <g transform="translate(7 7) scale(1.08)"><path d="${GLYPH[glyph]||GLYPH.ring}" fill="rgba(255,255,255,.9)" fill-rule="evenodd"/></g></svg>`;
 }
-const ATTR_NAME={str:"Strength",fin:"Finesse",int:"Intelligence"};
+const ATTR_NAME={str:"Strength",fin:"Finesse",int:"Intelligence",con:"Constitution"};
 const WEIGHT={heavy:["Heavy","str","Most Physical Armour, little Magic Armour and elemental protection."],light:["Light","fin","Balanced Physical and Magic Armour, less of each than the specialised types."],robe:["Robe","int","Most Magic Armour, little Physical Armour."]};
 const BASE_GEAR=[];
 ["helmet","chest","gloves","legs","boots"].forEach(sl=>Object.entries(WEIGHT).forEach(([w,[wn,at,d]])=>BASE_GEAR.push({id:`${sl}-${w}`,n:`${wn} ${({helmet:"helmet",chest:"chest armour",gloves:"gloves",legs:"leggings",boots:"boots"})[sl]}`,slot:sl,cat:wn,attr:at,glyph:sl,d:`${d} Needs ${ATTR_NAME[at]}.`})));
@@ -1433,7 +1433,7 @@ WEAPONS.forEach(([id,n,cat,at,h,g,d])=>{
   BASE_GEAR.push({id:`main-${id}`,n,slot:"main",cat,attr:at,hands:h,glyph:g,d:`${d} Needs ${ATTR_NAME[at]}.`});
   if(h===1) BASE_GEAR.push({id:`off-${id}`,n:`${n} (off hand)`,slot:"off",cat,attr:at,hands:1,glyph:g,d:`Second weapon for dual wielding. Uses Dual Wielding. Needs ${ATTR_NAME[at]}.`});
 });
-BASE_GEAR.push({id:"off-shield",n:"Shield",slot:"off",cat:"Shield",attr:"str",glyph:"shield",d:"Physical and Magic Armour. Unlocks Bouncing Shield and Deflective Barrier. Check its attribute requirement on the item."});
+BASE_GEAR.push({id:"off-shield",n:"Shield",slot:"off",cat:"Shield",attr:"con",glyph:"shield",d:"Physical and Magic Armour. Unlocks Bouncing Shield and Deflective Barrier. Needs Constitution."});
 
 // Unique items from your install's stat files. Attribute bonuses here are the base values; the game grows them a little with item level.
 const ITEM_WHERE={"The Reckoning": ["Act 1", "Dropped by Dallis if you fight her at the Fort Joy gates"], "Falone": ["Act 4", "Unguarded in a church in Arx City (stealing)"], "Divine Spark": ["Act 4", "Unarmed elf trader outside Arx Cathedral"], "Lohar's Two-Handed Source Hammer": ["Act 2", "Reaper's Coast: bring Mordus's amulet to Lohar"], "Eternal Stormblade": ["Act 3", "Murky cave on the Nameless Isle, guarded by four elementals"], "Fang of the Winter Dragon": ["Act 1", "From Slane, in The Purged Dragon side quest"], "Blazing Justice": ["Act 1", "Dallis drop at the Fort Joy gates (alternative to The Reckoning)"], "Rancour": ["Act 4", "Unarmed elf trader outside Arx Cathedral"], "Domoh Dumora": ["Act 4", "Arx: balcony outside Arhu's room, under the dog bed"], "Fiery Inferno": ["Act 4", "Lord Omyt, Lord Kemm's mansion in Arx"], "Shattergrasp": ["Act 4", "Unarmed elf trader outside Arx Cathedral"], "Vord Emver": ["Act 4", "Karon's minions, after defeating Karon"], "Shadow's Eye": ["Act 1", "Zaleskar, across the drawbridge outside Fort Joy (needs Ifan in the party)"], "Morning's Light": ["Act 2", "Reaper's Coast"], "Deiseis Riveil": ["Act 4", "Trader Non, Arx main square"], "The Silent Path": ["Act 4", "Trader in Kemm's mansion, Arx"], "Gloves of Teleportation": ["Act 1", "A teleporting crocodile in The Teleporter quest (from Gawin in the Fort Joy ghetto)"], "Ave Layal": ["Act 4", "Locked chest in the Owlmistress's office, Kemm Gardens, Arx"], "Ancient Belt": ["Act 4", "Trader Adam outside Lord Kemm's mansion, Arx"], "Band of Braccus": ["Act 2", "Reaper's Coast"], "Lohar's Source Hammer": ["Act 2", "Reward from Lohar, Reaper's Coast"]};
@@ -1541,7 +1541,10 @@ function autoGear(st,opt={}){
   };
   const used=new Set();
   const ex=opt.exclude||new Set();
-  const top=(slot,ok,n=1)=>ALL_GEAR.filter(g=>slotAccepts(slot,g)&&gets(g)&&ok(g)&&!used.has(g.id)&&!ex.has(g.id)).sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n)).slice(0,n);
+  // an item with a Memory penalty must not push the memorised skills over the limit
+  const memSlack=3+(st.attrs?.mem||0)+((st.talents||[]).includes("mnemonic")?3:0)+Math.floor(L/2)-(st.skills||[]).reduce((a,id)=>a+(SKILL_BY_ID[id]?.mem||0),0);
+  const wearable=g=>(!g.attr||10+(st.attrs?.[g.attr]||0)>=armourReq(g.unique?g.lvl:L))&&!((g.b?.mem||0)<0&&-(g.b.mem)>memSlack);
+  const top=(slot,ok,n=1)=>ALL_GEAR.filter(g=>slotAccepts(slot,g)&&gets(g)&&wearable(g)&&ok(g)&&!used.has(g.id)&&!ex.has(g.id)).sort((a,b)=>score(b)-score(a)||a.n.localeCompare(b.n)).slice(0,n);
   let tot=0; const put=(gear,slot,g)=>{ if(!g) return; if(g.unique) used.add(g.id); tot+=baseScore(g); gear[slot]={id:g.id,rarity:autoRarity(L),bonuses:[]};
     // stand-in: a named item kept over a stronger at-level roll for this slot
     if(NAMED&&g.unique){ const roll=ALL_GEAR.find(r=>!r.unique&&slotAccepts(slot,r)&&(slot==="main"||slot==="off"?r.cat===g.cat||r.cat===g.cat.replace(/^2H /,""):r.cat===g.cat||["amulet","belt","ring1","ring2"].includes(slot)));
@@ -1562,7 +1565,7 @@ function autoGear(st,opt={}){
   else if(style==="twohand") opts=[{main:hand(only(AUTO_2H[prim]),2)}];
   else if(style==="dual") opts=[{main:hand(only(AUTO_1H[prim]),1),off:hand(only(AUTO_1H[prim]),1)}];
   else if(prim==="int"){ const staff=/staff/i.test(wt), wand=/wand/i.test(wt);
-    opts=[]; if(staff||!wand) opts.push({main:hand(AUTO_2H.int,2)}); if(wand||!staff) opts.push({main:hand(AUTO_1H.int,1),off:g=>g.cat==="Shield"}); }
+    opts=[]; if(staff||!wand) opts.push({main:hand(AUTO_2H.int,2)}); if(wand||!staff){ opts.push({main:hand(AUTO_1H.int,1),off:g=>g.cat==="Shield"}); opts.push({main:hand(AUTO_1H.int,1),off:hand(AUTO_1H.int,1)}); } }
   else opts=[{main:hand(only(AUTO_1H[prim]),1),off:g=>g.cat==="Shield"}];
   let bestO=null;
   for(const o of opts){
@@ -1582,8 +1585,12 @@ function autoGear(st,opt={}){
         .map(u=>({u,need:armourReq(u.lvl)-(10+(st.attrs?.[u.attr]||0))})).sort((a,b)=>a.need-b.need||(b.u.lvl||0)-(a.u.lvl||0))[0];
       const next=UNIQUES.filter(u=>u.where&&slotAccepts(sl,u)&&!gets(u)&&(u.cat===AUTO_WEAR[prim]||!u.attr||armourReq(u.lvl)-(10+(st.attrs?.[u.attr]||0))<=4)).sort((a,b)=>(a.lvl||0)-(b.lvl||0)||(a.cat===AUTO_WEAR[prim]?0:1)-(b.cat===AUTO_WEAR[prim]?0:1))[0];
       const toMate=ALL_GEAR.some(u=>u.unique&&u.where&&slotAccepts(sl,u)&&gets(u)&&u.cat===AUTO_WEAR[prim]&&ex.has(u.id)), wt=g.cat;
-      if(near&&near.need<=4){ put(gear,sl,near.u); gear[sl].needs={attr:near.u.attr,need:near.need,req:armourReq(near.u.lvl),wt,toMate}; }
-      else gear[sl].next=next?next.id:null; } });
+      if(near&&near.need<=4) gear[sl].near={id:near.u.id,attr:near.u.attr,need:near.need,req:armourReq(near.u.lvl),toMate};
+      gear[sl].next=next?next.id:null; } });
+  // second pass: a named piece a point or two out of reach becomes wearable when other equipped items add that attribute
+  for(let pass=0;pass<3;pass++) AUTO_ARMOUR.forEach(sl=>{ const e=gear[sl]; if(!e||!e.near||used.has(e.near.id)) return;
+    const gb={}; Object.values(gear).forEach(x=>Object.entries(GEAR_BY_ID[x.id].b||{}).forEach(([k,v])=>gb[k]=(gb[k]||0)+v));
+    const u=GEAR_BY_ID[e.near.id]; if(10+(st.attrs?.[u.attr]||0)+(gb[u.attr]||0)-((GEAR_BY_ID[e.id].b||{})[u.attr]||0)>=e.near.req){ const nr=e.near; put(gear,sl,u); gear[sl].boosted=nr.attr; } });
   put(gear,"amulet",top("amulet",()=>true)[0]);
   put(gear,"belt",top("belt",()=>true)[0]);
   put(gear,"ring1",top("ring1",()=>true)[0]);
@@ -1593,8 +1600,11 @@ function autoGear(st,opt={}){
   if(look.length<3) look.push("wit");
   return {gear,uniques:Object.values(gear).filter(e=>GEAR_BY_ID[e.id].unique).length,look,tot};
 }
-// Armour attribute requirement by item level, fitted to the game's items (11 at low level up to 14 in Arx). Items with no attribute have none.
-function armourReq(l){ l=l||0; return l<=7?11:l<=13?12:l<=16?13:14; }
+// Attribute requirement by item level, fitted to the game's items (10 at the start, 11 from level 4, up to 14 in Arx). Items with no attribute have none.
+function itemReq(g,eq){ if(!g||!g.attr) return null;
+  const req=armourReq(g.unique?g.lvl:state.level), have=10+(state.attrs[g.attr]||0)+(gearTot()[g.attr]||0)-((g.b||{})[g.attr]||0)-((eq&&eq.bonuses||[]).filter(([k])=>k===g.attr).reduce((a,[,v])=>a+v,0));
+  return {req,have}; }
+function armourReq(l){ l=l||0; return l<=3?10:l<=7?11:l<=13?12:l<=16?13:14; }
 // Teammates' builds at a level, for sharing out unique gear.
 function mateState(id,L){ const a=ARCH_BY_ID[id]; const st=buildArchetype(a,L,{origin:a.origin||"custom",race:"human",party:3,gear:{}}); return st; }
 // Gear for several builds that can't all hold the same unique: each contested unique goes to the build that would lose
@@ -1969,7 +1979,9 @@ function loRow(sl,n){
   let sub="";
   if(g){ const b=[...Object.entries(g.b||{}),...(eq.bonuses||[])].map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`); const gr=(g.grants||[]).map(x=>"Grants "+x); sub=[...b,...gr].slice(0,3).join(" · ")||`${rar} ${g.cat}`;
     if(!g.unique&&eq.next&&GEAR_BY_ID[eq.next]){ const nx=GEAR_BY_ID[eq.next]; sub=`No named one yet. First: ${nx.n} (Lv ${nx.lvl})`; }
-    if(eq.needs&&g.attr){ const have=10+(state.attrs[g.attr]||0)+(gearTot()[g.attr]||0)-((g.b||{})[g.attr]||0), req=eq.needs.req; if(have<req) sub=`Needs about ${req} ${ATTR_NAME[g.attr]} (you have ${have})`; } }
+    if(!g.unique&&eq.near&&GEAR_BY_ID[eq.near.id]){ const nx=GEAR_BY_ID[eq.near.id]; sub=`Closest named: ${nx.n}, needs about ${eq.near.req} ${ATTR_NAME[eq.near.attr]}`; }
+    const rq=itemReq(g,eq); if(rq&&rq.have<rq.req) sub=`Can't wear yet: needs about ${rq.req} ${ATTR_NAME[g.attr]||g.attr} (you have ${rq.have})`;
+    else if(eq.boosted) sub=`Wearable thanks to ${ATTR_NAME[eq.boosted]} from your other gear`; }
   return `<button type="button" class="lo-row${g?" filled":""}" data-gslot="${sl}" ${g?`data-tip="slot:${sl}"`:""} aria-pressed="${ui.gslot===sl}" style="--rc:${rc}">
     <span class="lo-tile">${tile}</span>
     <span class="lo-txt"><small>${n}</small><b ${g?`style="color:${rc}"`:""}>${g?esc(gearLabel(eq)):blocked?"Blocked by two-handed weapon":"Empty"}</b>${sub?`<span>${esc(sub)}</span>`:""}</span>
@@ -2079,7 +2091,7 @@ function renderGuide(){
     const bon=Object.entries(g.b||{}).map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`).join(" · ");
     return `<div class="gg${have?" done":""}"><button type="button" class="got" data-got="${g.id}" aria-pressed="${have}" aria-label="${have?"Got":"Mark as found"}: ${esc(g.n)}">${have?"✓":""}</button>${gearIcon(g.glyph,g.attr,true,34,g.icon)}
       <div data-tip="gear:${g.id}" tabindex="0"><b style="color:var(--r-unique)">${esc(g.n)}</b><small>${N[sl]}${g.lvl?` · Lv ${g.lvl}`:""}${earlier?` · from ${ACT_NAME(ia)}, keep using it`:""}${bon?` · ${esc(bon)}`:""}</small>
-      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+"; exact spot not found":"Location unknown"))}</small>${G.gear[sl].needs?(nd=>`<small class="gwhere">The closest named ${esc(N[sl].toLowerCase())} you can get by now; ${nd.toMate?`the named ${esc(nd.wt.toLowerCase())} one went to your teammate`:`the game has no named ${esc(nd.wt.toLowerCase())} one yet`}. It's ${esc(g.cat.toLowerCase())} armour and needs about ${nd.req} ${esc(ATTR_NAME[nd.attr])}: ${nd.need} more than this build has. Gear bonuses count, or wear ${/^[AEIOU]/.test(autoRarity(act.to))?"an":"a"} ${esc(autoRarity(act.to))} ${esc(nd.wt.toLowerCase())} roll until you can.</small>`)(G.gear[sl].needs):""}${G.gear[sl].offWeight?`<small class="gwhere">The game has no named ${esc(AUTO_WEAR[autoPrimary(end)].toLowerCase())} ${esc(N[sl].toLowerCase())} you can get by now, so this is the next best named one: it's ${esc(g.cat.toLowerCase())} armour you can still wear${g.attr?` (it needs about ${armourReq(g.lvl)} ${esc(ATTR_NAME[g.attr])})`:" (no attribute requirement)"}.</small>`:""}${G.gear[sl].old&&g.lvl&&["main","off"].includes(sl)&&g.cat!=="Shield"?`<small class="gwhere">No newer named weapon of this type exists yet, so this is the best one you can find. It's level ${g.lvl}, so expect less damage than an at-level ${esc(autoRarity(act.to))} roll; swap if one drops.</small>`:G.gear[sl].old&&g.lvl&&!["amulet","ring1","ring2","belt"].includes(sl)?`<small class="gwhere">No newer named ${esc(g.cat.toLowerCase())} piece exists for this slot yet, so this is the best one you can find. At level ${act.to} it gives about ${Math.round(100*levelVitality(g.lvl)/levelVitality(act.to))}% of the armour of a new piece, so replace it with ${/^[AEIOU]/.test(autoRarity(act.to))?"an":"a"} ${esc(autoRarity(act.to))} roll from a trader when you can.</small>`:G.gear[sl].standin?`<small class="gwhere">The best named item you can get for this slot. ${/^[AEIOU]/.test(autoRarity(act.to))?"An":"A"} ${esc(autoRarity(act.to))} roll at your level would be a bit stronger, so swap if one drops.</small>`:""}</div></div>`; }).join("");
+      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+"; exact spot not found":"Location unknown"))}</small>${G.gear[sl].boosted?`<small class="gwhere">Needs about ${armourReq(g.lvl)} ${esc(ATTR_NAME[g.attr])}; your other gear's ${esc(ATTR_NAME[g.attr])} bonuses get you there, so keep them on.</small>`:""}${G.gear[sl].offWeight?`<small class="gwhere">The game has no named ${esc(AUTO_WEAR[autoPrimary(end)].toLowerCase())} ${esc(N[sl].toLowerCase())} you can get by now, so this is the next best named one: it's ${esc(g.cat.toLowerCase())} armour you can still wear${g.attr?` (it needs about ${armourReq(g.lvl)} ${esc(ATTR_NAME[g.attr])})`:" (no attribute requirement)"}.</small>`:""}${G.gear[sl].old&&g.lvl&&["main","off"].includes(sl)&&g.cat!=="Shield"?`<small class="gwhere">No newer named weapon of this type exists yet, so this is the best one you can find. It's level ${g.lvl}, so expect less damage than an at-level ${esc(autoRarity(act.to))} roll; swap if one drops.</small>`:G.gear[sl].old&&g.lvl&&!["amulet","ring1","ring2","belt"].includes(sl)?`<small class="gwhere">No newer named ${esc(g.cat.toLowerCase())} piece exists for this slot yet, so this is the best one you can find. At level ${act.to} it gives about ${Math.round(100*levelVitality(g.lvl)/levelVitality(act.to))}% of the armour of a new piece, so replace it with ${/^[AEIOU]/.test(autoRarity(act.to))?"an":"a"} ${esc(autoRarity(act.to))} roll from a trader when you can.</small>`:G.gear[sl].standin?`<small class="gwhere">The best named item you can get for this slot. ${/^[AEIOU]/.test(autoRarity(act.to))?"An":"A"} ${esc(autoRarity(act.to))} roll at your level would be a bit stronger, so swap if one drops.</small>`:""}</div></div>`; }).join("");
   if(bSlots.length){ const rar=G.gear[bSlots[0]].rarity;
     const names=bSlots.map(sl=>GEAR_BY_ID[G.gear[sl].id].n.toLowerCase());
     rowsG+=`<div class="gg"><span class="got ph" aria-hidden="true"></span>${gearIcon(GEAR_BY_ID[G.gear[bSlots[0]].id].glyph,null,false,34,"")}<div><b style="color:${RARITY_COLOR[rar]}">${rar} or better rolled gear</b>
@@ -2087,7 +2099,7 @@ function renderGuide(){
       <small class="gwhere">${(()=>{ const or=a=>a.length>1?a.slice(0,-1).join(", ")+" or "+a[a.length-1]:a[0];
         const toMate=new Set((G.gaveUp||[]).filter(x=>x.to>0).map(x=>x.id)), mateSl=[], noneSl=[];
         bSlots.forEach(sl=>{ const r=GEAR_BY_ID[G.gear[sl].id]; (ALL_GEAR.some(u=>toMate.has(u.id)&&slotAccepts(sl,u)&&(["amulet","ring1","ring2","belt"].includes(sl)||u.cat===r.cat))?mateSl:noneSl).push(r.n.toLowerCase()); });
-        return (noneSl.length?`There's no named ${esc(or(noneSl))} worth wearing by this point in the game. `:"")+(mateSl.length?`The named ${esc(mateSl.length>1?mateSl.slice(0,-1).join(", ")+" and "+mateSl[mateSl.length-1]:mateSl[0])} went to your teammates. `:"")+"These come from random loot and traders."; })()}${(()=>{ const nx=[...new Set(bSlots.map(sl=>G.gear[sl].next).filter(Boolean))].map(id=>GEAR_BY_ID[id]); return nx.length?` First named ones to look out for: ${nx.map(u=>`${esc(u.n)} (${esc(N[GEAR_SLOTS.find(([s])=>slotAccepts(s,u))[0]].toLowerCase())}, ${esc(ACT_NAME(itemActGuess(u)))}, Lv ${u.lvl})`).join("; ")}.`:""; })()} ${esc([...new Set(bSlots.map(sl=>ROLL_SHOP[GEAR_BY_ID[G.gear[sl].id].cat]||(["amulet","ring1","ring2","belt"].includes(sl)?ROLL_SHOP.Jewellery:"")))].join(""))}This act's traders: ${esc(act.shops)}. Trader stock re-rolls every time you level up, so check back. Look for ${esc(lookTxt)}.</small></div></div>`; }
+        return (noneSl.length?`There's no named ${esc(or(noneSl))} worth wearing by this point in the game. `:"")+(mateSl.length?`The named ${esc(mateSl.length>1?mateSl.slice(0,-1).join(", ")+" and "+mateSl[mateSl.length-1]:mateSl[0])} went to your teammates. `:"")+"These come from random loot and traders."; })()}${(()=>{ const nr=bSlots.filter(sl=>G.gear[sl].near).map(sl=>{ const n=G.gear[sl].near, u=GEAR_BY_ID[n.id]; return `${esc(u.n)} (${esc(N[sl].toLowerCase())}, ${esc(u.where||"")}) needs about ${n.req} ${esc(ATTR_NAME[n.attr])}, ${n.need} more than this build has`; }); return nr.length?` Closest named pieces you can't wear yet: ${nr.join("; ")}.`:""; })()}${(()=>{ const nx=[...new Set(bSlots.map(sl=>G.gear[sl].next).filter(Boolean))].map(id=>GEAR_BY_ID[id]); return nx.length?` First named ones to look out for: ${nx.map(u=>`${esc(u.n)} (${esc(N[GEAR_SLOTS.find(([s])=>slotAccepts(s,u))[0]].toLowerCase())}, ${esc(ACT_NAME(itemActGuess(u)))}, Lv ${u.lvl})`).join("; ")}.`:""; })()} ${esc([...new Set(bSlots.map(sl=>ROLL_SHOP[GEAR_BY_ID[G.gear[sl].id].cat]||(["amulet","ring1","ring2","belt"].includes(sl)?ROLL_SHOP.Jewellery:"")))].join(""))}This act's traders: ${esc(act.shops)}. Trader stock re-rolls every time you level up, so check back. Look for ${esc(lookTxt)}.</small></div></div>`; }
   const nGot=GEAR_SLOTS.filter(([sl])=>G.gear[sl]&&GEAR_BY_ID[G.gear[sl].id].unique&&got[G.gear[sl].id]).length;
   h+=`<div class="gh">Gear goals for Act ${act.n} <span>${nGot}/${G.uniques} uniques found</span></div><div class="ggear">${rowsG}</div>`;
   if(G.mates&&G.gaveUp){ const left=G.gaveUp.filter(x=>x.to>0).map(x=>`${esc(GEAR_BY_ID[x.id].n)} (${esc(ARCH_BY_ID[G.mates[x.to-1]].n)})`);
@@ -2116,17 +2128,17 @@ function gearSheet(){
 }
 function gearChecks(sel){
   const out=[]; const m=state.gear.main&&GEAR_BY_ID[state.gear.main.id]; const o=state.gear.off&&GEAR_BY_ID[state.gear.off.id];
-  const twoMelee=m&&m.hands===2&&!["Bow","Crossbow","Staff"].includes(m.cat);
+  const twoMelee=m&&m.hands===2&&!["Bow","Crossbow"].includes(m.cat); // staffs count as two-handed melee
   if((state.combat.twohand||0)>0&&m&&!twoMelee) out.push(`<span class="warn">Two-Handed points do nothing without a two-handed melee weapon</span>`);
   if((state.combat.dual||0)>0&&m&&!(o&&o.cat!=="Shield")) out.push(`<span class="warn">Dual Wielding needs a weapon in each hand</span>`);
   if((state.combat.ranged||0)>0&&m&&!["Bow","Crossbow"].includes(m.cat)) out.push(`<span class="warn">Ranged points need a bow or crossbow</span>`);
-  if(m&&sel.some(s=>s.s==="hunt"&&["single","multi","aoe"].includes(s.t))&&!["Bow","Crossbow"].includes(m.cat)) out.push(`<span class="warn">Huntsman attacks need a bow or crossbow</span>`);
-  if(m&&sel.some(s=>s.s==="scound"&&["single","multi","aoe"].includes(s.t))&&!(m.cat==="Dagger"||(o&&o.cat==="Dagger"))) out.push(`<span class="warn">Most Scoundrel attacks need a dagger</span>`);
-  if(sel.some(s=>["bouncing-shield","deflective-barrier"].includes(s.id))&&!(o&&o.cat==="Shield")) out.push(`<span class="warn">Bouncing Shield and Deflective Barrier need a shield</span>`);
-  // attribute mismatch: armour/weapons tied to a stat you barely raised
-  const mainAttr=Object.entries(state.attrs).sort((a,b)=>b[1]-a[1])[0]?.[0];
-  const off=GEAR_SLOTS.filter(([sl])=>{const g=state.gear[sl]&&GEAR_BY_ID[state.gear[sl].id];return g&&g.attr&&g.attr!==mainAttr&&(state.attrs[g.attr]||0)<3;}).length;
-  if(off) out.push(`<span class="warn">${off} item${off>1?"s need":" needs"} an attribute you've barely raised; check its requirement</span>`);
+  const k=x=>x&&x.cat.replace(/^2H /,"");
+  const kitOk=w=>w==="DaggerWeapon"?k(m)==="Dagger"||k(o)==="Dagger":w==="ShieldWeapon"?!!(o&&o.cat==="Shield"):w==="RangedWeapon"?!!(m&&["Bow","Crossbow"].includes(k(m))):w==="StaffWeapon"?k(m)==="Staff":w==="MeleeWeapon"?!!(m&&!["Bow","Crossbow","Wand"].includes(k(m))):true;
+  const noKit=m?sel.filter(s=>s.wreq&&WREQ[s.wreq]&&!kitOk(s.wreq)):[];
+  if(noKit.length) out.push(`<span class="bad">${noKit.map(s=>s.n).join(", ")} ${noKit.length>1?"need":"needs"} a ${[...new Set(noKit.map(s=>WREQ[s.wreq].toLowerCase()))].join(" / ")}</span>`);
+  // items whose attribute requirement isn't met
+  const short=GEAR_SLOTS.map(([sl])=>state.gear[sl]&&[GEAR_BY_ID[state.gear[sl].id],state.gear[sl]]).filter(x=>x&&x[0]).filter(([g,eq])=>{ const r=itemReq(g,eq); return r&&r.have<r.req; });
+  if(short.length) out.push(`<span class="bad">Can't wear yet: ${short.map(([g,eq])=>{ const r=itemReq(g,eq); return `${esc(g.n)} (needs about ${r.req} ${ATTR_NAME[g.attr]||g.attr}, you have ${r.have})`; }).join(", ")}</span>`);
   return out;
 }
 function gearTipHTML(g,eq){
