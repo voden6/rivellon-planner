@@ -1679,6 +1679,12 @@ function buildGuide(a,keep){
       talents:tal.filter(t=>!(prev?prev.talents:[]).includes(t)),learn:st.skills.filter(id=>!ps.includes(id)),drop:ps.filter(id=>!st.skills.includes(id)),st});
     prev=st;
   }
+  // Extra skills that only fill spare memory for a level or three before a planned skill needs the slot just make you
+  // learn and drop them again. Leave those out; the slot stays free until something lasting goes in it.
+  const core=new Set(a.k), runs={};
+  rows.forEach((r,i)=>r.st.skills.forEach(id=>{ if(core.has(id)) return; const x=runs[id]||(runs[id]=[]); const last=x[x.length-1]; if(last&&last[1]===i-1) last[1]=i; else x.push([i,i]); }));
+  for(const [id,x] of Object.entries(runs)) for(const [s,e] of x) if(e-s+1<4&&e<rows.length-1) for(let i=s;i<=e;i++) rows[i].st.skills=rows[i].st.skills.filter(k=>k!==id);
+  rows.forEach((r,i)=>{ const ps=i?rows[i-1].st.skills:[]; r.learn=r.st.skills.filter(id=>!ps.includes(id)); r.drop=ps.filter(id=>!r.st.skills.includes(id)); });
   return rows;
 }
 const GOT_KEY="rivellon-planner-v1-got", MATES_KEY="rivellon-planner-v1-mates";
