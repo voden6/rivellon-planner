@@ -1521,7 +1521,7 @@ function autoGear(st,opt={}){
   const isWeapon=g=>(g.slot==="main"||g.slot==="off")&&g.cat!=="Shield";
   // In the guide, a named unique you can actually go and get beats an unnamed roll whenever one is recent enough
   // (within 8 levels); the guide flags it as a stand-in when an at-level roll would be stronger.
-  const NAMED=maxAct!=null?1000:0, fresh=g=>(g.lvl||0)>=L-8;
+  const NAMED=1000, fresh=g=>(g.lvl||0)>=L-8;
   // only items with a known source count as findable; when no recent one exists, an older named armour piece or jewel
   // still beats a roll you'd have to hope for (weapons stay recent, since they set your damage)
   const isWpn=g=>(g.slot==="main"||g.slot==="off")&&g.cat!=="Shield";
@@ -1535,7 +1535,7 @@ function autoGear(st,opt={}){
     for(const n of g.grants||[]) s+=have.has(n)?1.5:.4;
     const lvl=g.lvl||0;
     // in the guide, prefer a named item with a known source over an unnamed roll of similar strength, if it isn't badly out of date
-    if(maxAct!=null&&lvl>=L-8) s+=2.5;
+    if(lvl>=L-8) s+=2.5;
     return s+(isWeapon(g)?(g.hands===2?1.2:.8)*lvl:(g.slot==="amulet"||g.slot==="ring"||g.slot==="belt")?.15*lvl:.35*lvl);
   };
   const used=new Set();
@@ -1579,9 +1579,10 @@ function autoGear(st,opt={}){
     // nothing named you can wear: point at the nearest named piece and what it would take
     if(NAMED&&g&&!g.unique){ const near=ALL_GEAR.filter(u=>u.unique&&u.where&&slotAccepts(sl,u)&&gets(u)&&!used.has(u.id)&&!ex.has(u.id)&&u.attr)
         .map(u=>({u,need:armourReq(u.lvl)-(10+(st.attrs?.[u.attr]||0))})).sort((a,b)=>a.need-b.need||(b.u.lvl||0)-(a.u.lvl||0))[0];
-      const next=UNIQUES.filter(u=>u.where&&slotAccepts(sl,u)&&u.cat===AUTO_WEAR[prim]&&!gets(u)).sort((a,b)=>(a.lvl||0)-(b.lvl||0))[0];
-      gear[sl].toMate=ALL_GEAR.some(u=>u.unique&&u.where&&slotAccepts(sl,u)&&gets(u)&&u.cat===AUTO_WEAR[prim]&&ex.has(u.id));
-      gear[sl].near=near&&near.need<=4?{id:near.u.id,attr:near.u.attr,need:near.need}:null; gear[sl].next=next?next.id:null; } });
+      const next=UNIQUES.filter(u=>u.where&&slotAccepts(sl,u)&&!gets(u)&&(u.cat===AUTO_WEAR[prim]||!u.attr||armourReq(u.lvl)-(10+(st.attrs?.[u.attr]||0))<=4)).sort((a,b)=>(a.lvl||0)-(b.lvl||0)||(a.cat===AUTO_WEAR[prim]?0:1)-(b.cat===AUTO_WEAR[prim]?0:1))[0];
+      const toMate=ALL_GEAR.some(u=>u.unique&&u.where&&slotAccepts(sl,u)&&gets(u)&&u.cat===AUTO_WEAR[prim]&&ex.has(u.id)), wt=g.cat;
+      if(near&&near.need<=4){ put(gear,sl,near.u); gear[sl].needs={attr:near.u.attr,need:near.need,req:armourReq(near.u.lvl),wt,toMate}; }
+      else gear[sl].next=next?next.id:null; } });
   put(gear,"amulet",top("amulet",()=>true)[0]);
   put(gear,"belt",top("belt",()=>true)[0]);
   put(gear,"ring1",top("ring1",()=>true)[0]);
@@ -1965,7 +1966,9 @@ function loRow(sl,n){
   const ph=sl==="ring1"||sl==="ring2"?"ring":sl==="main"?"sword":sl==="off"?"shield":sl;
   const tile=g?gearIcon(g.glyph,g.attr,g.unique,40,g.icon):`<svg class="dph" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="${GLYPH[ph]||GLYPH.ring}" fill-rule="evenodd"/></svg>`;
   let sub="";
-  if(g){ const b=[...Object.entries(g.b||{}),...(eq.bonuses||[])].map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`); const gr=(g.grants||[]).map(x=>"Grants "+x); sub=[...b,...gr].slice(0,3).join(" · ")||`${rar} ${g.cat}`; }
+  if(g){ const b=[...Object.entries(g.b||{}),...(eq.bonuses||[])].map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`); const gr=(g.grants||[]).map(x=>"Grants "+x); sub=[...b,...gr].slice(0,3).join(" · ")||`${rar} ${g.cat}`;
+    if(!g.unique&&eq.next&&GEAR_BY_ID[eq.next]){ const nx=GEAR_BY_ID[eq.next]; sub=`No named one yet. First: ${nx.n} (Lv ${nx.lvl})`; }
+    if(eq.needs&&g.attr){ const have=10+(state.attrs[g.attr]||0)+(gearTot()[g.attr]||0)-((g.b||{})[g.attr]||0), req=eq.needs.req; if(have<req) sub=`Needs about ${req} ${ATTR_NAME[g.attr]} (you have ${have})`; } }
   return `<button type="button" class="lo-row${g?" filled":""}" data-gslot="${sl}" ${g?`data-tip="slot:${sl}"`:""} aria-pressed="${ui.gslot===sl}" style="--rc:${rc}">
     <span class="lo-tile">${tile}</span>
     <span class="lo-txt"><small>${n}</small><b ${g?`style="color:${rc}"`:""}>${g?esc(gearLabel(eq)):blocked?"Blocked by two-handed weapon":"Empty"}</b>${sub?`<span>${esc(sub)}</span>`:""}</span>
@@ -2075,13 +2078,7 @@ function renderGuide(){
     const bon=Object.entries(g.b||{}).map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`).join(" · ");
     return `<div class="gg${have?" done":""}"><button type="button" class="got" data-got="${g.id}" aria-pressed="${have}" aria-label="${have?"Got":"Mark as found"}: ${esc(g.n)}">${have?"✓":""}</button>${gearIcon(g.glyph,g.attr,true,34,g.icon)}
       <div data-tip="gear:${g.id}" tabindex="0"><b style="color:var(--r-unique)">${esc(g.n)}</b><small>${N[sl]}${g.lvl?` · Lv ${g.lvl}`:""}${earlier?` · from ${ACT_NAME(ia)}, keep using it`:""}${bon?` · ${esc(bon)}`:""}</small>
-      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+"; exact spot not found":"Location unknown"))}</small>${G.gear[sl].offWeight?`<small class="gwhere">The game has no named ${esc(AUTO_WEAR[autoPrimary(end)].toLowerCase())} ${esc(N[sl].toLowerCase())} you can get by now, so this is the next best named one: it's ${esc(g.cat.toLowerCase())} armour you can still wear${g.attr?` (it needs about ${armourReq(g.lvl)} ${esc(ATTR_NAME[g.attr])})`:" (no attribute requirement)"}.</small>`:""}${G.gear[sl].old&&g.lvl&&["main","off"].includes(sl)&&g.cat!=="Shield"?`<small class="gwhere">No newer named weapon of this type exists yet, so this is the best one you can find. It's level ${g.lvl}, so expect less damage than an at-level ${esc(autoRarity(act.to))} roll; swap if one drops.</small>`:G.gear[sl].old&&g.lvl&&!["amulet","ring1","ring2","belt"].includes(sl)?`<small class="gwhere">No newer named ${esc(g.cat.toLowerCase())} piece exists for this slot yet, so this is the best one you can find. At level ${act.to} it gives about ${Math.round(100*levelVitality(g.lvl)/levelVitality(act.to))}% of the armour of a new piece, so replace it with ${/^[AEIOU]/.test(autoRarity(act.to))?"an":"a"} ${esc(autoRarity(act.to))} roll from a trader when you can.</small>`:G.gear[sl].standin?`<small class="gwhere">The best named item you can get for this slot. ${/^[AEIOU]/.test(autoRarity(act.to))?"An":"A"} ${esc(autoRarity(act.to))} roll at your level would be a bit stronger, so swap if one drops.</small>`:""}</div></div>`; }).join("");
-  bSlots.filter(sl=>G.gear[sl].near).forEach(sl=>{ const nr=G.gear[sl].near, g=GEAR_BY_ID[nr.id], have=!!got[g.id], wt=GEAR_BY_ID[G.gear[sl].id].cat.toLowerCase();
-    const bon=Object.entries(g.b||{}).map(([k,v])=>`${v>0?"+":""}${v} ${bonusName(k)}`).join(" · ");
-    rowsG+=`<div class="gg${have?" done":""}"><button type="button" class="got" data-got="${g.id}" aria-pressed="${have}" aria-label="${have?"Got":"Mark as found"}: ${esc(g.n)}">${have?"✓":""}</button>${gearIcon(g.glyph,g.attr,true,34,g.icon)}
-      <div data-tip="gear:${g.id}" tabindex="0"><b style="color:var(--r-unique)">${esc(g.n)}</b><small>${N[sl]}${g.lvl?` · Lv ${g.lvl}`:""}${bon?` · ${esc(bon)}`:""}</small>
-      <small class="gwhere">${esc(g.where)}</small><small class="gwhere">The closest named ${esc(N[sl].toLowerCase())} you can get by now; ${G.gear[sl].toMate?`the named ${esc(wt)} one went to your teammate`:`there's no named ${esc(wt)} one yet`}. It's ${esc(g.cat.toLowerCase())} armour and needs about ${armourReq(g.lvl)} ${esc(ATTR_NAME[nr.attr])}, ${nr.need} more than this build has, so wear ${/^[AEIOU]/.test(G.gear[sl].rarity)?"an":"a"} ${esc(G.gear[sl].rarity)} ${esc(wt)} roll until you can.</small></div></div>`; });
-  bSlots=bSlots.filter(sl=>!G.gear[sl].near);
+      <small class="gwhere">${esc(g.where||(ia!=null?ACT_NAME(ia)+"; exact spot not found":"Location unknown"))}</small>${G.gear[sl].needs?(nd=>`<small class="gwhere">The closest named ${esc(N[sl].toLowerCase())} you can get by now; ${nd.toMate?`the named ${esc(nd.wt.toLowerCase())} one went to your teammate`:`the game has no named ${esc(nd.wt.toLowerCase())} one yet`}. It's ${esc(g.cat.toLowerCase())} armour and needs about ${nd.req} ${esc(ATTR_NAME[nd.attr])}: ${nd.need} more than this build has. Gear bonuses count, or wear ${/^[AEIOU]/.test(autoRarity(act.to))?"an":"a"} ${esc(autoRarity(act.to))} ${esc(nd.wt.toLowerCase())} roll until you can.</small>`)(G.gear[sl].needs):""}${G.gear[sl].offWeight?`<small class="gwhere">The game has no named ${esc(AUTO_WEAR[autoPrimary(end)].toLowerCase())} ${esc(N[sl].toLowerCase())} you can get by now, so this is the next best named one: it's ${esc(g.cat.toLowerCase())} armour you can still wear${g.attr?` (it needs about ${armourReq(g.lvl)} ${esc(ATTR_NAME[g.attr])})`:" (no attribute requirement)"}.</small>`:""}${G.gear[sl].old&&g.lvl&&["main","off"].includes(sl)&&g.cat!=="Shield"?`<small class="gwhere">No newer named weapon of this type exists yet, so this is the best one you can find. It's level ${g.lvl}, so expect less damage than an at-level ${esc(autoRarity(act.to))} roll; swap if one drops.</small>`:G.gear[sl].old&&g.lvl&&!["amulet","ring1","ring2","belt"].includes(sl)?`<small class="gwhere">No newer named ${esc(g.cat.toLowerCase())} piece exists for this slot yet, so this is the best one you can find. At level ${act.to} it gives about ${Math.round(100*levelVitality(g.lvl)/levelVitality(act.to))}% of the armour of a new piece, so replace it with ${/^[AEIOU]/.test(autoRarity(act.to))?"an":"a"} ${esc(autoRarity(act.to))} roll from a trader when you can.</small>`:G.gear[sl].standin?`<small class="gwhere">The best named item you can get for this slot. ${/^[AEIOU]/.test(autoRarity(act.to))?"An":"A"} ${esc(autoRarity(act.to))} roll at your level would be a bit stronger, so swap if one drops.</small>`:""}</div></div>`; }).join("");
   if(bSlots.length){ const rar=G.gear[bSlots[0]].rarity;
     const names=bSlots.map(sl=>GEAR_BY_ID[G.gear[sl].id].n.toLowerCase());
     rowsG+=`<div class="gg"><span class="got ph" aria-hidden="true"></span>${gearIcon(GEAR_BY_ID[G.gear[bSlots[0]].id].glyph,null,false,34,"")}<div><b style="color:${RARITY_COLOR[rar]}">${rar} or better rolled gear</b>
