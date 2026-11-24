@@ -98,6 +98,10 @@ label.field input,label.field select{background:var(--panel-2);border:1px solid 
 .sk.mem{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .sk .why{color:var(--bad,#d66)}
 .sk .ok{color:var(--good,#6b6)}
+.skfilters .frow{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px}
+.skfilters .flab{flex:0 0 58px;padding-top:9px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.skfilters .frow .chips{flex:1;min-width:0}
+.chip .lvl{opacity:.65;font-size:.85em;margin-left:4px}
 .skhead{grid-column:1/-1;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 2px;display:flex;justify-content:space-between;gap:8px}
 .skhead:first-child{margin-top:0}
 .skhead small{text-transform:none;letter-spacing:0}
@@ -434,12 +438,14 @@ a{color:var(--accent)}
       <section class="step" id="stepSkills">
         <div class="step-head"><div><div class="kicker">Step 7</div><h2>Skills &amp; spells</h2></div><div class="toolbar" style="align-items:center"><button type="button" class="btn" id="btnFillMem">Fill free memory</button><span class="budget" id="memBudget"></span></div></div>
         <div class="memory"><span>Memory</span><div class="membar" id="memBar"><div></div></div></div>
-        <div class="filters">
-          <div class="chips" id="schoolChips"></div>
-          <div class="row" style="align-items:center">
-            <div class="chips" id="typeChips"></div>
-            <div class="chips" id="showChips"></div>
-            <label class="field" style="flex:1 1 160px"><input id="skillSearch" type="search" placeholder="Search skills" aria-label="Search skills"></label>
+        <div class="filters skfilters">
+          <div class="frow"><span class="flab">School</span><div class="chips" id="schoolChips"></div></div>
+          <div class="frow"><span class="flab">Type</span><div class="chips" id="typeChips"></div></div>
+          <div class="frow"><span class="flab">Tier</span><div class="chips" id="skTierChips"></div></div>
+          <div class="frow"><span class="flab">Show</span><div class="chips" id="showChips"></div></div>
+          <div class="row" style="align-items:flex-end">
+            <label class="field" style="flex:2 1 180px">Search<input id="skillSearch" type="search" placeholder="Name or description" aria-label="Search skills"></label>
+            <label class="field" style="flex:1 1 160px">Sort by<select id="skillSort"><option value="req">School points needed</option><option value="name">Name</option><option value="ap">AP cost</option><option value="mem">Memory</option><option value="sp">Source points</option><option value="school">School</option></select></label>
           </div>
         </div>
         <div class="skills" id="skillList"></div>
@@ -480,7 +486,7 @@ a{color:var(--accent)}
 
       <footer>
         Hover (or tap) anything for its full details. Skills and unique items are read from the stat files in your own DOS2 install: names, AP, Source cost, cooldown, memory, requirements, descriptions and item bonuses. Damage is shown as a percentage of base damage because the real number depends on level and gear. Item attribute bonuses are the base values; the game raises them a little with item level. Talents come from the wikis because they aren't in the stat files. Icons are original glyphs unless you import your own from the game files.
-        <div class="note" style="margin-top:8px">Version 2026-11-23c</div>
+        <div class="note" style="margin-top:8px">Version 2026-11-23d</div>
       </footer>
     </main>
 
@@ -1830,11 +1836,14 @@ function render(){
   $("memBudget").className="budget "+(D.memUsed>D.memSlots?"over":D.memUsed<D.memSlots?"left":"ok");
   const bar=$("memBar"); bar.classList.toggle("over",D.memUsed>D.memSlots);
   bar.firstElementChild.style.width=Math.min(100,D.memUsed/Math.max(1,D.memSlots)*100)+"%";
-  $("schoolChips").innerHTML=[["all","All schools"],...SCHOOL_KEYS.map(k=>[k,`${SCHOOLS[k].n} ${lv(k)}`])].map(([k,n])=>`<button type="button" class="chip" data-school="${k}" aria-pressed="${ui.school===k}">${n}</button>`).join("");
+  $("schoolChips").innerHTML=[["all","All schools"],...SCHOOL_KEYS.map(k=>[k,`${SCHOOLS[k].n}<span class="lvl" title="Your level">${lv(k)}</span>`])].map(([k,n])=>`<button type="button" class="chip" data-school="${k}" aria-pressed="${ui.school===k}">${n}</button>`).join("");
   $("typeChips").innerHTML=[["all","All"],["single","Single target"],["multi","Multi-target"],["aoe","Area"],["support","Support"],["summon","Summon"],["combo","Crafted combos"]].map(([k,n])=>`<button type="button" class="chip" data-type="${k}" aria-pressed="${ui.type===k}">${n}</button>`).join("");
   const q=ui.q.toLowerCase();
+  $("skTierChips").innerHTML=[["all","All"],["Starter","Starter"],["Novice","Novice"],["Adept","Adept"],["Master","Master"],["None","Other"]].map(([k,n])=>`<button type="button" class="chip" data-stier="${k}" aria-pressed="${(ui.stier||"all")===k}">${n}</button>`).join("");
+  $("skillSort").value=ui.ssort||"req";
   $("showChips").innerHTML=[["all","Every skill"],["avail","Learnable now"],["mem","Memorised"]].map(([k,n])=>`<button type="button" class="chip" data-sshow="${k}" aria-pressed="${(ui.sshow||"all")===k}">${n}</button>`).join("");
-  const list=SKILLS.filter(s=>(ui.sshow!=="avail"||reqMet(s,lv)&&weaponAllows(s))&&(ui.sshow!=="mem"||state.skills.includes(s.id))&&(ui.school==="all"||s.reqs.some(r=>r[0]===ui.school))&&(ui.type==="all"||(ui.type==="combo"?s.combo:s.t===ui.type))&&(!q||s.n.toLowerCase().includes(q)||s.d.toLowerCase().includes(q)));
+  const SORT={req:(a,b)=>a.reqs[0][1]-b.reqs[0][1]||a.n.localeCompare(b.n),name:(a,b)=>a.n.localeCompare(b.n),ap:(a,b)=>a.ap-b.ap||a.n.localeCompare(b.n),mem:(a,b)=>a.mem-b.mem||a.n.localeCompare(b.n),sp:(a,b)=>(b.sp||0)-(a.sp||0)||a.n.localeCompare(b.n),school:(a,b)=>(SCHOOLS[a.s]?.n||"").localeCompare(SCHOOLS[b.s]?.n||"")||a.reqs[0][1]-b.reqs[0][1]||a.n.localeCompare(b.n)};
+  const list=SKILLS.filter(s=>((ui.stier||"all")==="all"||s.tier===ui.stier)&&(ui.sshow!=="avail"||reqMet(s,lv)&&weaponAllows(s))&&(ui.sshow!=="mem"||state.skills.includes(s.id))&&(ui.school==="all"||s.reqs.some(r=>r[0]===ui.school))&&(ui.type==="all"||(ui.type==="combo"?s.combo:s.t===ui.type))&&(!q||s.n.toLowerCase().includes(q)||s.d.toLowerCase().includes(q))).sort(SORT[ui.ssort||"req"]||SORT.req);
   const needTxt=s=>s.reqs.filter(([k,l])=>lv(k)<l).map(([k,l])=>`${SCHOOLS[k]?.n||COMBAT_NAME[k]||k} ${l}`).join(" + ");
   const state_=s=>state.skills.includes(s.id)?"mem":!reqMet(s,lv)?"lock":!weaponAllows(s)?"weap":"learn";
   const card=s=>{ const st_=state_(s);
@@ -2464,6 +2473,7 @@ document.addEventListener("click",e=>{
   else if(ds.school){ ui.school=ds.school; }
   else if(ds.type){ ui.type=ds.type; }
   else if(ds.sshow){ ui.sshow=ds.sshow; }
+  else if(ds.stier){ ui.stier=ds.stier; }
   else if(ds.skill){ const s=SKILL_BY_ID[ds.skill]; const i=state.skills.indexOf(ds.skill);
     if(i>=0) state.skills.splice(i,1);
     else if(!reqMet(s,lv)){ toast(`Needs ${reqText(s)}`); return; }
@@ -2496,6 +2506,7 @@ $("charName").addEventListener("input",e=>{state.name=e.target.value; renderShee
 $("charLevel").addEventListener("change",e=>{state.level=+e.target.value; render();});
 $("partySize").addEventListener("change",e=>{state.party=+e.target.value; render();});
 $("skillSearch").addEventListener("input",e=>{ui.q=e.target.value; render();});
+$("skillSort").addEventListener("change",e=>{ui.ssort=e.target.value; render();});
 $("gearSearch").addEventListener("input",e=>{ui.gq=e.target.value; renderGear(); refreshTipAfterRender();});
 $("gearSort").addEventListener("change",e=>{ui.gsort=e.target.value; renderGear();});
 $("archSchool").addEventListener("change",e=>{ui.aschool=e.target.value; ui.apage=1; renderArch();});
