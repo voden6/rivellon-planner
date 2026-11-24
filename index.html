@@ -95,6 +95,12 @@ label.field input,label.field select{background:var(--panel-2);border:1px solid 
 .sk{display:flex;gap:10px;align-items:flex-start;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);cursor:pointer;text-align:left;min-width:0}
 .sk[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .sk.locked{opacity:.5}
+.sk.mem{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.sk .why{color:var(--bad,#d66)}
+.sk .ok{color:var(--good,#6b6)}
+.skhead{grid-column:1/-1;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 2px;display:flex;justify-content:space-between;gap:8px}
+.skhead:first-child{margin-top:0}
+.skhead small{text-transform:none;letter-spacing:0}
 .sk svg{flex-shrink:0;border-radius:7px}
 .sk .t{min-width:0}
 .sk .t b{display:block;font-weight:700;font-size:14px}
@@ -1373,15 +1379,16 @@ function buildArchetype(a,L,keep){
   const gt=gearBonuses(st).tot;
   const memSlots=3+(st.attrs.mem||0)+(gt.mem||0)+(st.talents.includes("mnemonic")?3:0)+Math.floor(L/2); let used=0;
   for(const id of a.k){ const s=SKILL_BY_ID[id]; if(!s) continue; if(!reqMet(s,k=>eff(k,st.combat[k]||0)+(gt[k]||0))) continue; if(used+s.mem>memSlots) continue; st.skills.push(id); used+=s.mem; }
-  // Character creation gives three skills. If the build's own list can't fill three yet, take the best other starter skills
-  // its points allow: damage first, skills of its main schools next, and nothing that would hurt an undead.
-  if(st.skills.length<3){ const order=a.plan.map(([k])=>k), undead=/undead/.test(keep.race||"")||a.fit>=3;
+  // Character creation gives three skills; after that, fill any spare memory. Take the best other skills the points and
+  // weapon allow: the build's main schools first, damage before utility, nothing that would hurt an undead, no Source
+  // skills (Source points are scarce), and no area skills, so filler never hits teammates.
+  if(st.skills.length<3||(L>1&&used<memSlots)){ const order=a.plan.map(([k])=>k), undead=/undead/.test(keep.race||"")||a.fit>=3;
     const kit=weaponKit(a), caster=a.range==="caster";
     const wOk=s=>s.wreq==="DaggerWeapon"?kit.kind==="dagger":s.wreq==="ShieldWeapon"?!!kit.shield:s.wreq==="RangedWeapon"?kit.abil==="ranged":s.wreq==="MeleeWeapon"?kit.abil!=="ranged"&&!(kit.main.ranged):true;
     const rank=s=>{ const i=order.indexOf(s.reqs[0][0]); return (i<0?99:i)+(caster&&s.wreq==="MeleeWeapon"?50:0); };
-    const cand=SKILLS.filter(s=>(s.tier==="Starter"||(L>1&&s.tier==="Novice"))&&!st.skills.includes(s.id)&&!s.sp&&wOk(s)&&reqMet(s,k=>eff(k,st.combat[k]||0)+(gt[k]||0))&&!(undead&&SKILL_NOTES[s.id]?.u))
+    const cand=SKILLS.filter(s=>(L>1||s.tier==="Starter")&&!st.skills.includes(s.id)&&!s.sp&&s.t!=="aoe"&&!(caster&&s.id==="provoke")&&wOk(s)&&order.includes(s.reqs[0][0])&&reqMet(s,k=>eff(k,st.combat[k]||0)+(gt[k]||0))&&!(undead&&SKILL_NOTES[s.id]?.u))
       .sort((x,y)=>rank(x)-rank(y)||(!!SKILL_DMG[y.id])-(!!SKILL_DMG[x.id])||(y.ap>0)-(x.ap>0));
-    for(const s of cand){ if(st.skills.length>=3) break; if(used+s.mem>memSlots) continue; st.skills.push(s.id); used+=s.mem; } }
+    for(const s of cand){ if(L===1&&st.skills.length>=3) break; if(used+s.mem>memSlots) continue; st.skills.push(s.id); used+=s.mem; } }
   return st;
 }
 
@@ -1817,12 +1824,16 @@ function render(){
   const q=ui.q.toLowerCase();
   $("showChips").innerHTML=[["all","Every skill"],["avail","Learnable now"],["mem","Memorised"]].map(([k,n])=>`<button type="button" class="chip" data-sshow="${k}" aria-pressed="${(ui.sshow||"all")===k}">${n}</button>`).join("");
   const list=SKILLS.filter(s=>(ui.sshow!=="avail"||reqMet(s,lv)&&weaponAllows(s))&&(ui.sshow!=="mem"||state.skills.includes(s.id))&&(ui.school==="all"||s.reqs.some(r=>r[0]===ui.school))&&(ui.type==="all"||(ui.type==="combo"?s.combo:s.t===ui.type))&&(!q||s.n.toLowerCase().includes(q)||s.d.toLowerCase().includes(q)));
-  $("skillList").innerHTML=list.length?list.map(s=>{
-    const on=state.skills.includes(s.id); const lock=!reqMet(s,lv); const noW=!weaponAllows(s);
+  const needTxt=s=>s.reqs.filter(([k,l])=>lv(k)<l).map(([k,l])=>`${SCHOOLS[k]?.n||COMBAT_NAME[k]||k} ${l}`).join(" + ");
+  const state_=s=>state.skills.includes(s.id)?"mem":!reqMet(s,lv)?"lock":!weaponAllows(s)?"weap":"learn";
+  const card=s=>{ const st_=state_(s);
     const typeLabel={single:"Single",multi:"Multi",aoe:"Area",support:"Support",summon:"Summon"}[s.t];
-    return `<button type="button" class="sk${lock?" locked":""}" data-skill="${s.id}" data-tip="skill:${s.id}" aria-pressed="${on}">
+    const tag=st_==="mem"?`<span class="ok">✓ Memorised · tap to remove</span>`:st_==="lock"?`<span class="why">Needs ${esc(needTxt(s))}</span>`:st_==="weap"?`<span class="why">Needs a ${esc(WREQ[s.wreq].toLowerCase())}</span>`:`<span>${reqText(s)}</span>`;
+    return `<button type="button" class="sk${st_==="mem"?" mem":""}${st_==="lock"||st_==="weap"?" locked":""}" data-skill="${s.id}" data-tip="skill:${s.id}" aria-pressed="${st_==="mem"}">
       ${icon(s.s,s.t,s.sp>0,40,s.n,s.icon)}<div class="t"><b>${s.n}</b><span>${s.d}</span>
-      <div class="meta"><span class="tag ${s.t}">${typeLabel}</span>${s.sp?`<span class="tag src">${s.sp} SP</span>`:""}<span>${s.ap} AP</span><span>${reqText(s)}</span><span>${s.mem} mem</span>${s.combo?`<span class="tag">Combo</span>`:""}${lock?`<span class="bad">locked</span>`:""}${!lock&&noW?`<span class="bad">needs ${esc(WREQ[s.wreq].toLowerCase())}</span>`:""}</div></div></button>`;}).join("")
+      <div class="meta"><span class="tag ${s.t}">${typeLabel}</span>${s.sp?`<span class="tag src">${s.sp} SP</span>`:""}<span>${s.ap} AP</span><span>${s.mem} mem</span>${s.combo?`<span class="tag">Combo</span>`:""}${tag}</div></div></button>`; };
+  const groups=[["mem",`Memorised`,`${D.memUsed} / ${D.memSlots} memory used`],["learn","You can learn these",D.memUsed>=D.memSlots?"memory is full: remove one to add another":"enough school points and the right weapon"],["weap","Wrong weapon for this build","you have the points, but not the weapon it needs"],["lock","Not enough school points yet",""]];
+  $("skillList").innerHTML=list.length?groups.map(([k,t,sub])=>{ const g=list.filter(s=>state_(s)===k); return g.length?`<div class="skhead"><span>${t} (${g.length})</span><small>${sub}</small></div>`+g.map(card).join(""):""; }).join("")
     :`<p class="note">No skills match this filter.</p>`;
 
   const hasIcons=Object.keys(USER_ICONS).length>0;
